@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leads</title>
+</head>
+<link rel="stylesheet" href="../stylesheets/table.css">
+
+<body>
+    <h1>Leads</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Lead Score</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% leads.forEach(lead => { %>
+                <tr>
+                    <td>
+                        <%= lead.first_name %>
+                    </td>
+                    <td>
+                        <%= lead.last_name %>
+                    </td>
+                    <td>
+                        <%= lead.email %>
+                    </td>
+                    <td>
+                        <%= lead.phone_number %>
+                    </td>
+                    <td>
+                        <%= lead.company_name %>
+                    </td>
+                    <td>
+                        <%= lead.lead_score %>
+                    </td>
+                    <td>
+                        <%= lead.created_at %>
+                    </td>
+                    <td>
+                        <%= lead.updated_at %>
+                    </td>
+                </tr>
+                <% }); %>
+        </tbody>
+    </table>
+</body>
+
+</html>

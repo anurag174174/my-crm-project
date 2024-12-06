@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../stylesheets/leadForm.css">
+</head>
+
+<body>
+    <form method="post" action="/leads/create">
+        <section>
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+        </section>
+
+        <section>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber">
+        </section>
+
+        <section>
+            <label for="companyName">Company Name:</label>
+            <input type="text" id="companyName" name="companyName">
+
+            <label for="leadScore">Lead Score:</label>
+            <input type="number" id="leadScore" name="leadScore" min="0">
+        </section>
+
+        <button type="submit">Submit</button>
+    </form>
+
+
+</body>
+
+</html>
