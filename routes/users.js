@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+
 const pool = require('../database/connection');
 
 router.get('/register', (req, res) => {
@@ -99,9 +100,16 @@ router.post('/login', (req, res) => {
                 }
 
                 if (isMatch) {
-                    connection.release();
 
-                    res.render('dashboard')
+                    req.session.user = {
+                        id: user.id,
+                        firstName: user.first_name,
+                        lastName: user.last_name,
+                        email: user.email,
+                        role: user.role,
+                    }
+                    connection.release();
+                    res.render('dashboard', { user: req.session.user })
                 } else {
                     connection.release();
                     res.status(401).send('Invalid email or password');
