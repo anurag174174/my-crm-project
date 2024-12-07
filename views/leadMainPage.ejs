@@ -16,7 +16,10 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Company</th>
+                <th>Lead_owner_id</th>
+
                 <th>Lead Score</th>
+
                 <th>Created At</th>
                 <th>Updated At</th>
             </tr>
@@ -40,6 +43,9 @@
                         <%= lead.company_name %>
                     </td>
                     <td>
+                        <%= lead.lead_owner_id %>
+                    </td>
+                    <td>
                         <%= lead.lead_score %>
                     </td>
                     <td>
@@ -53,5 +59,7 @@
         </tbody>
     </table>
 </body>
+
+</html>
 
 </html>
