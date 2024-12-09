@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Lead</title>
+</head>
+
+<body>
+    <h1>Edit Lead</h1>
+    <form method="POST" action="/leads/<%= lead.lead_id %>/edit">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" value="<%= lead.first_name %>"><br><br>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" value="<%= lead.last_name %>"><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="<%= lead.email %>"><br><br>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" value="<%= lead.phone_number %>"><br><br>
+
+        <label for="company">Company:</label>
+        <input type="text" id="company" name="company" value="<%= lead.company_name %>"><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+</body>
+
+</html>
