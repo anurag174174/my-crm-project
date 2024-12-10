@@ -16,12 +16,14 @@
     <p>Email:
         <%= user.email %>
     </p>
-    <p>Email:
+    <p>User id:
         <%= user.id %>
     </p>
     <p>Role:
         <%= user.role %>
     </p>
+    <a href="/users/<%= user.id %>/edit">Edit Profile</a> 
+    <a href="/logout">Logout</a> 
     <a href="/leads/create">Add Lead</a>
     <a href="/leads">view leads</a>
 

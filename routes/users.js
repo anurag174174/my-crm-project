@@ -242,6 +242,17 @@ router.post('/:userId/edit', (req, res) => {
     });
 });
 
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error logging out:', err);
+        res.status(500).send('Error logging out');
+      } else {
+        res.redirect('users/login'); 
+      }
+    });
+  });
+
 module.exports = router;
 
 // try {

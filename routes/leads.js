@@ -31,7 +31,7 @@ router.post('/create', (req, res) => {
             return;
         }
 
-        var sql = "INSERT INTO leads(first_name, last_name, email, phone_number, company_name, lead_score,lead_owner_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,NOW(),NOW())";
+        var sql = "INSERT INTO leads(first_name, last_name, email, phone_number, company_name, lead_score,lead_owner_id,created_at,updated_at) VALUES(?,? OR NULL,?,? OR NULL,? OR NULL,? OR NULL,?,NOW(),NOW())";
         connection.query(sql, [firstName, lastName, email, phone, company, leadScore, userId], (error, results) => {
             connection.release();
 
@@ -175,7 +175,7 @@ router.get('/:leadId/edit', (req, res) => {
 
 router.post('/:leadId/edit', (req, res) => {
     const leadId = req.params.leadId;
-    const { firstName, lastName, email, phone, company } = req.body;
+    const { firstName, lastName, email, phone, company ,leadScore } = req.body;
 
     pool.getConnection((err, connection) => {
         if (err) {
@@ -184,7 +184,7 @@ router.post('/:leadId/edit', (req, res) => {
             return;
         }
 
-        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? WHERE lead_id = ?', [firstName, lastName, email, phone, company, leadId],
+        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? , lead_score= ? WHERE lead_id = ?', [firstName, lastName, email, phone, company, leadScore,leadId],
             (error, results) => {
                 connection.release();
 

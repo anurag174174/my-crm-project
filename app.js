@@ -17,6 +17,18 @@ app.use(session({
     saveUninitialized: true
 }));
 
+//logouting user
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error logging out:', err);
+        res.status(500).send('Error logging out');
+      } else {
+        res.redirect('users/login'); 
+      }
+    });
+  });
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
