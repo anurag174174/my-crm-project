@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="../stylesheets/table.css">
 </head>
 
-
 <body>
     <h1>Leads</h1>
     <table>
@@ -17,12 +16,10 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Company</th>
-                <th>Assign to</th>
-
+                <th>Assign To</th>
                 <th>Lead Score</th>
-
-                <th>Created At</th>
-                <th>Updated At</th>
+                <th>Lead Created At</th>
+                <th>Lead Updated At</th>
             </tr>
         </thead>
         <tbody>
@@ -44,14 +41,12 @@
                         <%= lead.company_name %>
                     </td>
                     <td>
-                        <% if (lead.ownerFirstName || lead.ownerLastName) { %>
-                            <a href="/users/<%= lead.lead_owner_id %>">
-                                <%= lead.ownerFirstName %>
-                                    <%= lead.ownerLastName %>
-                            </a>
-                            <% } else { %>
-                                -
-                                <% } %>
+                        <select name="lead_owner_id" id="assignToDropdown" data-lead-id="<%= lead.lead_id %>"> 
+                            <option value="">Select User</option> 
+                            <% users.forEach(user => { %>
+                                <option value="<%= user.user_id %>" <% if (lead.lead_owner_id === user.user_id) { %>selected<% } %>><%= user.full_name %></option>
+                            <% }); %>
+                        </select>
                     </td>
                     <td>
                         <%= lead.lead_score %>
@@ -62,13 +57,46 @@
                     <td>
                         <%= new Date(lead.updated_at).toLocaleString() %>
                     </td>
-
                 </tr>
                 <% }); %>
         </tbody>
     </table>
-</body>
 
-</html>
+    <script>
+        const dropdownElements = document.querySelectorAll('#assignToDropdown');
+
+        dropdownElements.forEach(dropdown => {
+            dropdown.addEventListener('change', async(event) => {
+                const leadId = event.target.dataset.leadId;
+                const selectedUserId = event.target.value;
+
+                try {
+                    const response = await fetch(`/leads/${leadId}/assign`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            selectedUserId
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorMessage = await response.text(); // Get error message from server
+                        throw new Error(`Failed to update lead owner: ${errorMessage}`);
+                    }
+
+                    const data = await response.json();
+                    alert(data.message);
+
+                } catch (error) {
+                    console.error('Error updating lead owner:', error);
+                    alert('Error updating lead owner. Please try again.');
+                }
+            });
+        });
+    </script>
+
+</body>
 
 </html>

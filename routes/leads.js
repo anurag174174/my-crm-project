@@ -49,6 +49,7 @@ router.post('/create', (req, res) => {
     });
 });
 
+//viewing leads
 router.get('/', (req, res) => {
     if (!req.session.user) {
         return res.status(401).send('Unauthorized');
@@ -63,23 +64,79 @@ router.get('/', (req, res) => {
             return;
         }
 
-        var sql = "SELECT l.*, u.first_name as ownerFirstName, u.last_name as ownerLastName FROM leads l LEFT JOIN users u ON l.lead_owner_id = u.user_id WHERE l.lead_owner_id = ?";
-        connection.query(sql, [userId], (error, results) => {
+        // First query: Get leads for the current user
+        connection.query(`
+        SELECT 
+            l.*, 
+            u.first_name as ownerFirstName, 
+            u.last_name as ownerLastName 
+        FROM 
+            leads l 
+        LEFT JOIN 
+            users u ON l.lead_owner_id = u.user_id 
+        WHERE 
+            l.lead_owner_id = ? 
+        ORDER BY 
+            l.created_at DESC`, [userId], (err, leadsResults) => {
+            if (err) {
+                console.error('Error retrieving leads:', err);
+                res.status(500).send('Error retrieving leads');
+                return;
+            }
+
+            // Second query: Get all users
+            connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) as full_name FROM users', (err, usersResults) => {
+                if (err) {
+                    console.error('Error retrieving users:', err);
+                    res.status(500).send('Error retrieving users');
+                    return;
+                }
+
+                // Check if leads were found
+                if (Array.isArray(leadsResults) && leadsResults.length > 0) {
+                    res.render('leadMainPage', { leads: leadsResults, users: usersResults });
+                } else {
+                    console.error('No leads found.');
+                    res.status(404).send('No leads found.');
+                }
+
+                connection.release();
+            });
+        });
+    });
+});
+router.post('/:leadId/assign', (req, res) => {
+    const leadId = req.params.leadId;
+    const selectedUserId = req.body.selectedUserId;
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error getting connection from pool:', err);
+            res.status(500).send('Error connecting to database: ' + err.message);
+            return;
+        }
+
+        // Update the lead owner_id directly using the provided selectedUserId
+        const updateQuery = 'UPDATE leads SET lead_owner_id = ? WHERE lead_id = ?';
+        connection.query(updateQuery, [selectedUserId, leadId], (err, results) => {
             connection.release();
 
             if (err) {
-                console.error('Error retrieving data:', error);
-                res.status(500).send('Error retrieving data');
+                console.error('Error updating lead owner:', err);
+                res.status(500).send('Error updating lead owner: ' + err.message);
                 return;
             }
-            console.log(results)
 
-            res.render('leadMainPage', { leads: results });
+            if (results.affectedRows === 0) {
+                console.error('No rows were affected by the UPDATE query.');
+                res.status(404).send('Lead not found or update failed.');
+                return;
+            }
+
+            res.json({ message: 'Lead owner updated successfully' });
         });
     });
-
 });
-
 
 //lead udpate 
 
@@ -145,7 +202,41 @@ router.post('/:leadId/edit', (req, res) => {
             });
     });
 });
-module.exports = router; // const express = require('express');
+
+module.exports = router;
+
+
+// router.post('/:leadId/assign', (req, res) => {
+//     const leadId = req.params.leadId;
+//     const { lead_owner_id } = req.body;
+
+//     pool.getConnection((err, connection) => {
+//         if (err) {
+//             console.error('Error getting connection from pool:', err);
+//             res.status(500).send('Error connecting to database');
+//             return;
+//         }
+
+//         const updateQuery = 'UPDATE leads SET lead_owner_id = ? WHERE user_id = ?';
+//         connection.query(updateQuery, [lead_owner_id, leadId], (error, results) => {
+//             connection.release();
+
+//             if (error) {
+//                 console.error('Error updating lead owner:', error);
+//                 res.status(500).send('Error updating lead owner');
+//                 return;
+//             }
+
+//             if (results.affectedRows === 0) {
+//                 return res.status(404).send('Lead not found');
+//             }
+
+//             res.json({ message: 'Lead owner updated successfully' });
+//         });
+//     });
+// });
+
+// const express = require('express');
 // const router = express.Router();
 
 // const pool = require('../database/connection');
