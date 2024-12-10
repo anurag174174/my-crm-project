@@ -1,4 +1,4 @@
-/* Basic CSS styling for the edit user form */
+/* stylesheets/userEdit.css */
 
 body {
     font-family: sans-serif;
@@ -11,6 +11,7 @@ h1 {
 
 form {
     max-width: 400px;
+    /* Limit the form width for better presentation */
 }
 
 label {
@@ -21,18 +22,24 @@ label {
 input[type="text"],
 input[type="email"] {
     width: 100%;
+    /* Make inputs occupy the full width of the form */
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 3px;
+    box-sizing: border-box;
+    /* Include padding and border in width calculation */
 }
 
 button[type="submit"] {
-    background-color: #4CAF50;
-    /* Green */
-    color: white;
-    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
     border: none;
+    padding: 10px 20px;
     border-radius: 3px;
     cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #0062cc;
 }

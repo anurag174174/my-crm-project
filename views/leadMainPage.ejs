@@ -3,8 +3,9 @@
 
 <head>
     <title>Leads</title>
+    <link rel="stylesheet" href="../stylesheets/table.css">
 </head>
-<link rel="stylesheet" href="../stylesheets/table.css">
+
 
 <body>
     <h1>Leads</h1>
@@ -56,10 +57,10 @@
                         <%= lead.lead_score %>
                     </td>
                     <td>
-                        <%= lead.created_at %>
+                        <%= new Date(lead.created_at).toLocaleString() %>
                     </td>
                     <td>
-                        <%= lead.updated_at %>
+                        <%= new Date(lead.updated_at).toLocaleString() %>
                     </td>
 
                 </tr>

@@ -41,7 +41,7 @@
                 <%= user.role %>
             </li>
             <li><strong>Joined On:</strong>
-                <%= user.created_at %>
+                <%= new Date(user.created_at).toLocaleString() %>
             </li>
         </ul>
     </div>
