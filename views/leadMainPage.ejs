@@ -16,6 +16,7 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Company</th>
+                <th>Created by</th>
                 <th>Assign To</th>
                 <th>Lead Score</th>
                 <th>Lead Created At</th>
@@ -39,6 +40,9 @@
                     </td>
                     <td>
                         <%= lead.company_name %>
+                    </td>
+                    <td>
+                        <a href="/users/creator/<%= lead.created_by %>"><%= lead.createdByFullName %></a> 
                     </td>
                     <td>
                         <select name="lead_owner_id" id="assignToDropdown" data-lead-id="<%= lead.lead_id %>"> 

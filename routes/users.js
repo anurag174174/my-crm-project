@@ -63,7 +63,7 @@ router.post('/register', (req, res) => {
                         role: role
                     };
 
-                    console.log('User ID after registration:', userId);
+                   // console.log('User ID after registration:', userId);
                     req.session.save((err) => {
                         if (err) {
                             console.error('Error saving session:', err);
@@ -84,8 +84,6 @@ router.post('/register', (req, res) => {
 router.get('/login', (req, res) => {
     res.render('login');
 });
-
-
 
 
 router.post('/login', (req, res) => {
@@ -154,9 +152,20 @@ router.post('/login', (req, res) => {
 
 //view user 
 
+
 router.get('/:userId', (req, res) => {
     const userId = req.params.userId;
+    const userIdFromUrl = parseInt(req.params.userId, 10); // Extract and parse the userId from the URL
 
+    // Check if user is logged in
+    if (!req.session.user) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    // Check if the logged-in user's ID matches the userId in the URL
+    if (req.session.user.id !== userIdFromUrl) {
+        return res.status(401).send('Unauthorized'); // Prevent access to other users' details
+    }
     pool.getConnection((err, connection) => {
         if (err) {
             console.error('Error getting connection from pool:', err);
@@ -182,11 +191,22 @@ router.get('/:userId', (req, res) => {
     });
 });
 
+
 //editing user
 
 router.get('/:userId/edit', (req, res) => {
     const userId = req.params.userId;
+    const userIdFromUrl = parseInt(req.params.userId, 10); // Extract and parse the userId from the URL
 
+    // Check if user is logged in
+    if (!req.session.user) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    // Check if the logged-in user's ID matches the userId in the URL
+    if (req.session.user.id !== userIdFromUrl) {
+        return res.status(401).send('Unauthorized'); // Prevent access to other users' details
+    }
     pool.getConnection((err, connection) => {
         if (err) {
             console.error('Error getting connection from pool:', err);
@@ -215,6 +235,9 @@ router.get('/:userId/edit', (req, res) => {
 router.post('/:userId/edit', (req, res) => {
     const userId = req.params.userId;
     const { firstName, lastName, email, role } = req.body;
+    if (!req.session.user) {
+        return res.status(401).send('Unauthorized');
+    }
 
     pool.getConnection((err, connection) => {
         if (err) {
@@ -242,16 +265,38 @@ router.post('/:userId/edit', (req, res) => {
     });
 });
 
-router.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
+
+// In your routes/users.js file
+router.get('/creator/:creatorId', (req, res) => {
+    const creatorId = req.params.creatorId; 
+  
+    pool.getConnection((err, connection) => {
       if (err) {
-        console.error('Error logging out:', err);
-        res.status(500).send('Error logging out');
-      } else {
-        res.redirect('users/login'); 
+        console.error('Error getting connection from pool:', err);
+        res.status(500).send('Error connecting to database');
+        return;
       }
+  
+      connection.query('SELECT * FROM users WHERE user_id = ?', [creatorId], (error, results) => {
+        connection.release();
+        //console.log(results[0])
+  
+        if (error) {
+          console.error('Error fetching user:', error);
+          res.status(500).send('Error fetching user data');
+          return;
+        }
+  
+        if (results.length === 0) {
+          return res.status(404).send('User not found');
+        }
+  
+        res.render('createdByUserDetail', { user: results[0] }); 
+      });
     });
   });
+
+
 
 module.exports = router;
 

@@ -13,42 +13,49 @@ router.get('/create', (req, res) => {
 
 router.post('/create', (req, res) => {
     if (!req.session.user) {
-        return res.status(401).send('Unauthorized');
+      return res.status(401).send('Unauthorized');
     }
-
-    var firstName = req.body.firstName;
-    var lastName = req.body.lastName;
-    var email = req.body.email;
-    var phone = req.body.phoneNumber;
-    var company = req.body.companyName;
-    var leadScore = req.body.leadScore;
-    const userId = req.session.user.id;
-
+  
+    const { firstName, lastName, email, phone, company, leadScore } = req.body; 
+    const userId = req.session.user.id; 
+  
+    const sql = `
+      INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `;
+  
+    const values = [
+      firstName, 
+      lastName || null, 
+      email || null, 
+      phone || null, 
+      company || null, 
+      leadScore || null, 
+      userId, 
+      userId // Set creator_id to the currently logged-in user 
+    ];
+  
     pool.getConnection((err, connection) => {
+      if (err) {
+        console.error('Error getting connection from pool:', err);
+        res.status(500).send('Error connecting to database');
+        return;
+      }
+  
+      connection.query(sql, values, (error, results) => {
+        connection.release();
+  
         if (err) {
-            console.error('Error getting connection from pool:', err);
-            res.status(500).send('Error connecting to database');
-            return;
+          console.error('Error inserting data:', err);
+          res.status(500).send('Error inserting data');
+          return;
         }
-
-        var sql = "INSERT INTO leads(first_name, last_name, email, phone_number, company_name, lead_score,lead_owner_id,created_at,updated_at) VALUES(?,? OR NULL,?,? OR NULL,? OR NULL,? OR NULL,?,NOW(),NOW())";
-        connection.query(sql, [firstName, lastName, email, phone, company, leadScore, userId], (error, results) => {
-            connection.release();
-
-            if (err) {
-                console.error('Error inserting data:', error);
-                res.status(500).send('Error inserting data');
-                return;
-            }
-
-            console.log('Data inserted successfully');
-
-            // Redirect to leads list page after successful insertion
-            res.redirect('/leads');
-        });
+  
+        console.log('Data inserted successfully');
+        res.redirect('/leads'); 
+      });
     });
-});
-
+  });
 //viewing leads
 router.get('/', (req, res) => {
     if (!req.session.user) {
@@ -68,12 +75,14 @@ router.get('/', (req, res) => {
         connection.query(`
         SELECT 
             l.*, 
-            u.first_name as ownerFirstName, 
-            u.last_name as ownerLastName 
+            CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
+            CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
         FROM 
-            leads l 
+            leads l
         LEFT JOIN 
-            users u ON l.lead_owner_id = u.user_id 
+            users u ON l.lead_owner_id = u.user_id
+        LEFT JOIN 
+            users c ON l.created_by = c.user_id
         WHERE 
             l.lead_owner_id = ? 
         ORDER BY 
@@ -85,7 +94,7 @@ router.get('/', (req, res) => {
             }
 
             // Second query: Get all users
-            connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) as full_name FROM users', (err, usersResults) => {
+            connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
                 if (err) {
                     console.error('Error retrieving users:', err);
                     res.status(500).send('Error retrieving users');
@@ -94,7 +103,10 @@ router.get('/', (req, res) => {
 
                 // Check if leads were found
                 if (Array.isArray(leadsResults) && leadsResults.length > 0) {
-                    res.render('leadMainPage', { leads: leadsResults, users: usersResults });
+                    res.render('leadMainPage', { 
+                        leads: leadsResults, 
+                        users: usersResults 
+                    });
                 } else {
                     console.error('No leads found.');
                     res.status(404).send('No leads found.');
@@ -105,6 +117,7 @@ router.get('/', (req, res) => {
         });
     });
 });
+
 router.post('/:leadId/assign', (req, res) => {
     const leadId = req.params.leadId;
     const selectedUserId = req.body.selectedUserId;

@@ -9,6 +9,7 @@ router.get('/', function(req, res, next) {
     res.render('index', { title: 'Express' });
 });
 router.use('/user', usersRouter);
+//router.use('/creator', usersRouter);
 router.use('/leads ', leadsRouter);
 router.use('/', dashBoardRouter);
 module.exports = router;
