@@ -105,7 +105,8 @@ router.get('/', (req, res) => {
                 if (Array.isArray(leadsResults) && leadsResults.length > 0) {
                     res.render('leadMainPage', { 
                         leads: leadsResults, 
-                        users: usersResults 
+                        users: usersResults,
+                        currentUser: req.session.user
                     });
                 } else {
                     console.error('No leads found.');
@@ -197,7 +198,7 @@ router.post('/:leadId/edit', (req, res) => {
             return;
         }
 
-        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? , lead_score= ? WHERE lead_id = ?', [firstName, lastName, email, phone, company, leadScore,leadId],
+        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? , lead_score= ? WHERE lead_id = ?', [firstName || null, lastName || null, email, phone || null, company || null, leadScore || null ,leadId],
             (error, results) => {
                 connection.release();
 
