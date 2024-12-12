@@ -22,8 +22,12 @@
             <input type="email" id="email" name="email" required>
         </section>
         <section>
-            <label for="role">Role:</label>
-            <input type="text" id="role" name="role" required>
+            <select id="role" name="roleId" required> 
+                <option value="">Select Role</option> 
+                <% roles.forEach(role => { %>
+                  <option value="<%= role.role_id %>"><%= role.roles_name %></option>
+                <% }); %>
+              </select>
         </section>
         <section>
             <label for="password">Password:</label>

@@ -38,14 +38,18 @@
         <h2>Other Information</h2>
         <ul>
             <li><strong>Role:</strong>
-                <%= user.role %>
+                <%= user.roleName %>
             </li>
             <li><strong>Joined On:</strong>
                 <%= new Date(user.created_at).toLocaleString() %>
             </li>
         </ul>
     </div>
-    <a href="<%= user.user_id %>/edit">Edit User</a>
+
+    <h1>hi<%isCurrentUser%></h1>
+    <% if (isCurrentUser) { %> 
+        <a href="/users/<%= user.user_id %>/edit">Edit Profile</a> 
+      <% } %> 
     <a href="/leads">View leads</a>
 
 

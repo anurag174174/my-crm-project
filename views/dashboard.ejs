@@ -12,17 +12,15 @@
 
 
     <h1>Welcome,
-        <%= user.firstName %>!</h1>
+        <%= user.first_name %>!</h1>
     <p>Email:
         <%= user.email %>
     </p>
     <p>User id:
-        <%= user.id %>
+        <%= user.user_id %>
     </p>
-    <p>Role:
-        <%= user.role %>
-    </p>
-    <a href="/users/<%= user.id %>/edit">Edit Profile</a> 
+    <p>Your Role: <%= user.roleName %> </p> 
+    <a href="/users/<%= user.user_id %>/edit">Edit Profile</a> 
     <a href="/logout">Logout</a> 
     <a href="/leads/create">Add Lead</a>
     <a href="/leads">view leads</a>

@@ -6,7 +6,9 @@
     <link rel="stylesheet" href="../stylesheets/table.css">
 </head>
 
-<body><h1>Leads: <%= currentUser.firstName %></h1>
+<body>
+    <h1>Leads: <%= currentUser.firstName %>
+    </h1>
     <table>
         <thead>
             <tr>
@@ -23,7 +25,7 @@
             </tr>
         </thead>
         <tbody>
-            <% leads.forEach(lead => { %>
+            <% leads.forEach(lead=> { %>
                 <tr>
                     <td>
                         <a href="/leads/<%= lead.lead_id %>/edit">
@@ -41,18 +43,26 @@
                         <%= lead.company_name %>
                     </td>
                     <td>
-                        <a href="/users/creator/<%= lead.created_by %>"><%= lead.createdByFullName %></a> 
+                        <a href="/users/creator/<%= lead.created_by %>">
+                            <%= lead.createdByFullName %>
+                        </a>
                     </td>
+
+
                     <td>
-                        <select name="lead_owner_id" id="assignToDropdown" data-lead-id="<%= lead.lead_id %>"> 
-                            <option value="">Select User</option> 
-                            <% users.forEach(user => { %>
-                                <option value="<%= user.user_id %>" <% if (lead.lead_owner_id === user.user_id) { %>selected<% } %>>
-                                    <%= user.full_name %> 
-                                </option>
-                            <% }); %>
+                        <select name="lead_owner_id" id="assignToDropdown" data-lead-id="<%= lead.lead_id %>" <% if
+                            (currentUser.is_admin !==1) { %>disabled<% } %>>
+                                <option value="">Select User</option>
+                                <% users.forEach(user=> { %>
+                                    <option value="<%= user.user_id %>" <% if (lead.lead_owner_id===user.user_id) { %>
+                                        selected<% } %>>
+                                            <%= user.full_name %>
+                                    </option>
+                                    <% }); %>
                         </select>
-                        <a href="/users/<%= lead.lead_owner_id %>">view</a> 
+                        <% if (lead.lead_owner_id && currentUser.is_admin===1) { %>
+                            <a href="/users/assign/<%= lead.lead_owner_id %>">view</a>
+                            <% } %>
                     </td>
                     <td>
                         <%= lead.lead_score %>
@@ -72,7 +82,7 @@
         const dropdownElements = document.querySelectorAll('#assignToDropdown');
 
         dropdownElements.forEach(dropdown => {
-            dropdown.addEventListener('change', async(event) => {
+            dropdown.addEventListener('change', async (event) => {
                 const leadId = event.target.dataset.leadId;
                 const selectedUserId = event.target.value;
 

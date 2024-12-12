@@ -19,7 +19,12 @@
         <input type="email" id="email" name="email" value="<%= user.email %>"><br><br>
 
         <label for="role">Role:</label>
-        <input type="text" id="role" name="role" value="<%= user.role %>"><br><br>
+        <select id="role" name="roleId" required>
+            <option value="">Select Role</option>
+            <% roles.forEach(role => { %>
+              <option value="<%= role.role_id %>" <% if (user.user_role_id === role.role_id) { %>selected<% } %>><%= role.roles_name %></option>
+            <% }); %>
+          </select><br><br>
 
         <button type="submit">Save Changes</button>
     </form>

@@ -10,30 +10,103 @@ router.get('/create', (req, res) => {
 
     res.render('leadForm');
 });
-
 router.post('/create', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  const { firstName, lastName, email, phone_number, company_name, leadScore } = req.body; 
+  const userId = req.session.user.id; 
+
+  const sql = `
+    INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+  `;
+
+  let values = [
+    firstName, 
+    lastName || null, 
+    email, 
+    phone_number || null, 
+    company_name || null, 
+    leadScore || 0, 
+    userId, 
+    userId 
+  ];
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database');
+      return;
+    }
+
+    connection.query(sql, values, (error, results) => {
+      connection.release();
+
+      if (err) {
+        console.error('Error inserting data:', err);
+        res.status(500).send('Error inserting data');
+        return;
+      }
+
+      console.log('Data inserted successfully');
+      res.redirect('/leads'); 
+    });
+  });
+});
+
+// router.post('/create', (req, res) => {
+//     if (!req.session.user) {
+//       return res.status(401).send('Unauthorized');
+//     }
+  
+//     const { firstName, lastName, email, phone, company, leadScore } = req.body; 
+//     const userId = req.session.user.id; 
+  
+//     const sql = `
+//       INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
+//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+//     `;
+  
+//     const values = [
+//       firstName, 
+//       lastName , 
+//       email , 
+//       phone , 
+//       company , 
+//       leadScore, 
+//       userId, 
+//       userId // Set creator_id to the currently logged-in user 
+//     ];
+  
+//     pool.getConnection((err, connection) => {
+//       if (err) {
+//         console.error('Error getting connection from pool:', err);
+//         res.status(500).send('Error connecting to database');
+//         return;
+//       }
+  
+//       connection.query(sql, values, (error, results) => {
+//         connection.release();
+  
+//         if (err) {
+//           console.error('Error inserting data:', err);
+//           res.status(500).send('Error inserting data');
+//           return;
+//         }
+  
+//         console.log('Data inserted successfully');
+//         res.redirect('/leads'); 
+//       });
+//     });
+//   });
+//viewing leads
+
+router.get('/', (req, res) => {
     if (!req.session.user) {
       return res.status(401).send('Unauthorized');
     }
-  
-    const { firstName, lastName, email, phone, company, leadScore } = req.body; 
-    const userId = req.session.user.id; 
-  
-    const sql = `
-      INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-    `;
-  
-    const values = [
-      firstName, 
-      lastName || null, 
-      email || null, 
-      phone || null, 
-      company || null, 
-      leadScore || null, 
-      userId, 
-      userId // Set creator_id to the currently logged-in user 
-    ];
   
     pool.getConnection((err, connection) => {
       if (err) {
@@ -42,82 +115,131 @@ router.post('/create', (req, res) => {
         return;
       }
   
-      connection.query(sql, values, (error, results) => {
-        connection.release();
-  
-        if (err) {
-          console.error('Error inserting data:', err);
-          res.status(500).send('Error inserting data');
-          return;
-        }
-  
-        console.log('Data inserted successfully');
-        res.redirect('/leads'); 
-      });
-    });
-  });
-//viewing leads
-router.get('/', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).send('Unauthorized');
-    }
-
-    const userId = req.session.user.id;
-
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Error getting connection from pool:', err);
-            res.status(500).send('Error connecting to database');
-            return;
-        }
-
-        // First query: Get leads for the current user
-        connection.query(`
-        SELECT 
+      let sql;
+      if (req.session.user && req.session.user.is_admin === 1) { 
+        // If user is admin, fetch all leads
+        sql = `
+          SELECT 
             l.*, 
             CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
             CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
-        FROM 
+          FROM 
             leads l
-        LEFT JOIN 
+          LEFT JOIN 
             users u ON l.lead_owner_id = u.user_id
-        LEFT JOIN 
+          LEFT JOIN 
             users c ON l.created_by = c.user_id
-        WHERE 
-            l.lead_owner_id = ? 
-        ORDER BY 
-            l.created_at DESC`, [userId], (err, leadsResults) => {
-            if (err) {
-                console.error('Error retrieving leads:', err);
-                res.status(500).send('Error retrieving leads');
-                return;
-            }
-
-            // Second query: Get all users
-            connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
-                if (err) {
-                    console.error('Error retrieving users:', err);
-                    res.status(500).send('Error retrieving users');
-                    return;
-                }
-
-                // Check if leads were found
-                if (Array.isArray(leadsResults) && leadsResults.length > 0) {
-                    res.render('leadMainPage', { 
-                        leads: leadsResults, 
-                        users: usersResults,
-                        currentUser: req.session.user
-                    });
-                } else {
-                    console.error('No leads found.');
-                    res.status(404).send('No leads found.');
-                }
-
-                connection.release();
+        `;
+      } else { 
+        // If user is not admin, fetch only leads assigned to them
+        sql = `
+          SELECT 
+            l.*, 
+            CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
+            CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
+          FROM 
+            leads l
+          LEFT JOIN 
+            users u ON l.lead_owner_id = u.user_id
+          LEFT JOIN 
+            users c ON l.created_by = c.user_id
+          WHERE 
+            l.lead_owner_id = ?
+        `;
+      }
+  
+      connection.query(sql, req.session.user.is_admin === 1 ? [] : [req.session.user.id], (err, leadsResults) => {
+        if (err) {
+          console.error('Error retrieving leads:', err);
+          connection.release();
+          res.status(500).send('Error retrieving leads');
+          return;
+        }
+  
+        connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
+          if (err) {
+            console.error('Error retrieving users:', err);
+            connection.release();
+            res.status(500).send('Error retrieving users');
+            return;
+          }
+  
+          if (Array.isArray(leadsResults) && leadsResults.length > 0) {
+            res.render('leadMainPage', { 
+              leads: leadsResults, 
+              users: usersResults, 
+              currentUser: req.session.user 
             });
+          } else {
+            console.error('No leads found.');
+            connection.release();
+            res.status(404).send('No leads found.'); 
+          }
         });
+      });
     });
-});
+  });
+// router.get('/', (req, res) => {
+//     if (!req.session.user) {
+//         return res.status(401).send('Unauthorized');
+//     }
+
+//     const userId = req.session.user.id;
+
+//     pool.getConnection((err, connection) => {
+//         if (err) {
+//             console.error('Error getting connection from pool:', err);
+//             res.status(500).send('Error connecting to database');
+//             return;
+//         }
+
+//         // First query: Get leads for the current user
+//         connection.query(`
+//         SELECT 
+//             l.*, 
+//             CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
+//             CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
+//         FROM 
+//             leads l
+//         LEFT JOIN 
+//             users u ON l.lead_owner_id = u.user_id
+//         LEFT JOIN 
+//             users c ON l.created_by = c.user_id
+//         WHERE 
+//             l.lead_owner_id = ? 
+//         ORDER BY 
+//             l.created_at DESC`, [userId], (err, leadsResults) => {
+//             if (err) {
+//                 console.error('Error retrieving leads:', err);
+//                 res.status(500).send('Error retrieving leads');
+//                 return;
+//             }
+
+//             // Second query: Get all users
+//             connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
+//                 if (err) {
+//                     console.error('Error retrieving users:', err);
+//                     res.status(500).send('Error retrieving users');
+//                     return;
+//                 }
+
+//                 // Check if leads were found
+//                 if (Array.isArray(leadsResults) && leadsResults.length > 0) {
+//                     res.render('leadMainPage', { 
+//                         leads: leadsResults, 
+//                         users: usersResults,
+//                         currentUser: req.session.user
+//                     });
+//                 } else {
+//                     console.error('No leads found.');
+//                     res.status(404).send('No leads found.');
+//                 }
+
+//                 connection.release();
+//             });
+//         });
+//     });
+// });
 
 router.post('/:leadId/assign', (req, res) => {
     const leadId = req.params.leadId;
