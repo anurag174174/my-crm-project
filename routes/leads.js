@@ -4,23 +4,52 @@ const router = express.Router();
 const pool = require('../database/connection');
 
 router.get('/create', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).send('Unauthorized');
+  if (!req.session.user) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database');
+      return;
     }
 
-    res.render('leadForm');
+    connection.query('SELECT * FROM lead_statuses', (err, statuses) => {
+      if (err) {
+        console.error('Error fetching lead statuses:', err);
+        connection.release();
+        res.status(500).send('Error fetching lead statuses');
+        return;
+      }
+
+      connection.query('SELECT * FROM lead_sources', (err, leadSources) => { 
+        if (err) {
+          console.error('Error fetching lead sources:', err);
+          connection.release();
+          res.status(500).send('Error fetching lead sources');
+          return;
+        }
+
+        connection.release();
+        res.render('leadForm', { statuses, leadSources }); 
+      });
+    });
+  });
 });
+
+
 router.post('/create', (req, res) => {
   if (!req.session.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  const { firstName, lastName, email, phone_number, company_name, leadScore } = req.body; 
+  const { firstName, lastName, email, phone_number, company_name, leadScore,lead_status_id,lead_source_id } = req.body; 
   const userId = req.session.user.id; 
 
   const sql = `
-    INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at,lead_status_id,lead_source_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(),?,?)
   `;
 
   let values = [
@@ -31,7 +60,9 @@ router.post('/create', (req, res) => {
     company_name || null, 
     leadScore || 0, 
     userId, 
-    userId 
+    userId ,//Set creator_id to the currently logged-in user 
+    lead_status_id,
+    lead_source_id
   ];
 
   pool.getConnection((err, connection) => {
@@ -279,6 +310,7 @@ router.post('/:leadId/assign', (req, res) => {
 router.get('/:leadId/edit', (req, res) => {
     const leadId = req.params.leadId;
     console.log("Received leadId:", leadId);
+    
 
     pool.getConnection((err, connection) => {
         if (err) {
@@ -287,7 +319,7 @@ router.get('/:leadId/edit', (req, res) => {
             return;
         }
 
-        connection.query('SELECT * FROM leads WHERE lead_id = ?', [leadId], (error, results) => {
+        connection.query('SELECT l.*, s.status_name FROM leads l LEFT JOIN lead_statuses s ON l.lead_status_id = s.lead_status_id WHERE l.lead_id = ?;', [leadId], (error, results) => {
             connection.release();
 
             if (error) {
@@ -300,8 +332,18 @@ router.get('/:leadId/edit', (req, res) => {
                 return res.status(404).send('Lead not found');
             }
             console.log(results)
-
-            res.render('editLead', { lead: results[0] });
+            connection.query('SELECT * FROM lead_statuses', (err, statusesResults) => {
+              if (err) {
+                console.error('Error fetching lead statuses:', err);
+                connection.release();
+                res.status(500).send('Error fetching lead statuses');
+                return;
+              }
+  
+              connection.release();
+              res.render('editLead', { lead :results[0], statuses: statusesResults });
+            });
+            
         });
     });
 });
@@ -311,7 +353,7 @@ router.get('/:leadId/edit', (req, res) => {
 
 router.post('/:leadId/edit', (req, res) => {
     const leadId = req.params.leadId;
-    const { firstName, lastName, email, phone, company ,leadScore } = req.body;
+    const { firstName, lastName, email, phone, company ,leadScore ,lead_status_id} = req.body;
 
     pool.getConnection((err, connection) => {
         if (err) {
@@ -320,7 +362,7 @@ router.post('/:leadId/edit', (req, res) => {
             return;
         }
 
-        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? , lead_score= ? WHERE lead_id = ?', [firstName || null, lastName || null, email, phone || null, company || null, leadScore || null ,leadId],
+        connection.query('UPDATE leads SET first_name = ?, last_name = ?, email = ?, phone_number = ?, company_name = ? , lead_score= ? ,lead_status_id =? WHERE lead_id = ?', [firstName || null, lastName || null, email, phone || null, company || null, leadScore || null, lead_status_id,leadId,],
             (error, results) => {
                 connection.release();
 

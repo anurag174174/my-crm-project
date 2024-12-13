@@ -73,6 +73,9 @@
                     <td>
                         <%= new Date(lead.updated_at).toLocaleString() %>
                     </td>
+                    <td>
+                        <a href="/leads/<%= lead.lead_id %>/edit"> More</a>
+                    </td>
                 </tr>
                 <% }); %>
         </tbody>

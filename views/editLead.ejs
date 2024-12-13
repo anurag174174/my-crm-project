@@ -3,6 +3,49 @@
 
 <head>
     <title>Edit Lead</title>
+    <style>
+        body {
+          font-family: sans-serif;
+          margin: 20px;
+        }
+    
+        h1 {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+    
+        form {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+    
+        label {
+          display: block;
+          margin-bottom: 5px;
+        }
+    
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 3px;
+        }
+    
+        button {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px 20px;
+         
+          border: none;
+          border-radius: 3px;
+          cursor: pointer;
+        }
+      </style>
+    
 </head>
 
 <body>
@@ -25,6 +68,15 @@
 
         <label for="company">Lead Score:</label>
         <input type="text" id="leadScore" name="leadScore" value="<%= lead.lead_score %>"><br><br>
+        <label for="leadStatus">Lead Status:</label>
+        <select id="leadStatus" name="lead_status_id" required>
+            <option value="">Select Status</option>
+            <% statuses.forEach(status => { %>
+              <option value="<%= status.lead_status_id %>" <% if (lead.lead_status_id === status.lead_status_id) { %>selected<% } %>>
+                <%= status.status_name %>
+              </option>
+            <% }); %>
+          </select><br><br>
 
         <button type="submit">Save Changes</button>
     </form>

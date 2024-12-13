@@ -3,7 +3,63 @@
 
 <head>
     <title>User Details</title>
-    <link rel="stylesheet" href="../stylesheets/userDetail.css">
+   
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>User Details</title>
+  <link rel="stylesheet" href="../stylesheets/userDetail.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .user-info {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .user-info h2 {
+      margin-bottom: 10px;
+    }
+
+    .user-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .user-info li {
+      margin-bottom: 5px;
+    }
+
+    .user-info li strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007bff;
+      margin: 5px;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+
+    a:hover {
+      background-color: #ddd;
+    }
+  </style>
 </head>
 
 <body>
@@ -46,7 +102,7 @@
         </ul>
     </div>
 
-    <h1>hi<%isCurrentUser%></h1>
+    <h1><%isCurrentUser%></h1>
     <% if (isCurrentUser) { %> 
         <a href="/users/<%= user.user_id %>/edit">Edit Profile</a> 
       <% } %> 
