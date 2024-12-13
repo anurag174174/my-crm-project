@@ -258,7 +258,7 @@ router.get('/:userId', (req, res) => {
             return res.status(404).send('User not found');
           }
           const isCurrentUser = req.session.user.id === userId;
-          res.render('userDetail', { user: results[0],isCurrentUser });
+          res.render('userDetail', { user: results[0], isCurrentUser });
         });
       });
   });

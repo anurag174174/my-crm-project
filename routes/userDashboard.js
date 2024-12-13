@@ -6,6 +6,7 @@ const pool = require('../database/connection');
 
 router.get('/:userId/dashboard', (req, res) => {
     if (!req.session.user) {
+      res.redirect('/users/login')
       return res.status(401).send('Unauthorized');
     }
   
@@ -58,6 +59,7 @@ router.get('/:userId/dashboard', (req, res) => {
                 res.status(500).send('Error retrieving user details');
                 return;
               }
+              
   
               if (userResults.length === 0) {
                 connection.release();
@@ -69,7 +71,7 @@ router.get('/:userId/dashboard', (req, res) => {
               connection.release();
               res.render('dashboard', { user: user, leads: leadsResults });
             });
-        });
+          });
       });
     });
   
