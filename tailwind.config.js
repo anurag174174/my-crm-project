@@ -1,11 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./views/**/*.ejs", // Scans all EJS files in the views folder
-    "./public/**/*.js", // Optional: Scan JS files in the public folder if needed
+    './views/**/*.ejs', // Path to your EJS files
+    './public/**/*.js', // Optional: if you are using JavaScript files in the public folder
   ],
   theme: {
     extend: {},
   },
   plugins: [],
-};
+}
+

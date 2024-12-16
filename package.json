@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "build:css": "npx tailwindcss -i ./public/stylesheets/tailwind.css -o ./public/stylesheets/main.css --watch"
+     "build:css": "npx tailwindcss -i ./public/stylesheets/styles.css -o ./public/css/styles.css --watch"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.20",
     "bcrypt": "^5.1.1",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -18,13 +19,10 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.11.5",
     "nodemon": "^3.1.7",
+    "postcss": "^8.4.49",
     "promise": "^8.3.0",
     "promise-mysql": "^5.2.0",
-    "Router": "^2.1.0"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
+    "Router": "^2.1.0",
     "tailwindcss": "^3.4.16"
   }
 }

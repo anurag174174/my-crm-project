@@ -342,7 +342,7 @@ router.get('/:userId/edit', (req, res) => {
             res.status(500).send('Error fetching user data');
             return;
           }
-  
+          console.log(userResults[0])
           if (userResults.length === 0) {
             connection.release();
             return res.status(404).send('User not found');
