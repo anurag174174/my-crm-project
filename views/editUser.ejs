@@ -1,33 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Edit User</title>
-    <link rel="stylesheet" href="../stylesheets/userEdit.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDIT USER</title>
+    <link rel="stylesheet" href="/stylesheets/tailwind.css">
 </head>
 
-<body>
-    <h1>Edit User</h1>
-    <form method="POST" action="/user/<%= user.user_id %>/edit">
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" value="<%= user.first_name %>"><br><br>
+<body class="bg-gray-100">
+    <!-- Main Wrapper -->
+    <div class="flex flex-col sm:flex-row justify-center items-center sm:items-start sm:space-x-6 p-2 bg-white shadow-lg rounded-lg mx-auto mt-8 max-w-5xl ">
+        <!-- Sidebar -->
+        <div class="sm:w-2/5 bg-white  p-6 space-y-4">
+            <div class="text-center">
+                <!-- Profile Image -->
+                <img src="https://via.placeholder.com/100" alt="Profile Picture"
+                    class="w-24 h-24 mx-auto rounded-full mb-4">
+                <p class="text-lg font-bold text-gray-800 capitalize" ><%=user.first_name%> <%=user.last_name%></p>
+            </div>
+            <!-- Menu -->
+            <nav>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/user/<%= user.user_id %>/dashboard" class="flex items-center px-4 py-2 text-orange-600 font-semibold hover:bg-gray-200 rounded-md">
+                            <span>🏠</span>
+                            <span class="ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-4 py-2 bg-blue-100 text-blue-600 font-medium rounded-md ">
+                            <span>📋</span>
+                            <span class="ml-3">Edit user</span>
+                        </a>
+                    </li>
+                    <li>
+                      <a href="/user/<%= user.user_id %>/" class="flex items-center px-4 py-2  text-blue-600 font-medium rounded-md hover:bg-gray-200">
+                          <span>📋</span>
+                          <span class="ml-3">User Details</span>
+                      </a>
+                  </li>
+                  <li>
+                    <a href="/leads" class="flex items-center px-4 py-2  text-blue-600 font-medium rounded-md hover:bg-gray-200">
+                        <span>📊</span>
+                        <span class="ml-3">View Leads</span>
+                    </a>
+                </li>
+                <li>
+                  <a href="/logout" class="flex items-center px-4 py-2  text-red-400 font-medium rounded-md hover:bg-gray-200">
+                      <span>🚪</span>
+                      <span class="ml-3">&nbsp; Logout</span>
+                  </a>
+              </li>
+                </ul>
+          </nav>
+        </div>
 
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" value="<%= user.last_name %>"><br><br>
+        <!-- Form Wrapper -->
+        <div class="w-full sm:w-3/5 p-6 bg-gray-50 rounded-lg">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wider">Edit User</h1>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<%= user.email %>"><br><br>
+            <form method="POST" action="/user/<%= user.user_id %>/edit" class="space-y-6">
+                <!-- First Name -->
+                <div class="mb-4">
+                    <label for="firstName" class="block text-gray-700 font-medium mb-2">First name</label>
+                    <input type="text" id="firstName" name="firstName" value="<%= user.first_name %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
 
-        <label for="role">Role:</label>
-        <select id="role" name="roleId" required>
-            <option value="">Select Role</option>
-            <% roles.forEach(role => { %>
-              <option value="<%= role.role_id %>" <% if (user.user_role_id === role.role_id) { %>selected<% } %>><%= role.roles_name %></option>
-            <% }); %>
-          </select><br><br>
+                <!-- Last Name -->
+                <div class="mb-4">
+                    <label for="lastName" class="block text-gray-700 font-medium mb-2">Last name</label>
+                    <input type="text" id="lastName" name="lastName" value="<%= user.last_name %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
 
-        <button type="submit">Save Changes</button>
-    </form>
+                <!-- Email Address -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-medium mb-2">Email address</label>
+                    <input type="email" id="email" name="email" value="<%= user.email %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <!-- Role Dropdown -->
+                <div class="mb-4">
+                    <label for="role" class="block text-gray-700 font-medium mb-2">Role</label>
+                    <select id="role" name="roleId" required
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">Select Role</option>
+                        <% roles.forEach(role => { %>
+                        <option value="<%= role.role_id %>" <% if (user.user_role_id === role.role_id) { %>selected<% } %>>
+                            <%= role.roles_name %>
+                        </option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <!-- Save Button -->
+                <div class="mt-6">
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

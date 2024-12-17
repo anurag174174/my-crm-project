@@ -1,85 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Edit Lead</title>
-    <style>
-        body {
-          font-family: sans-serif;
-          margin: 20px;
-        }
-    
-        h1 {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-    
-        form {
-          max-width: 600px;
-          margin: 0 auto;
-        }
-    
-        label {
-          display: block;
-          margin-bottom: 5px;
-        }
-    
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        select {
-          width: 100%;
-          padding: 10px;
-          margin-bottom: 10px;
-          border: 1px solid #ccc;
-          border-radius: 3px;
-        }
-    
-        button {
-          background-color: #4CAF50;
-          color: white;
-          padding: 10px 20px;
-         
-          border: none;
-          border-radius: 3px;
-          cursor: pointer;
-        }
-      </style>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDIT USER</title>
+    <link rel="stylesheet" href="/stylesheets/tailwind.css">
 </head>
 
-<body>
-    <h1>Edit Lead</h1>
-    <form method="POST" action="/leads/<%= lead.lead_id %>/edit">
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" value="<%= lead.first_name %>"><br><br>
+<body class="bg-gray-100">
+    <!-- Main Wrapper -->
+    <div class="flex flex-col sm:flex-row justify-center items-center sm:items-start sm:space-x-6 p-2 bg-white shadow-lg rounded-lg mx-auto mt-8 max-w-5xl ">
+        <!-- Sidebar -->
+        <div class="sm:w-2/5 bg-white  p-6 space-y-4">
+            <div class="text-center my-40">
+                <!-- Profile Image -->
+                <img src="https://img.freepik.com/free-vector/office_1284-16995.jpg" alt="Profile Picture"
+                    class="w-full h-full mx-auto rounded-full  mb-4">
+                
+            </div>
+           
+            
+        </div>
 
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" value="<%= lead.last_name %>"><br><br>
+        <!-- Form Wrapper -->
+        <div class="w-full sm:w-3/5 p-6 bg-gray-50 rounded-lg">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wider">Edit Lead</h1>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<%= lead.email %>"><br><br>
+            <form method="POST" action="/leads/<%= lead.lead_id %>/edit" class="space-y-6">
+                <!-- First Name -->
+                <div class="mb-4">
+                    <label for="firstName" class="block text-gray-700 font-medium mb-2">First name</label>
+                    <input type="text" id="firstName" name="firstName" value="<%= lead.first_name %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
 
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" value="<%= lead.phone_number %>"><br><br>
+                <!-- Last Name -->
+                <div class="mb-4">
+                    <label for="lastName" class="block text-gray-700 font-medium mb-2">Last name</label>
+                    <input type="text" id="lastName" name="lastName" value="<%= lead.last_name %> "
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
 
-        <label for="company">Company:</label>
-        <input type="text" id="company" name="company" value="<%= lead.company_name %>"><br><br>
+                <!-- Email Address -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-medium mb-2">Email address</label>
+                    <input type="email" id="email" name="email" value="<%= lead.email %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
 
-        <label for="company">Lead Score:</label>
-        <input type="text" id="leadScore" name="leadScore" value="<%= lead.lead_score %>"><br><br>
-        <label for="leadStatus">Lead Status:</label>
-        <select id="leadStatus" name="lead_status_id" required>
-            <option value="">Select Status</option>
-            <% statuses.forEach(status => { %>
+                  <!-- company name -->
+                <div class="mb-4">
+                    <label for="company" class="block text-gray-700 font-medium mb-2">Company Name</label>
+                    <input type="text" id="company" name="company" value="<%= lead.company_name %>"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <!-- lead score -->
+                <div class="mb-4">
+                  <label for="leadScore" class="block text-gray-700 font-medium mb-2">Lead Score</label>
+                  <input type="text" id="leadScore" name="leadScore" value="<%= lead.lead_score %>"
+                      class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+               <!-- phone number -->
+               <div class="mb-4">
+                <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                <input type="text" id="phone" name="phone" value="<%= lead.phone_number %>"
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+                
+
+                <!-- Status Dropdown -->
+                <div class="mb-4">
+                    <label for="leadStatus" class="block text-gray-700 font-medium mb-2">Status</label>
+                    <select id="leadStatus" name="lead_status_id" required
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">Select Status</option>
+                        <% statuses.forEach(status => { %>
+                        
               <option value="<%= status.lead_status_id %>" <% if (lead.lead_status_id === status.lead_status_id) { %>selected<% } %>>
                 <%= status.status_name %>
               </option>
-            <% }); %>
-          </select><br><br>
+                        <% }); %>
+                    </select>
+                </div>
 
-        <button type="submit">Save Changes</button>
-    </form>
+                <!-- Save Button -->
+                <div class="mt-6">
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>
