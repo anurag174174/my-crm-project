@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
-        <link rel="stylesheet" href="/stylesheets/tailwind.css">
+        <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dashboard" />
         <link rel="stylesheet"
@@ -13,146 +13,134 @@
     </head>
     <body class="w-full h-screen " id="container">
         <!-- header here -->
-        <div
-            class="w-full h-[7%]  flex justify-between items-center bg-blue-500 border-gray-300">
-            <!-- menu bar -->
-            <div class="h-[100%] w-1/2 flex ">
-                <div id="sidebar"
-                    class="w-[15%] fixed top-0 mt-2 rounded-md  left-0   bg-white shadow-md transition-all duration-300 ease-in-out transform -translate-x-full">
+        <div class="w-full h-16 flex items-center justify-between bg-blue-500 px-4 relative">
+            <!-- Menu Icon -->
+            <div id="menu-container" class="relative">
+                <button id="menuButton" class="text-white material-symbols-outlined text-2xl cursor-pointer">
+                    menu
+                </button>
+                <!-- Dropdown Menu -->
+                <ul id="menuDropdown" 
+                    class="absolute left-0 top-full mt-2 bg-white shadow-md rounded-lg w-48 hidden">
+                    <li><a href="/user/<%= user.user_id %>/dashboard" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
+                    <li><a href="/user/<%= user.user_id %>/" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Profile</a></li>
+                    <li><a href="/leads" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Leads</a></li>
+                    <li><a href="/logout" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
+                </ul>
+            </div>
+        
+            <!-- Page Title -->
+            <h1 class="text-white text-lg font-bold">Responsive Header</h1>
+        
+            <!-- Profile Icon -->
+            <div id="profile-container" class="relative">
+                <img id="profileButton" 
+                     class="w-10 h-10 rounded-full cursor-pointer"
+                     src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+                     alt="Profile">
+                <!-- Side Toolbar -->
+                <div id="profileSidebar" 
+                     class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
                     <div class="p-4">
-                        <h2 class="text-lg font-semibold mb-4 py-2 border-b-2  w-full capitalize">
-                            <%=user.first_name%> <%=user.last_name%></h2>
-                        <ul class="space-y-4">
-                            <li class="  hover:text-white hover:bg-blue-500 py-3 rounded-md">
-                                
-                                <a href="/user/<%= user.user_id %>/dashboard" class= " ml-4 text-left hover:text-white hover:bg-blue-500">Dashboard</a>
-                            </li>
-                            <li class="  hover:text-white hover:bg-blue-500 py-3 rounded-md">
-                                
-                                <a href="/user/<%= user.user_id %>/" class= " ml-4 text-left hover:text-white hover:bg-blue-500">View Profile</a>
-                            </li>
-                            <li class="  hover:text-white hover:bg-blue-500 py-3 rounded-md">
-                                
-                                <a href="/user/<%= user.user_id %>/edit" class= " ml-4 text-left hover:text-white hover:bg-blue-500">Edit Profile</a>
-                            </li>
-                            <li class="  hover:text-white hover:bg-blue-500 py-3 rounded-md">
-                                
-                                <a href="/leads/create" class= " ml-4 text-left hover:text-white hover:bg-blue-500">Add leads</a>
-                            </li>
-                           
-                        </ul>
+                        <h2 class="text-lg font-bold mb-4">User Details</h2>
+                        <p class="mb-2">Name: John Doe</p>
+                        <p class="mb-2">Email: johndoe@example.com</p>
+                        <p>Role: User</p>
                     </div>
-                </div> 
-
-                <div class="flex-1 p-3">
-                    <button id="menuButton"
-                        class="material-symbols-outlined text-white   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        menu
-                    </button>
-
                 </div>
             </div>
-
-            <!-- header profile  -->
-            <div class="w-[18%] flex h-[70%] items-center cursor-pointer justify-between relative"> 
-                <h1 class="text-white text-lg ml-24 ">hi, <%=user.first_name%></h1>
-                 <img id="profileImage" class="w-[20%] h-[100%] rounded-full mx-auto"
-                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                alt>
-                <div id="popUp" class="bg-white mt-10 absolute top-0 left-0 w-full h-full  shadow-md rounded-lg p-2 hidden transition-all duration-300 ease-in-out">
-               
-               <p class="text-sm">Name: <%=user.first_name%> <%=user.last_name%></p>
-               <p class="text-sm">Email: <%=user.email%> </p>
-               <button id="closeButton" class="mt-4 text-blue-500 hover:text-blue-700">Close</button>
-           </div>
-       </div>
         </div>
+        
+        <!-- Backdrop to close menus/toolbars -->
+       
         <!-- welcome div -->
-        <div class="w-[85%] h-[10%]  mt-16 flex ml-28">
-            <div class=" w-[8%] flex items-end">
-                <img class="w-[70%] h-full"
-                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                    alt>
+         <!-- Welcome Div -->
+<div class="w-full mt-16 flex flex-col md:flex-row md:items-center px-4 md:px-16">
+    <!-- Profile Image -->
+    <div class="w-full md:w-[10%] flex justify-center md:justify-start mb-4 md:mb-0">
+        <img class="w-20 h-20 md:w-16 md:h-16 rounded-full"
+             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+             alt="Profile">
+    </div>
+    <!-- Welcome Text -->
+    <div class="w-full md:w-[70%] text-center md:text-left">
+        <h1 class="text-gray-500 text-xl md:text-3xl capitalize tracking-wide font-semibold">
+            Hello, <%= user.first_name %>
+        </h1>
+        <h1 class="text-blue-600 text-lg md:text-2xl capitalize font-semibold">
+            Welcome back to <%= user.first_name %> <%= user.last_name %>
+        </h1>
+    </div>
+</div>
+
+<!-- Getting Start Div -->
+<div class="w-full mt-6 px-4 md:px-16">
+    <h1 class="text-xl md:text-3xl tracking-tight text-gray-700 font-semibold text-center md:text-left">
+        Getting Started
+    </h1>
+</div>
+<div class="w-full h-auto flex flex-col items-start justify-start">
+    <!-- Card Container -->
+    <div class="w-[90%] mx-auto p-4 flex flex-wrap gap-6">
+        <!-- Last Lead Card -->
+        <div
+            class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+            <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
+            <% if (lastLead) { %>
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Contact name</h6>
+                <h6><%=lastLead.leadFirstName%> <%=lastLead.leadLastName%></h6>
             </div>
-            <div class=" w-[50%] flex flex-col">
-                <h1
-                    class="text-gray-500 text-3xl capitalize tracking-wide font-semibold">Hello
-                    <%=user.first_name%></h1>
-                <h1
-                    class="text-blue-600 text-2xl capitalize font-semibold">Welcome
-                    back to <%=user.first_name%> <%=user.last_name%></h1>
-
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Organisation name</h6>
+                <h6><%=lastLead.leadCompanyName%></h6>
             </div>
-        </div>
-        <!-- getting start div -->
-        <div class="w-[85%]  mt-2 p-4  ">
-            <h1
-                class="text-3xl ml-24 tracking-tight  text-gray-700 font-semibold">Getting
-                Start</h1>
-
-        </div>
-
-        <div class="w-full h-screen  flex items-center justify-center">
-            <div class="w-[85%] h-screen   p-4 flex  flex-wrap ">
-                <!-- view last cards here -->
-                <div
-                    class="w-[23%] h-72  rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3 ">
-                    <h1 class="text-center mt-2 text-gray-600">Your Last
-                        Lead</h1>
-                    <% if (lastLead) { %>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500">Contact name </h6>
-                        <h6><%=lastLead.leadFirstName%>
-                            <%=lastLead.leadLastName%></h6>
-                    </div>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500">Organisation name
-                        </h6>
-                        <h6><%=lastLead.leadCompanyName%></h6>
-                    </div>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500">Email </h6>
-                        <h6> <%=lastLead.leadEmail%></h6>
-                    </div>
-
-                    <a href="/leads"
-                        class=" cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                        View Leads</a>
-                    <% } else { %>
-                    <div
-                        class="flex flex-col my-auto items-center justify-between h-full">
-                        <h6 class="text-center text-gray-500">You haven't
-                            created any leads yet.</h6>
-                        <a href="/leads/create"
-                            class=" cursor-pointer mb-3 w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                            Create New Lead
-                        </a>
-                    </div>
-                    <% } %>
-                </div>
-                <!-- view user detail card here-->
-                <div
-                    class=" ml-4 w-[23%] h-72  rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3 ">
-                    <h1 class="text-center mt-2 text-gray-600">Profile</h1>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500"> Name </h6>
-                        <h6><%=user.first_name%> <%=user.last_name%></h6>
-                    </div>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500">Role </h6>
-                        <h6><%=user.roleName%></h6>
-                    </div>
-                    <div class="mx-3 mt-3 w-[100%] h-[20%]">
-                        <h6 class="text-sm text-gray-500">Email </h6>
-                        <h6> <%=user.email%></h6>
-                    </div>
-
-                    <a href="/users/<%= user.user_id %>"
-                        class=" cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                        View Profile</a>
-                </div>
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Email</h6>
+                <h6><%=lastLead.leadEmail%></h6>
             </div>
+            <a href="/leads"
+                class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                View Leads</a>
+            <% } else { %>
+            <div class="flex flex-col my-auto items-center justify-between h-full">
+                <h6 class="text-center text-gray-500">You haven't created any leads yet.</h6>
+                <a href="/leads/create"
+                    class="cursor-pointer mb-3 w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                    Create New Lead</a>
+            </div>
+            <% } %>
         </div>
+
+        <!-- Profile Card -->
+        <div
+            class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+            <h1 class="text-center mt-2 text-gray-600">Profile</h1>
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Name</h6>
+                <h6><%=user.first_name%> <%=user.last_name%></h6>
+            </div>
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Role</h6>
+                <h6><%=user.roleName%></h6>
+            </div>
+            <div class="mx-3 mt-3 w-full h-[20%]">
+                <h6 class="text-sm text-gray-500">Email</h6>
+                <h6><%=user.email%></h6>
+            </div>
+            <a href="/users/<%= user.user_id %>"
+                class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                View Profile</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+        
+
+       
         <script src="/javascripts/dashboard.js"></script>
 
     </body>

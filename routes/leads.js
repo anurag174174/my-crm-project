@@ -319,7 +319,7 @@ router.get('/:leadId/edit', (req, res) => {
             return;
         }
 
-        connection.query('SELECT l.*, s.status_name FROM leads l LEFT JOIN lead_statuses s ON l.lead_status_id = s.lead_status_id WHERE l.lead_id = ?;', [leadId], (error, results) => {
+        connection.query('SELECT l.*, s.status_name, u.user_id as owner_user_id, u.first_name as owner_first_name, u.last_name as owner_last_name, u.email as owner_email FROM leads l LEFT JOIN lead_statuses s ON l.lead_status_id = s.lead_status_id LEFT JOIN users u ON l.lead_owner_id = u.user_id WHERE l.lead_id = ?;', [leadId], (error, results) => {
             connection.release();
 
             if (error) {
