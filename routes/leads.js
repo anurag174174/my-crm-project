@@ -8,35 +8,61 @@ router.get('/create', (req, res) => {
     return res.status(401).send('Unauthorized');
   }
 
+  const userId = req.session.user.id; // Get the logged-in user's ID
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+      return res.status(500).send('Error connecting to database');
     }
 
+    // Fetch lead statuses
     connection.query('SELECT * FROM lead_statuses', (err, statuses) => {
       if (err) {
         console.error('Error fetching lead statuses:', err);
         connection.release();
-        res.status(500).send('Error fetching lead statuses');
-        return;
+        return res.status(500).send('Error fetching lead statuses');
       }
 
-      connection.query('SELECT * FROM lead_sources', (err, leadSources) => { 
+      // Fetch lead sources
+      connection.query('SELECT * FROM lead_sources', (err, leadSources) => {
         if (err) {
           console.error('Error fetching lead sources:', err);
           connection.release();
-          res.status(500).send('Error fetching lead sources');
-          return;
+          return res.status(500).send('Error fetching lead sources');
         }
 
-        connection.release();
-        res.render('leadForm', { statuses, leadSources }); 
+        // Fetch the logged-in user's owner details (first and last name)
+        connection.query('SELECT user_id, first_name, last_name FROM users WHERE user_id = ?', [userId], (err, ownerDetails) => {
+          if (err) {
+            console.error('Error fetching owner details:', err);
+            connection.release();
+            return res.status(500).send('Error fetching owner details');
+          }
+
+          if (ownerDetails.length === 0) {
+            connection.release();
+            return res.status(404).send('User not found');
+          }
+
+          // Get owner details
+          const user = ownerDetails[0];
+          console.log('Owner details:', user); // Add this log to debug
+
+          // Release the connection and render the lead creation form
+          connection.release();
+          console.log('Lead statuses:', statuses); // Log the statuses
+          console.log('Lead sources:', leadSources); // Log the lead sources
+
+          // Check if data is correct
+          res.render('leadForm', { statuses, leadSources, user });
+        });
       });
     });
   });
 });
+
+
 
 
 router.post('/create', (req, res) => {
@@ -44,7 +70,7 @@ router.post('/create', (req, res) => {
     return res.status(401).send('Unauthorized');
   }
 
-  const { firstName, lastName, email, phone_number, company_name, leadScore,lead_status_id,lead_source_id } = req.body; 
+  const { firstName, lastName, email, phoneNumber, companyName, leadScore,lead_status_id,lead_source_id } = req.body; 
   const userId = req.session.user.id; 
 
   const sql = `
@@ -56,8 +82,8 @@ router.post('/create', (req, res) => {
     firstName, 
     lastName || null, 
     email, 
-    phone_number || null, 
-    company_name || null, 
+    phoneNumber || null, 
+    companyName || null, 
     leadScore || 0, 
     userId, 
     userId ,//Set creator_id to the currently logged-in user 
@@ -87,51 +113,7 @@ router.post('/create', (req, res) => {
   });
 });
 
-// router.post('/create', (req, res) => {
-//     if (!req.session.user) {
-//       return res.status(401).send('Unauthorized');
-//     }
-  
-//     const { firstName, lastName, email, phone, company, leadScore } = req.body; 
-//     const userId = req.session.user.id; 
-  
-//     const sql = `
-//       INSERT INTO leads (first_name, last_name, email, phone_number, company_name, lead_score, lead_owner_id, created_by, created_at, updated_at) 
-//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-//     `;
-  
-//     const values = [
-//       firstName, 
-//       lastName , 
-//       email , 
-//       phone , 
-//       company , 
-//       leadScore, 
-//       userId, 
-//       userId // Set creator_id to the currently logged-in user 
-//     ];
-  
-//     pool.getConnection((err, connection) => {
-//       if (err) {
-//         console.error('Error getting connection from pool:', err);
-//         res.status(500).send('Error connecting to database');
-//         return;
-//       }
-  
-//       connection.query(sql, values, (error, results) => {
-//         connection.release();
-  
-//         if (err) {
-//           console.error('Error inserting data:', err);
-//           res.status(500).send('Error inserting data');
-//           return;
-//         }
-  
-//         console.log('Data inserted successfully');
-//         res.redirect('/leads'); 
-//       });
-//     });
-//   });
+
 //viewing leads
 
 router.get('/', (req, res) => {
@@ -210,67 +192,7 @@ router.get('/', (req, res) => {
       });
     });
   });
-// router.get('/', (req, res) => {
-//     if (!req.session.user) {
-//         return res.status(401).send('Unauthorized');
-//     }
 
-//     const userId = req.session.user.id;
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         // First query: Get leads for the current user
-//         connection.query(`
-//         SELECT 
-//             l.*, 
-//             CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
-//             CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
-//         FROM 
-//             leads l
-//         LEFT JOIN 
-//             users u ON l.lead_owner_id = u.user_id
-//         LEFT JOIN 
-//             users c ON l.created_by = c.user_id
-//         WHERE 
-//             l.lead_owner_id = ? 
-//         ORDER BY 
-//             l.created_at DESC`, [userId], (err, leadsResults) => {
-//             if (err) {
-//                 console.error('Error retrieving leads:', err);
-//                 res.status(500).send('Error retrieving leads');
-//                 return;
-//             }
-
-//             // Second query: Get all users
-//             connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
-//                 if (err) {
-//                     console.error('Error retrieving users:', err);
-//                     res.status(500).send('Error retrieving users');
-//                     return;
-//                 }
-
-//                 // Check if leads were found
-//                 if (Array.isArray(leadsResults) && leadsResults.length > 0) {
-//                     res.render('leadMainPage', { 
-//                         leads: leadsResults, 
-//                         users: usersResults,
-//                         currentUser: req.session.user
-//                     });
-//                 } else {
-//                     console.error('No leads found.');
-//                     res.status(404).send('No leads found.');
-//                 }
-
-//                 connection.release();
-//             });
-//         });
-//     });
-// });
 
 router.post('/:leadId/assign', (req, res) => {
     const leadId = req.params.leadId;
@@ -381,121 +303,169 @@ router.post('/:leadId/edit', (req, res) => {
     });
 });
 
+// Route to render lead page (including tasks and activities)
+router.get('/:lead_id', (req, res) => {
+  const { lead_id } = req.params;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query('SELECT * FROM leads WHERE lead_id = ?', [lead_id], (err, lead) => {
+      if (err) {
+        connection.release();
+        console.error(err);
+        return res.status(500).send('Failed to fetch lead details.');
+      }
+
+      connection.query('SELECT * FROM tasks WHERE lead_id = ?', [lead_id], (err, tasks) => {
+        if (err) {
+          connection.release();
+          console.error(err);
+          return res.status(500).send('Failed to fetch tasks.');
+        }
+
+        connection.query('SELECT * FROM lead_activities WHERE lead_id = ?', [lead_id], (err, activities) => {
+          connection.release();
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Failed to fetch activities.');
+          }
+
+          // Format the activity_date to remove time
+          activities = activities.map(activity => {
+            activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN'); // Modify the format if needed
+            return activity;
+          });
+          tasks = tasks.map(task => {
+           task.due_date = new Date(task.due_date).toLocaleDateString('en-IN'); // Modify the format if needed
+            return task;
+          });
+
+          res.render('leadDetail', {
+            lead: lead[0],
+            tasks,
+            activities,
+          });
+        });
+      });
+    });
+  });
+});
+
+
+// Route to add a new task
+router.post('/:lead_id/addTask', (req, res) => {
+  const { lead_id } = req.params;
+  const { task_name, task_description, due_date } = req.body;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query(
+      'INSERT INTO tasks (task_name, task_description, due_date, completed, lead_id) VALUES (?, ?, ?, false, ?)',
+      [task_name, task_description, due_date, lead_id],
+      (err) => {
+        connection.release();
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Failed to add task.');
+        }
+        res.redirect(`/leads/${lead_id}`);
+      }
+    );
+  });
+});
+
+// Route to add a new activity
+router.post('/:lead_id/addActivity', (req, res) => {
+  const { lead_id } = req.params;
+  const { activity_type, activity_date, activity_detail } = req.body;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query(
+      'INSERT INTO lead_activities (activity_type, activity_date, activity_details, lead_id) VALUES (?, ?, ?, ?)',
+      [activity_type, activity_date, activity_detail, lead_id],
+      (err) => {
+        connection.release();
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Failed to add activity.');
+        }
+        res.redirect(`/leads/${lead_id}`);
+      }
+    );
+  });
+});
+
+// Route to toggle task completion
+router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
+  const { task_id } = req.params;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query('SELECT completed,lead_id FROM tasks WHERE task_id = ?', [task_id], (err, task) => {
+      if (err) {
+        connection.release();
+        console.error(err);
+        return res.status(500).send('Failed to fetch task status.');
+      }
+
+      // Convert TINYINT (0 or 1) to boolean
+      const currentStatus = task[0].completed === 1; // true if 1, false if 0
+      const newStatus = !currentStatus;
+
+      connection.query('UPDATE tasks SET completed = ? WHERE task_id = ?', [newStatus ? 1 : 0, task_id], (err) => {
+        connection.release();
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Failed to update task status.');
+        }
+         res.redirect(`/leads/${task[0].lead_id}`);
+      });
+    });
+  });
+});
+
+
+// Route to delete a task
+router.post('/tasks/:task_id/delete', (req, res) => {
+  const { task_id } = req.params;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query('DELETE FROM tasks WHERE task_id = ?', [task_id], (err) => {
+      connection.release();
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Failed to delete task.');
+      }
+      res.redirect('back');
+    });
+  });
+});
+
+
+
+
 module.exports = router;
 
 
-// router.post('/:leadId/assign', (req, res) => {
-//     const leadId = req.params.leadId;
-//     const { lead_owner_id } = req.body;
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         const updateQuery = 'UPDATE leads SET lead_owner_id = ? WHERE user_id = ?';
-//         connection.query(updateQuery, [lead_owner_id, leadId], (error, results) => {
-//             connection.release();
-
-//             if (error) {
-//                 console.error('Error updating lead owner:', error);
-//                 res.status(500).send('Error updating lead owner');
-//                 return;
-//             }
-
-//             if (results.affectedRows === 0) {
-//                 return res.status(404).send('Lead not found');
-//             }
-
-//             res.json({ message: 'Lead owner updated successfully' });
-//         });
-//     });
-// });
-
-// const express = require('express');
-// const router = express.Router();
-
-// const pool = require('../database/connection');
-
-// router.get('/create', (req, res) => {
-//     res.render('leadForm');
-// });
-
-// router.post('/create', (req, res) => {
-//     if (!req.session.user) {
-//         return res.status(401).send('unauthorized')
-//     }
-
-//     var firstName = req.body.firstName;
-//     var lastName = req.body.lastName;
-//     var email = req.body.email;
-//     var phone = req.body.phoneNumber;
-//     var company = req.body.companyName;
-//     var leadScore = req.body.leadScore;
-//     const userId = req.session.user.id;
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         var sql = "INSERT INTO leads(first_name, last_name, email, phone_number, company_name, lead_score,lead_owner_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,NOW(),NOW())";
-//         connection.query(sql, [firstName, lastName, email, phone, company, leadScore, userId], (error, results) => {
-//             connection.release(); // Release the connection back to the pool
-
-//             if (error) {
-//                 console.error('Error inserting data:', error);
-//                 res.status(500).send('Error inserting data');
-//                 return;
-//             }
-
-//             console.log('Data inserted successfully');
-
-//             // Fetch all leads after successful insertion
-//             connection.query('SELECT * FROM leads', (error, results) => {
-//                 if (error) {
-//                     console.error('Error retrieving data:', error);
-//                     res.status(500).send('Error retrieving data');
-//                     return;
-//                 }
-
-//                 res.render('leadMainPage', { leads: results });
-//             });
-
-//         });
-//     });
-// });
-
-// router.get('/', (req, res) => {
-
-//     if (!req.session.user) {
-//         return res.status(401).send('unauthorized');
-//     }
-
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-//         var sql = "SELECT * FROM leads where lead_owner_id =?"
-//         connection.query(sql, [userId], (error, results) => {
-//             connection.release();
-
-//             if (error) {
-//                 console.error('Error retrieving data:', error);
-//                 res.status(500).send('Error retrieving data');
-//                 return;
-//             }
-
-//             res.render('leadMainPage', { leads: results });
-//         });
-//     });
-// });
-
-// module.exports = router;

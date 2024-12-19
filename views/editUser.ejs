@@ -10,28 +10,7 @@
 </head>
 
 <body class="bg-gray-100">
-    <div class="w-full h-16 flex items-center justify-end bg-blue-500 px-4 relative">
-        
-        
-    
-        <!-- Profile Icon -->
-        <div id="profile-container" class="relative">
-            <img id="profileButton" 
-                 class="w-10 h-10 rounded-full cursor-pointer"
-                 src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
-                 alt="Profile">
-            <!-- Side Toolbar -->
-            <div id="profileSidebar" 
-                 class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
-                <div class="p-4">
-                    <h2 class="text-lg font-bold mb-4">User Details</h2>
-                    <p class="mb-2">Name: John Doe</p>
-                    <p class="mb-2">Email: johndoe@example.com</p>
-                    <p>Role: User</p>
-                </div>
-            </div>
-        </div> 
-    </div>
+  
     
     <!-- Main Wrapper -->
     <div class="relative flex min-h-screen bg-gray-100">
@@ -67,7 +46,7 @@
                 </li>
                 <li>
                     <a href="/user/<%= user.user_id %>/"
-                        class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
+                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
                         <span>📋</span>
                         <span class="ml-2 sm:ml-3">User Details</span>
                     </a>
@@ -80,8 +59,15 @@
                     </a>
                 </li>
                 <li>
+                    <a href="/leads/create"
+                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
+                        <span>📋</span>
+                        <span class="ml-2 sm:ml-3">Add leads</span>
+                    </a>
+                </li>
+                <li>
                     <a href="/leads"
-                        class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
+                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
                         <span>📋</span>
                         <span class="ml-2 sm:ml-3">View Leads</span>
                     </a>

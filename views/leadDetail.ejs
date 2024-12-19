@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lead Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Container -->
+  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lead Management</h1>
+    <p class="text-lg mb-4"><strong>Lead Name:</strong> <%= lead.first_name %></p>
+    <p class="text-lg mb-4"><strong>Email:</strong> <%= lead.email %></p>
+
+    <!-- Activities Section -->
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activities</h2>
+    <form action="/leads/<%= lead.lead_id %>/addActivity" method="POST" class="space-y-4">
+      <div>
+        <label for="activity_type" class="block text-gray-700">Activity Type:</label>
+        <select name="activity_type" id="activity_type" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+          <option value="Call">Call</option>
+          <option value="Email">Email</option>
+          <option value="Meeting">Meeting</option>
+          <option value="Follow-up">Follow-up</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="activity_date" class="block text-gray-700">Activity Date:</label>
+        <input type="date" name="activity_date" id="activity_date" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+      </div>
+
+      <div>
+        <label for="activity_detail" class="block text-gray-700">Activity Detail:</label>
+        <textarea name="activity_detail" id="activity_detail" class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add Activity</button>
+    </form>
+
+    <h3 class="text-xl font-semibold text-gray-800 mt-6">Activity List</h3>
+    <% if (activities.length > 0) { %>
+      <% activities.forEach(activity => { %>
+        <div class="bg-gray-100 p-4 rounded-md shadow-md mb-4">
+          <p><strong>Type:</strong> <%= activity.activity_type %></p>
+          <p><strong>Date:</strong> <%= activity.activity_date %></p>
+          <p><strong>Details:</strong> <%= activity.activity_details %></p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No activities available.</p>
+    <% } %>
+
+    <!-- Tasks Section -->
+    <h2 class="text-2xl font-semibold text-gray-800 mt-6 mb-4">Tasks</h2>
+    <form action="/leads/<%= lead.lead_id %>/addTask" method="POST" class="space-y-4">
+      <div>
+        <label for="task_name" class="block text-gray-700">Task Name:</label>
+        <input type="text" name="task_name" id="task_name" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+      </div>
+
+      <div>
+        <label for="task_description" class="block text-gray-700">Task Description:</label>
+        <textarea name="task_description" id="task_description" class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+      </div>
+
+      <div>
+        <label for="due_date" class="block text-gray-700">Due Date:</label>
+        <input type="date" name="due_date" id="due_date" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add Task</button>
+    </form>
+
+    <h3 class="text-xl font-semibold text-gray-800 mt-6">Task List</h3>
+    <% if (tasks.length > 0) { %>
+      <% tasks.forEach(task => { %>
+        <div class="bg-gray-100 p-4 rounded-md shadow-md mb-4">
+          <h4 class="text-lg font-semibold text-gray-800"><%= task.task_name %></h4>
+          <p class="text-gray-700"><%= task.task_description %></p>
+          <p><strong>Due Date:</strong> <%= task.due_date %></p>
+          <p><strong>Completed:</strong> <%= task.completed == 1 ? "Yes" : "No" %></p>
+
+          <form action="/leads/tasks/<%= task.task_id %>/toggleCompletion" method="POST" class="inline-block mt-2">
+            <button type="submit" class="bg-blue-600 text-white py-1 px-4 rounded-md hover:bg-blue-700 transition">
+              <%= task.completed ? "Mark Incomplete" : "Mark Complete" %>
+            </button>
+          </form>
+
+          <form action="/leads/tasks/<%= task.task_id %>/delete" method="POST" class="inline-block mt-2 ml-4">
+            <button type="submit" class="bg-red-600 text-white py-1 px-4 rounded-md hover:bg-red-700 transition">Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No tasks available.</p>
+    <% } %>
+  </div>
+
+</body>
+</html>

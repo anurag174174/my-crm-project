@@ -6,7 +6,7 @@ const dashBoardRouter = require('./userDashboard')
     // const userDetailsRouter = require('./userDetails');
     /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('index', { title: 'Express' });
+    res.render('home');
 });
 router.use('/user', usersRouter);
 //router.use('/creator', usersRouter);

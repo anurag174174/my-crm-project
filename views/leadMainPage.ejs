@@ -28,7 +28,7 @@
             <% leads.forEach(lead=> { %>
                 <tr>
                     <td>
-                        <a href="/leads/<%= lead.lead_id %>/edit">
+                        <a href="/leads/<%= lead.lead_id %>">
                             <%= lead.first_name %>
                                 <%= lead.last_name %>
                         </a>
@@ -74,7 +74,7 @@
                         <%= new Date(lead.updated_at).toLocaleString() %>
                     </td>
                     <td>
-                        <a href="/leads/<%= lead.lead_id %>/edit"> More</a>
+                        <a href="/leads/<%= lead.lead_id %>/edit">update</a>
                     </td>
                 </tr>
                 <% }); %>

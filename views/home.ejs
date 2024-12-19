@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> CRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=block" />
+</head>
+<body class="font-sans ">
+
+  <!-- Header Section -->
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+    <div class="container mx-auto flex justify-between items-center p-5">
+      <!-- Logo -->
+      <div>
+        <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-6">
+        
+        <a href="/users/register" class="text-gray-800 hover:text-blue-500">Registration</a>
+        <a href="/users/login" class="text-gray-800 hover:text-blue-500">Login</a>
+      </nav>
+      
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+      
+      <a href="/users/register" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Registration</a>
+      <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Login</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="container mx-auto flex flex-col-reverse md:flex-row items-center justify-between px-5 pt-24 pb-12 md:pt-32">
+    <!-- Text Content -->
+    <div class="w-full md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+      <h1 class="text-xl text-blue-500 font-semibold mb-2">SALES CRM & AUTOMATION SOFTWARE</h1>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-snug">Grow Your Revenue & Relationships</h2>
+      <p class="text-gray-600 mb-6 text-lg leading-relaxed">
+        Salesmate offers simple, personal, and productive experiences for your sales team and customers.
+      </p>
+      <!-- Call-To-Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start space-y-3 sm:space-y-0 sm:space-x-4">
+        <a href="/users/register" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-red-500 transition duration-300 flex items-center">
+          Get Started
+          <span class="material-symbols-outlined ml-2">arrow_forward</span>
+        </a>
+        <button class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-400 transition duration-300">
+          How It Works
+        </button>
+      </div>
+    </div>
+
+    <!-- Image Content -->
+    <div class="w-full md:w-1/2">
+      <img src="https://img.freepik.com/free-vector/isometric-crm-illustration_52683-83950.jpg" alt="Sales CRM Illustration" class="w-full h-auto ">
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-6 md:px-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Services Section -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Services We Provide</h3>
+          <ul>
+            <li><a href="#" class="text-gray-400 hover:text-white">CRM Solutions</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white">Sales Analytics</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white">Customer Support</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white">Automation Tools</a></li>
+          </ul>
+        </div>
+  
+        <!-- Contact Details Section -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+          <ul>
+            <li class="text-gray-400 mb-2"><strong>Address:</strong> 18/72 hathibarkala, dehradun, india</li>
+            <li class="text-gray-400 mb-2"><strong>Phone:</strong> +91 9027297197</li>
+            <li class="text-gray-400 mb-2"><strong>Email:</strong> anuragpokhriyal174@gmail.com</li>
+          </ul>
+        </div>
+  
+        <!-- Social Media Section -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16" width="24" height="24">
+                <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm.5 12.5H7V8H5.5v4.5H3v-5h2.5V5.5C5.5 3.57 6.98 2 8.75 2c.77 0 1.5.14 2.25.14v2.86h-1.5c-1.16 0-1.5.69-1.5 1.33v1.67h3L11 12.5H8.5z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-twitter" viewBox="0 0 16 16" width="24" height="24">
+                <path d="M5.026 15c6.03 0 9.344-5.013 9.344-9.344 0-.14-.003-.28-.01-.42a6.687 6.687 0 0 0 1.625-1.703 6.28 6.28 0 0 1-1.824.502 3.236 3.236 0 0 0 1.417-1.784 6.472 6.472 0 0 1-2.072.79A3.225 3.225 0 0 0 9.667 6.262c-1.94 0-3.509 1.572-3.509 3.509 0 .274.032.54.094.793A9.174 9.174 0 0 1 1.114 4.322a3.489 3.489 0 0 0-.475 1.766c0 1.222.619 2.295 1.558 2.927a3.243 3.243 0 0 1-1.594-.44v.045c0 1.708 1.214 3.141 2.834 3.465a3.275 3.275 0 0 1-1.563.06c.433 1.351 1.692 2.33 3.182 2.362a6.51 6.51 0 0 1-4.022 1.381c-.261 0-.518-.014-.772-.045a9.144 9.144 0 0 0 4.963 1.43"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16" width="24" height="24">
+                <path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zM3 3h2v10H3V3zm1-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM13 3h2v10h-2V3zm1-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+  
+      <div class="mt-8 border-t border-gray-600 pt-4">
+        <p class="text-gray-400 text-sm">&copy; 2024 Time Management | Sales CRM. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- JavaScript for Mobile Menu -->
+  <script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    menuToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  </script>
+
+</body>
+</html>
