@@ -1,96 +1,103 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>User Registration</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/stylesheets/tailwind.css">
-    <link rel="stylesheet" href="../stylesheets/userRegistration.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Registration Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100">
 
-<body >
-    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
-        <div class="container mx-auto flex justify-between items-center p-5">
-          <!-- Logo -->
-          <div>
-            <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
-          </div>
-          
-          <!-- Desktop Navigation -->
-          <nav class="hidden md:flex space-x-6">
-            
-            <a href="/users/register" class="text-gray-800 hover:text-blue-500">Registration</a>
-            <a href="/users/login" class="text-gray-800 hover:text-blue-500">Login</a>
-          </nav>
-          
-          <!-- Mobile Menu Button -->
-          <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-          </button>
-        </div>
-    
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
-          
-          <a href="/users/register" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Registration</a>
-          <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Login</a>
-        </div>
-      </header>
-    <div class="grid-cols-2  flex justify-center items-center w-[80%] mx-auto  h-[60%]"> 
-        
-        <div class="w-[50%] mt-10 ">
-            
-            <div class="w-[80%] mx-auto h-[90%]">
-                <h1 class="text-left text-4xl text-blue-500 font-semibold tracking-normal">Welcome </h1>
-                <h1 class="text-left mt-3 text-gray-700">please enter your details for registration</h1>
-                <form action="/users/register" method="POST" class="mt-4" >
-                    <div class=" w-[60%]">
-                        <label for="firstName" class="text-sm">First Name</label>
-                        <input type="text" id="firstName" name="firstName" required  >
-                    </div>
-                    <div class=" w-[60%]">
-                        <label for="lastName" class="text-sm">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" required  >
-                    </div>
-                    <div class=" w-[60%]">
-                        <label for="email" class="text-sm">Email Address</label>
-                        <input type="email" id="email" name="email" required  >
-                    </div>
-                    <div class=" w-[60%]">
-                        <label for="password" class="text-sm">Password:</label>
-                        <input type="password" id="password" name="password" required >
-                     </div>
-                     <div  class=" w-[60%]">
-                        <label for="role" class="text-sm">please select your role</label>
-                        <select id="role" name="roleId" required  class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"> 
-                           <option value=""  >Select Role</option> 
-                           <% roles.forEach(role => { %>
-                             <option value="<%= role.role_id %>" class="text-sm text-gray-700"><%= role.roles_name %></option>
-                           <% }); %>
-                         </select>
-                     </div>
-                    
-                    
-                    <button type="submit" class="bg-blue-500 mt-2 text-white px-3 py-1 rounded-md w-[60%]">Register</button>
-                </form>
-            </div>
-        </div>
-        
-        <div class=" h-full w-[50%] mt-10">
-            <img class="object-fill w-full h-full " src="https://img.freepik.com/free-vector/isometric-crm-illustration_52683-83950.jpg" alt="">
-        </div>
+  <!-- Header Section -->
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+    <div class="container mx-auto flex justify-between items-center p-5">
+      <!-- Logo -->
+      <div>
+        <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-6">
+        <a href="/users/register" class="text-gray-800 hover:text-blue-500">Registration</a>
+        <a href="/users/login" class="text-gray-800 hover:text-blue-500">Login</a>
+      </nav>
+      
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
     </div>
-
-    <script>
-        const menuToggle = document.getElementById("menu-toggle");
-        const mobileMenu = document.getElementById("mobile-menu");
     
-        menuToggle.addEventListener("click", () => {
-          mobileMenu.classList.toggle("hidden");
-        });
-      </script>
-</body>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+      <a href="/users/register" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Registration</a>
+      <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Login</a>
+    </div>
+  </header>
+  
+  <!-- Main Registration Section -->
+  <div class="flex flex-col md:flex-row w-full max-w-6xl h-auto bg-white shadow-lg rounded-lg overflow-hidden mx-auto mt-24">
+    <!-- Left Div (Registration Form) -->
+    <div class="w-full md:w-[45%] p-6 md:p-12 flex flex-col justify-center space-y-6">
 
+      <h2 class="text-3xl font-bold text-gray-800 text-center ">Welcome</h2>
+      <h2 class="text-2xl font-semibold text-gray-500 text-center ">Please enter your details to register</h2>
+      <form action="/users/register" method="POST" class="space-y-6">
+        <div>
+          <label for="firstName" class="block text-gray-700 text-sm">First Name</label>
+          <input type="text" id="firstName" name="firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+        </div>
+        <div>
+          <label for="lastName" class="block text-gray-700 text-sm">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+        </div>
+        <div>
+          <label for="email" class="block text-gray-700 text-sm">Email Address</label>
+          <input type="email" id="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+        </div>
+        <div>
+          <label for="password" class="block text-gray-700 text-sm">Password</label>
+          <input type="password" id="password" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+        </div>
+        <div class="mb-4 ">
+          <label for="role" class="block text-gray-700 font-medium mb-2">Please select your role</label>
+          <!-- Fixed select box with Tailwind utility classes -->
+          <select id="role" name="roleId" required class=" w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-auto">
+            <option value="">Select Role</option> 
+            <% roles.forEach(role => { %>
+              <option value="<%= role.role_id %>" class="text-medium capitalize text-gray-700"><%= role.roles_name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+          Register
+        </button>
+      </form>
+    </div>
+  
+    <!-- Right Div (Image) -->
+    <div class="hidden md:flex md:w-1/2 items-center justify-center">
+      <img
+        src="https://img.freepik.com/free-vector/isometric-crm-illustration_52683-83950.jpg"
+        alt="Placeholder Image"
+        class="object-contain"
+      />
+    </div>
+  
+  </div>
+  
+  <!-- JavaScript for Mobile Menu Toggle -->
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden', !isHidden);
+    });
+  </script>
+
+</body>
 </html>

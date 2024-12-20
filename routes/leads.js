@@ -181,7 +181,9 @@ router.get('/', (req, res) => {
             res.render('leadMainPage', { 
               leads: leadsResults, 
               users: usersResults, 
-              currentUser: req.session.user 
+              currentUser: req.session.user ,
+              currentUserId: req.session.user.id
+
             });
           } else {
             console.error('No leads found.');

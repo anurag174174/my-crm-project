@@ -1,53 +1,100 @@
+
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>User Details</title>
-    <link rel="stylesheet" href="../stylesheets/userDetail.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 font-sans">
+    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+        <div class="container mx-auto flex justify-between items-center p-5">
+          <!-- Logo -->
+          <div>
+            <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex space-x-6">
+            
+            <a href="/user/<%=user.user_id%>/dashboard" class="text-gray-800 hover:text-blue-500">Dashboard</a>
+            <a href="/users/login" class="text-gray-800 hover:text-blue-500">Logout</a>
+          </nav>
+          
+          <!-- Mobile Menu Button -->
+          <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+    
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+          
+          <a href="/user/<%=user.user_id%>/dashboard" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+          <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
+        </div>
+      </header>
 
-<body>
+  <div class="max-w-4xl mx-auto  p-6 bg-white shadow-lg rounded-lg mt-20">
+    <!-- User Details Container -->
+    <h1 class="text-3xl font-semibold text-center mb-6">Creator</h1>
 
-    <h1>User Details</h1>
-
-    <div>
-        <h2>Personal Information</h2>
-        <ul>
-            <li><strong>First Name:</strong>
-                <%= user.first_name %>
-            </li>
-            <li><strong>Last Name:</strong>
-                <%= user.last_name %>
-            </li>
-            <li><strong>user id:</strong>
-                <%= user.user_id %>
-            </li>
-        </ul>
+    <!-- Personal Information Section -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Personal Information</h2>
+      <ul class="space-y-2">
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">First Name:</span>
+          <span><%= user.first_name %></span>
+        </li>
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">Last Name:</span>
+          <span>   <%= user.last_name %></span>
+        </li>
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">User ID:</span>
+          <span> <%= user.user_id %></span>
+        </li>
+      </ul>
     </div>
 
-    <div>
-        <h2>Contact Information</h2>
-        <ul>
-            <li><strong>Email:</strong>
-                <%= user.email %>
-            </li>
-        </ul>
+    <!-- Contact Information Section -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Contact Information</h2>
+      <ul class="space-y-2">
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">Email:</span>
+          <span><%= user.email %></span>
+        </li>
+      </ul>
     </div>
 
-    <div>
-        <h2>Other Information</h2>
-        <ul>
-            <li><strong>Role:</strong>
-                <%= user.roleName %>
-            </li>
-            <li><strong>Joined On:</strong>
-                <%= new Date(user.created_at).toLocaleString() %>
-            </li>
-        </ul>
+    <!-- Other Information Section -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Other Information</h2>
+      <ul class="space-y-2">
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">Role:</span>
+          <span> <%= user.roleName %></span>
+        </li>
+        <li class="flex justify-between text-gray-600">
+          <span class="font-medium">Joined On:</span>
+          <span>  <%= new Date(user.created_at).toLocaleString() %></span>
+        </li>
+      </ul>
     </div>
-   
+  </div>
+  <script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
 
+    menuToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  </script>
 
 </body>
-
 </html>
