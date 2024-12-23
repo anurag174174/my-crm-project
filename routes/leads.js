@@ -6,7 +6,7 @@ const pool = require('../database/connection');
 
 router.get('/create', (req, res) => {
   if (!req.session.user) {
-    return res.status(401).send('Unauthorized');
+    return res.render('unauthorized')
   }
 
   const userId = req.session.user.id; // Get the logged-in user's ID
@@ -68,7 +68,7 @@ router.get('/create', (req, res) => {
 
 router.post('/create', (req, res) => {
   if (!req.session.user) {
-    return res.status(401).send('Unauthorized');
+    return res.render('unauthorized')
   }
 
   const { firstName, lastName, email, phoneNumber, companyName, leadScore,lead_status_id,lead_source_id } = req.body; 
@@ -119,7 +119,7 @@ router.post('/create', (req, res) => {
 
 router.get('/', (req, res) => {
     if (!req.session.user) {
-      return res.status(401).send('Unauthorized');
+      return res.render('unauthorized')
     }
   
     pool.getConnection((err, connection) => {

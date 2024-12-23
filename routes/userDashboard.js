@@ -7,8 +7,8 @@ const pool = require('../database/connection');
 
 router.get('/:userId/dashboard', (req, res) => {
   if (!req.session.user) {
-    res.redirect('/users/login');
-    return res.status(401).send('Unauthorized');
+    // res.redirect('/users/login');
+    return res.render('unauthorized')
   }
 
   const userId = req.session.user.id;

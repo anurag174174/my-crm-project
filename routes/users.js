@@ -221,11 +221,11 @@ router.get('/:userId', (req, res) => {
     const userIdFromUrl = parseInt(req.params.userId, 10); 
   
     if (!req.session.user) {
-      return res.status(401).send('Unauthorized');
+      return res.render('unauthorized')
     }
   
     if (req.session.user.id !== userIdFromUrl) {
-      return res.status(401).send('Unauthorized'); 
+      return res.render('unauthorized')
     }
   
     pool.getConnection((err, connection) => {
@@ -271,11 +271,11 @@ router.get('/:userId/edit', (req, res) => {
     const userIdFromUrl = parseInt(req.params.userId, 10); 
   
     if (!req.session.user) {
-      return res.status(401).send('Unauthorized , session expired');
+      return res.render('unauthorized')
     }
   
     if (req.session.user.id !== userIdFromUrl) {
-      return res.status(401).send('Unauthorized , you are not authorized'); 
+      return res.render('unauthorized')
     }
   
     pool.getConnection((err, connection) => {
@@ -334,11 +334,11 @@ router.post('/:userId/edit', (req, res) => {
     const { firstName, lastName, email, roleId } = req.body; 
   
     if (!req.session.user) {
-      return res.status(401).send('Unauthorized, session out');
+      return res.render('unauthorized')
     }
   
     if (req.session.user.id !== parseInt(userId)) {
-      return res.status(401).send('Unauthorized , you re not the user'); 
+      return res.render('unauthorized')
     }
   
     pool.getConnection((err, connection) => {
