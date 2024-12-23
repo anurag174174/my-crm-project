@@ -107,68 +107,68 @@ router.get('/login', (req, res) => {
 
 
 router.post('/login', (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Error getting connection from pool:', err);
-            res.status(500).send('Error connecting to database');
-            return;
-        }
+  pool.getConnection((err, connection) => {
+      if (err) {
+          console.error('Error getting connection from pool:', err);
+          res.status(500).send('Error connecting to database');
+          return;
+      }
 
-        connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-            if (err) {
-                console.error('Error fetching user:', err);
-                res.status(500).send('Error fetching user');
-                connection.release();
-                return;
-            }
+      connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+          if (err) {
+              console.error('Error fetching user:', err);
+              res.status(500).send('Error fetching user');
+              connection.release();
+              return;
+          }
 
+          if (results.length === 0) {
+              connection.release();
+              return res.status(401).send('Invalid email or password');
+          }
 
-            if (results.length === 0) {
-                connection.release();
-                return res.status(401).send('Invalid email or password');
-            }
+          const user = results[0];
 
-            const user = results[0];
-            console.log(user.user_id)
+          bcrypt.compare(password, user.password_hash, (err, isMatch) => {
+              if (err) {
+                  console.error('Error comparing passwords:', err);
+                  res.status(500).send('Error comparing passwords');
+                  return;
+              }
 
-            bcrypt.compare(password, user.password_hash, (err, isMatch) => {
-                if (err) {
-                    console.error('Error comparing passwords:', err);
-                    res.status(500).send('Error comparing passwords');
-                    return;
-                }
+              if (isMatch) {
+                  // Store user data in session
+                  req.session.user = {
+                      id: user.user_id,
+                      firstName: user.first_name,
+                      lastName: user.last_name,
+                      email: user.email,  // Store email here
+                      roleId: user.user_role_id,
+                      is_admin: user.is_admin
+                  };
 
-                if (isMatch) {
-                    req.session.user = {
-                        id: user.user_id,
-                        firstName: user.first_name,
-                        lastName: user.last_name,
-                        email: user.email,
-                        roleId: user.user_role_id,
-                        is_admin: user.is_admin
-                    };
+                  req.session.save((err) => {
+                      if (err) {
+                          console.error('Error saving session:', err);
+                          res.status(500).send('Error saving session');
+                          return;
+                      }
 
-                    req.session.save((err) => {
-                        if (err) {
-                            console.error('Error saving session:', err);
-                            res.status(500).send('Error saving session');
-                            return;
-                        }
-
-                        console.log('User ID after login:', req.session.user.id);
-                        res.redirect(`/user/${req.session.user.id}/dashboard`);
-                        // res.render('dashboard', { user: req.session.user });
-                    });
-                } else {
-                    connection.release();
-                    res.status(401).send('Invalid email or password');
-                }
-            });
-        });
-    });
+                      console.log('Session user after login:', req.session.user); 
+                      res.redirect(`/user/${req.session.user.id}/dashboard`);
+                  });
+              } else {
+                  connection.release();
+                  res.status(401).send('Invalid email or password');
+              }
+          });
+      });
+  });
 });
+
+
 
 //view assigned user detail
 router.get('/assign/:userId', (req, res) => {
@@ -263,45 +263,6 @@ router.get('/:userId', (req, res) => {
       });
   });
 
-// router.get('/:userId', (req, res) => {
-//     const userId = req.params.userId;
- 
-//     const userIdFromUrl = parseInt(req.params.userId, 10); // Extract and parse the userId from the URL
-
-//     // Check if user is logged in
-//     if (!req.session.user) {
-//         return res.status(401).send('Unauthorized');
-//     }
-
-//     // Check if the logged-in user's ID matches the userId in the URL
-//     if (req.session.user.id !== userIdFromUrl) {
-//         return res.status(401).send('Unauthorized'); // Prevent access to other users' details
-//     }
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         connection.query('SELECT * FROM users WHERE user_id = ?', [userId], (error, results) => {
-//             connection.release();
-
-//             if (error) {
-//                 console.error('Error fetching user:', error);
-//                 res.status(500).send('Error fetching user data');
-//                 return;
-//             }
-
-//             if (results.length === 0) {
-//                 return res.status(404).send('User not found');
-//             }
-
-//             res.render('userDetail', { user: results[0] });
-//         });
-//     });
-// });
-
 
 //editing user
 
@@ -366,44 +327,6 @@ router.get('/:userId/edit', (req, res) => {
   
   
 
-// router.get('/:userId/edit', (req, res) => {
-//     const userId = req.params.userId;
-//     const userIdFromUrl = parseInt(req.params.userId, 10); // Extract and parse the userId from the URL
-
-//     // Check if user is logged in
-//     if (!req.session.user) {
-//         return res.status(401).send('Unauthorized');
-//     }
-
-//     // Check if the logged-in user's ID matches the userId in the URL
-//     if (req.session.user.id !== userIdFromUrl) {
-//         return res.status(401).send('Unauthorized'); // Prevent access to other users' details
-//     }
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         connection.query('SELECT * FROM users WHERE user_id = ?', [userId], (err, results) => {
-//             connection.release();
-
-//             if (err) {
-//                 console.error('Error fetching user:', err);
-//                 res.status(500).send('Error fetching user data');
-//                 return;
-//             }
-
-//             if (results.length === 0) {
-//                 return res.status(404).send('User not found');
-//             }
-
-//             res.render('editUser', { user: results[0] });
-//         });
-//     });
-// });
-
 
 
 router.post('/:userId/edit', (req, res) => {
@@ -445,38 +368,6 @@ router.post('/:userId/edit', (req, res) => {
     });
   });
 
-// router.post('/:userId/edit', (req, res) => {
-//     const userId = req.params.userId;
-//     const { firstName, lastName, email, role } = req.body;
-//     if (!req.session.user) {
-//         return res.status(401).send('Unauthorized');
-//     }
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         connection.query('UPDATE users SET first_name = ?, last_name = ?, email = ?, role = ? WHERE user_id = ?', [firstName, lastName, email, role, userId],
-//             (err, result) => {
-//                 connection.release();
-
-//                 if (err) {
-//                     console.error('Error updating user:', err);
-//                     res.status(500).send('Error updating user data');
-//                     return;
-//                 }
-
-//                 if (result.affectedRows === 0) {
-//                     return res.status(404).send('User not found');
-//                 }
-
-//                 res.redirect(`/user/${userId}`);
-//             });
-//     });
-// });
 
 
 // In your routes/users.js file
@@ -519,108 +410,5 @@ router.get('/creator/:creatorId', (req, res) => {
       });
     });
   
-// router.get('/creator/:creatorId', (req, res) => {
-//     const creatorId = req.params.creatorId; 
-  
-//     pool.getConnection((err, connection) => {
-//       if (err) {
-//         console.error('Error getting connection from pool:', err);
-//         res.status(500).send('Error connecting to database');
-//         return;
-//       }
-  
-//       connection.query('SELECT * FROM users WHERE user_id = ?', [creatorId], (error, results) => {
-//         connection.release();
-//         //console.log(results[0])
-  
-//         if (error) {
-//           console.error('Error fetching user:', error);
-//           res.status(500).send('Error fetching user data');
-//           return;
-//         }
-  
-//         if (results.length === 0) {
-//           return res.status(404).send('User not found');
-//         }
-  
-//         res.render('createdByUserDetail', { user: results[0] }); 
-//       });
-//     });
-//   });
-
-
-
 module.exports = router;
 
-// try {
-//     const userId = req.params.userId;
-
-//     const [results] = await pool.query('SELECT * FROM users WHERE user_id = ?', [userId]);
-
-//     if (results.length === 0) {
-//         return res.status(404).send('User not found');
-//     }
-
-//     const user = results[0];
-//     res.render('userProfile', { user: user });
-// } catch (error) {
-//     console.error('Error fetching user:', error);
-//     res.status(500).send('Error fetching user data');
-// }
-
-
-// })
-
-
-
-// router.post('/login', (req, res) => {
-//     const { email, password } = req.body;
-
-//     pool.getConnection((err, connection) => {
-//         if (err) {
-//             console.error('Error getting connection from pool:', err);
-//             res.status(500).send('Error connecting to database');
-//             return;
-//         }
-
-//         connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-//             if (err) {
-//                 console.error('Error fetching user:', err);
-//                 res.status(500).send('Error fetching user');
-//                 connection.release();
-//                 return;
-//             }
-
-//             if (results.length === 0) {
-//                 connection.release();
-//                 return res.status(401).send('Invalid email or password');
-//             }
-
-//             const user = results[0];
-
-//             bcrypt.compare(password, user.password_hash, (err, isMatch) => {
-//                 if (err) {
-//                     console.error('Error comparing passwords:', err);
-//                     res.status(500).send('Error comparing passwords');
-//                 }
-
-//                 if (isMatch) {
-
-//                     req.session.user = {
-//                         id: user.id,
-//                         firstName: user.first_name,
-//                         lastName: user.last_name,
-//                         email: user.email,
-//                         role: user.role,
-//                     }
-//                     console.log('User ID after login:', req.session.user.id);
-//                     connection.release();
-//                     res.render('dashboard', { user: req.session.user })
-//                 } else {
-//                     connection.release();
-//                     res.status(401).send('Invalid email or password');
-//                 }
-//             });
-//         });
-//     });
-// });

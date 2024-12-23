@@ -7,9 +7,38 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
+  
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10 ">
+    <div class="container mx-auto flex justify-between items-center p-5">
+      <!-- Logo -->
+      <div>
+        <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-6">
+        
+        <a href="/user/<%= lead.lead_owner_id %>/dashboard" class="text-gray-800 hover:text-blue-500">Dashboard</a>
+        <a href="/users/login" class="text-gray-800 hover:text-blue-500">Logout</a>
+      </nav>
+      
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
 
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+      
+      <a href="/user/<%= lead.lead_owner_id %>/dashboard" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+      <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
+    </div>
+  </header>
   <!-- Container -->
-  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-20 ">
     <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lead Management</h1>
     <p class="text-lg mb-4"><strong>Lead Name:</strong> <%= lead.first_name %></p>
     <p class="text-lg mb-4"><strong>Email:</strong> <%= lead.email %></p>
@@ -97,7 +126,33 @@
     <% } else { %>
       <p>No tasks available.</p>
     <% } %>
-  </div>
 
+    <!-- Separate Email Section -->
+    <h3 class="text-xl font-semibold text-gray-800 mt-6">Email Section</h3>
+    <form action="/leads/<%= lead.lead_id %>/sendEmail" method="POST" class="space-y-4">
+      <div>
+        <label for="email_subject" class="block text-gray-700">Email Subject:</label>
+        <input type="text" name="subject" id="email_subject" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+      </div>
+
+      <div>
+        <label for="email_body" class="block text-gray-700">Email Body: </label>
+        <textarea name="body" id="email_body" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+
+        </textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Send Email</button>
+    </form>
+
+  </div>
+  <script>
+     const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    menuToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  </script>
 </body>
 </html>

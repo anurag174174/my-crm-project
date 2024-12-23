@@ -13,8 +13,13 @@ var userDashboardRouter = require('./routes/userDashboard')
 var app = express();
 app.use(session({
     secret: '123456', // Replace with a strong secret key
-    resave: false,
-    saveUninitialized: true
+     resave: false,
+    saveUninitialized: true,
+    secure: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60,   // 1 hour in milliseconds (1000 ms * 60 s * 60 m)
+    }
+  
 }));
 
 //logouting user

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 
 const pool = require('../database/connection');
 
@@ -342,7 +343,7 @@ router.get('/:lead_id', (req, res) => {
             return activity;
           });
           tasks = tasks.map(task => {
-           task.due_date = new Date(task.due_date).toLocaleDateString('en-IN'); // Modify the format if needed
+            task.due_date = new Date(task.due_date).toLocaleDateString('en-IN'); // Modify the format if needed
             return task;
           });
 
@@ -356,8 +357,6 @@ router.get('/:lead_id', (req, res) => {
     });
   });
 });
-
-
 // Route to add a new task
 router.post('/:lead_id/addTask', (req, res) => {
   const { lead_id } = req.params;
@@ -465,6 +464,59 @@ router.post('/tasks/:task_id/delete', (req, res) => {
   });
 });
 
+
+// Route to send an email
+
+
+router.post('/:lead_id/sendEmail', (req, res) => {
+  const { lead_id } = req.params;
+  const { subject, body } = req.body;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      return res.status(500).send('Failed to connect to database.');
+    }
+
+    connection.query('SELECT email, first_name, last_name FROM leads WHERE lead_id = ?', [lead_id], (err, lead) => {
+      connection.release();
+      if (err || lead.length === 0) {
+        console.error(err || 'Lead not found.');
+        return res.status(500).send('Failed to fetch lead details.');
+      }
+
+      const { email, first_name, last_name } = lead[0];
+      const personalizedBody = `Dear ${first_name} ${last_name},\n\n${body}`;
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'anuragpokhriyal174@gmail.com',  // company mail address
+          pass: 'gxet sasg qmli qrhx' 
+        },
+        tls: {
+          rejectUnauthorized: false  // This allows self-signed certificates
+        }
+      });
+
+      const mailOptions = {
+        from: 'anuragpokhriyal174@gmail.com',   // Sender's email (logged-in user)
+        to: email,          // Lead's email
+        subject,
+        text: personalizedBody,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+          return res.status(500).send('Failed to send email.');
+        }
+        console.log('Email sent:', info.response);
+        res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
+      });
+    });
+  });
+});
 
 
 
