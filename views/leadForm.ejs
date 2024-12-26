@@ -150,6 +150,16 @@
                     <% }); %>
                     </select>
                 </div>
+                <div class="mb-4">
+                    <label for="leadCategory" class="block text-gray-700 font-medium mb-2">Lead Category:</label>
+                    <select id="leadCategory" name="lead_category_id" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                      <% leadCategories.forEach(category => { %>
+                        <option value="<%= category.lead_category_id %>"><%= category.category_name %></option>
+                      <% }); %>
+                    </select>
+                </div>
+           
+
 
 
                 <!-- Save Button -->

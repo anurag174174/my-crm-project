@@ -1,164 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDIT USER</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EDIT USER</title>
+        <script src="https://cdn.tailwindcss.com"></script>
 
-<body class="bg-gray-100">
-    <!-- Main Wrapper -->
-    <div class="relative flex min-h-screen bg-gray-100">
-        <!-- Menu Button (Visible only on smaller screens) -->
-        <button id="toggleNav"
-            class="lg:hidden fixed top-4 left-4 z-20 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-            ☰ 
-        </button>
+    </head>
 
-        <!-- Navigation Menu -->
-        <nav id="navMenu"
-            class="w-64 bg-white p-6 space-y-4 shadow-md fixed top-0 left-0 h-full transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 z-50">
-            <!-- Close Button (Visible only on smaller screens) -->
-            <button id="closeNav" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800">
-                ✕ Close
+    <body class="bg-gray-100">
+        <!-- Main Wrapper -->
+        <div class="relative flex min-h-screen bg-gray-100">
+            <!-- Menu Button (Visible only on smaller screens) -->
+            <button id="toggleNav"
+                class="lg:hidden fixed top-4 left-4 z-20 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                ☰
             </button>
 
-            <div class="text-center">
-                <!-- Profile Image -->
-                <img src="https://via.placeholder.com/100" alt="Profile Picture"
-                    class="w-16 sm:w-24 h-16 sm:h-24 mx-auto rounded-full mb-4 shadow-md">
-                <p class="text-md sm:text-lg font-bold text-gray-800 capitalize"><%=lead.owner_first_name%> <%=lead.owner_last_name%></p>
+            <!-- Navigation Menu -->
+            <nav id="navMenu"
+                class="w-64 bg-white p-6 space-y-4 shadow-md fixed top-0 left-0 h-full transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 z-50">
+                <!-- Close Button (Visible only on smaller screens) -->
+                <button id="closeNav"
+                    class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800">
+                    ✕ Close
+                </button>
+
+                <div class="text-center">
+                    <!-- Profile Image -->
+                    <img src="https://via.placeholder.com/100"
+                        alt="Profile Picture"
+                        class="w-16 sm:w-24 h-16 sm:h-24 mx-auto rounded-full mb-4 shadow-md">
+                    <p
+                        class="text-md sm:text-lg font-bold text-gray-800 capitalize"><%=lead.owner_first_name%>
+                        <%=lead.owner_last_name%></p>
+                </div>
+
+                <!-- Navigation Links -->
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/user/<%= lead.owner_user_id %>/dashboard"
+                            class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
+                            <span>🏠</span>
+                            <span class="ml-2 sm:ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/user/<%= lead.owner_user_id %>/"
+                            class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
+                            <span>📋</span>
+                            <span class="ml-2 sm:ml-3">User Details</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/user/<%= lead.owner_user_id %>/edit"
+                            class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
+                            <span>📋</span>
+                            <span class="ml-2 sm:ml-3">Edit Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/leads/<%= lead.lead_id %>/edit"
+                            class="flex items-center px-2 sm:px-4 py-2 bg-blue-100 text-blue-600 font-medium rounded-md transition">
+                            <span>📋</span>
+                            <span class="ml-2 sm:ml-3">Edit Lead</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/leads"
+                            class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
+                            <span>📋</span>
+                            <span class="ml-2 sm:ml-3">View Leads</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout"
+                            class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
+                            <span>🚪</span>
+                            <span class="ml-2 sm:ml-3">Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <div
+                class="w-full sm:w-3/5 md:w-full lg:w-full p-6 bg-gray-50 rounded-lg">
+                <h1
+                    class="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wider">Edit
+                    Lead</h1>
+
+                <form method="POST" action="/leads/<%= lead.lead_id %>/edit"
+                    class="space-y-6">
+                    <!-- First Name -->
+                    <div class="mb-4">
+                        <label for="firstName"
+                            class="block text-gray-700 font-medium mb-2">First
+                            name</label>
+                        <input type="text" id="firstName" name="firstName"
+                            value="<%= lead.first_name %>"
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="mb-4">
+                        <label for="lastName"
+                            class="block text-gray-700 font-medium mb-2">Last
+                            name</label>
+                        <input type="text" id="lastName" name="lastName"
+                            value="<%= lead.last_name %> "
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="mb-4">
+                        <label for="email"
+                            class="block text-gray-700 font-medium mb-2">Email
+                            address</label>
+                        <input type="email" id="email" name="email"
+                            value="<%= lead.email %>"
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <!-- company name -->
+                    <div class="mb-4">
+                        <label for="company"
+                            class="block text-gray-700 font-medium mb-2">Company
+                            Name</label>
+                        <input type="text" id="company" name="company"
+                            value="<%= lead.company_name %>"
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <!-- lead score -->
+                    <div class="mb-4">
+                        <label for="leadScore"
+                            class="block text-gray-700 font-medium mb-2">Lead
+                            Score</label>
+                        <input type="text" id="leadScore" name="leadScore"
+                            value="<%= lead.lead_score %>"
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <!-- phone number -->
+                    <div class="mb-4">
+                        <label for="phone"
+                            class="block text-gray-700 font-medium mb-2">Phone
+                            Number</label>
+                        <input type="text" id="phone" name="phone"
+                            value="<%= lead.phone_number %>"
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <!-- Status Dropdown -->
+                    <div class="mb-4">
+                        <label for="leadStatus"
+                            class="block text-gray-700 font-medium mb-2">Status</label>
+                        <select id="leadStatus" name="lead_status_id" required
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value>Select Status</option>
+                            <% statuses.forEach(status => { %>
+
+                            <option value="<%= status.lead_status_id %>" <% if
+                                (lead.lead_status_id === status.lead_status_id)
+                                { %>selected<% } %>>
+                                <%= status.status_name %>
+                            </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="leadCategory" class="block text-gray-700 font-medium mb-2">Lead Category:</label>
+                        <select id="leadCategory" name="lead_category_id"  class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            required>
+                            <% categories.forEach(category => { %>
+                            <option value="<%= category.lead_category_id %>"
+                                <%=lead.lead_category_id ===
+                                category.lead_category_id ? 'selected' : '' %>>
+                                <%= category.category_name %>
+                            </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="mt-6">
+                        <button type="submit"
+                            class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <!-- Navigation Links -->
-            <ul class="space-y-2">
-                <li>
-                    <a href="/user/<%= lead.owner_user_id %>/dashboard"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>🏠</span>
-                        <span class="ml-2 sm:ml-3">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/user/<%= lead.owner_user_id %>/"
-                        class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">User Details</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/user/<%= lead.owner_user_id %>/edit"
-                        class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">Edit Users</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/leads/<%= lead.lead_id %>/edit"
-                        class="flex items-center px-2 sm:px-4 py-2 bg-blue-100 text-blue-600 font-medium rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">Edit Lead</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/leads"
-                        class="flex items-center px-2 sm:px-4 py-2  text-blue-600 font-medium rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">View Leads</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/logout"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>🚪</span>
-                        <span class="ml-2 sm:ml-3">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="w-full sm:w-3/5 md:w-full lg:w-full p-6 bg-gray-50 rounded-lg">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wider">Edit Lead</h1>
-
-            <form method="POST" action="/leads/<%= lead.lead_id %>/edit" class="space-y-6">
-                <!-- First Name -->
-                <div class="mb-4">
-                    <label for="firstName" class="block text-gray-700 font-medium mb-2">First name</label>
-                    <input type="text" id="firstName" name="firstName" value="<%= lead.first_name %>"
-                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <!-- Last Name -->
-                <div class="mb-4">
-                    <label for="lastName" class="block text-gray-700 font-medium mb-2">Last name</label>
-                    <input type="text" id="lastName" name="lastName" value="<%= lead.last_name %> "
-                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <!-- Email Address -->
-                <div class="mb-4">
-                    <label for="email" class="block text-gray-700 font-medium mb-2">Email address</label>
-                    <input type="email" id="email" name="email" value="<%= lead.email %>"
-                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                  <!-- company name -->
-                <div class="mb-4">
-                    <label for="company" class="block text-gray-700 font-medium mb-2">Company Name</label>
-                    <input type="text" id="company" name="company" value="<%= lead.company_name %>"
-                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <!-- lead score -->
-                <div class="mb-4">
-                  <label for="leadScore" class="block text-gray-700 font-medium mb-2">Lead Score</label>
-                  <input type="text" id="leadScore" name="leadScore" value="<%= lead.lead_score %>"
-                      class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              </div>
-               <!-- phone number -->
-               <div class="mb-4">
-                <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
-                <input type="text" id="phone" name="phone" value="<%= lead.phone_number %>"
-                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-                
-
-                <!-- Status Dropdown -->
-                <div class="mb-4">
-                    <label for="leadStatus" class="block text-gray-700 font-medium mb-2">Status</label>
-                    <select id="leadStatus" name="lead_status_id" required
-                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">Select Status</option>
-                        <% statuses.forEach(status => { %>
-                        
-              <option value="<%= status.lead_status_id %>" <% if (lead.lead_status_id === status.lead_status_id) { %>selected<% } %>>
-                <%= status.status_name %>
-              </option>
-                        <% }); %>
-                    </select>
-                </div>
-
-                <!-- Save Button -->
-                <div class="mt-6">
-                    <button type="submit"
-                        class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
         </div>
-        
-        
-    </div>
 
-    <!-- JavaScript for Menu Toggle -->
-    <script src="/javascripts/editLead.js"></script>
-</body>
-
-
-
+        <!-- JavaScript for Menu Toggle -->
+        <script src="/javascripts/editLead.js"></script>
+    </body>
 
 </html>
