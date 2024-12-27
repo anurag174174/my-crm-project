@@ -86,34 +86,39 @@
 
     <div class="w-[90%] mx-auto p-4 flex flex-wrap gap-6">
         <!-- Last Lead Card -->
-        <div
-            class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
-            <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
-            <% if (lastLead) { %>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Contact name</h6>
-                <h6><%=lastLead.leadFirstName%> <%=lastLead.leadLastName%></h6>
-            </div>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Organisation name</h6>
-                <h6><%=lastLead.leadCompanyName%></h6>
-            </div>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Email</h6>
-                <h6><%=lastLead.leadEmail%></h6>
-            </div>
-            <a href="/leads"
-                class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                View Leads</a>
-            <% } else { %>
-            <div class="flex flex-col my-auto items-center justify-between h-full">
-                <h6 class="text-center text-gray-500">You haven't created any leads yet.</h6>
-                <a href="/leads/create"
+        <% if (user.user_role_id === 2 || user.is_admin===1 ) { %> <!-- Only show for admin users -->
+            <div class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+              <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
+              
+              <% if (lastLead) { %>
+                <div class="mx-3 mt-3 w-full h-[20%]">
+                  <h6 class="text-sm text-gray-500">Contact name</h6>
+                  <h6><%= lastLead.leadFirstName %> <%= lastLead.leadLastName %></h6>
+                </div>
+                <div class="mx-3 mt-3 w-full h-[20%]">
+                  <h6 class="text-sm text-gray-500">Organisation name</h6>
+                  <h6><%= lastLead.leadCompanyName %></h6>
+                </div>
+                <div class="mx-3 mt-3 w-full h-[20%]">
+                  <h6 class="text-sm text-gray-500">Email</h6>
+                  <h6><%= lastLead.leadEmail %></h6>
+                </div>
+                <a href="/leads"
+                  class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                  View Leads</a>
+              <% } else { %>
+                <div class="flex flex-col my-auto items-center justify-between h-full">
+                  <h6 class="text-center text-gray-500">You haven't created any leads yet.</h6>
+                  <a href="/leads/create"
                     class="cursor-pointer mb-3 w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
                     Create New Lead</a>
+                </div>
+              <% } %>
             </div>
-            <% } %>
-        </div>
+          <% } %> <!-- End of userRoleId check -->
+          
+          
+        
 
         <!-- Profile Card -->
         <div

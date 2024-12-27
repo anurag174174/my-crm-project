@@ -4,11 +4,48 @@ const nodemailer = require('nodemailer');
 
 const pool = require('../database/connection');
 
-router.get('/create', (req, res) => {
+// Middleware to check if the user has the correct role
+function checkUserRole(req, res, next) {
   if (!req.session.user) {
-    return res.render('unauthorized');
+    return res.render('unauthorized'); // User is not logged in
   }
 
+  const userId = req.session.user.id; // Assuming the user's ID is stored in the session
+  const query = 'SELECT user_role_id, is_admin FROM users WHERE user_id = ?';
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting database connection:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    connection.query(query, [userId], (err, results) => {
+      connection.release(); // Always release the connection back to the pool
+
+      if (err) {
+        console.error('Error querying database:', err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      if (results.length === 0) {
+        return res.status(404).send('User not found');
+      }
+
+      const userRoleId = results[0].user_role_id;
+      const isAdmin = results[0].is_admin;
+
+      // Check if the user is either role 2 (authorized user) or admin
+      if (userRoleId !== 2 && isAdmin !== 1) {
+        return res.status(403).send('Forbidden: You do not have access to this resource');
+      }
+
+      next(); // User has the correct role, proceed to the next middleware or route handler
+    });
+  });
+}
+
+// GET /create route with role check
+router.get('/create', checkUserRole, (req, res) => {
   const userId = req.session.user.id; // Get the logged-in user's ID
 
   pool.getConnection((err, connection) => {
@@ -41,7 +78,7 @@ router.get('/create', (req, res) => {
             return res.status(500).send('Error fetching lead categories');
           }
 
-          // Fetch the logged-in user's owner details (first and last name)
+          // Fetch the logged-in user's owner details
           connection.query('SELECT user_id, first_name, last_name FROM users WHERE user_id = ?', [userId], (err, ownerDetails) => {
             if (err) {
               console.error('Error fetching owner details:', err);
@@ -56,15 +93,9 @@ router.get('/create', (req, res) => {
 
             // Get owner details
             const user = ownerDetails[0];
-            console.log('Owner details:', user); // Add this log to debug
 
             // Release the connection and render the lead creation form
             connection.release();
-            console.log('Lead statuses:', statuses); // Log the statuses
-            console.log('Lead sources:', leadSources); // Log the lead sources
-            console.log('Lead categories:', leadCategories); // Log the lead categories
-
-            // Check if data is correct
             res.render('leadForm', { statuses, leadSources, leadCategories, user });
           });
         });
@@ -73,15 +104,8 @@ router.get('/create', (req, res) => {
   });
 });
 
-
-
-
-
-router.post('/create', (req, res) => {
-  if (!req.session.user) {
-    return res.render('unauthorized');
-  }
-
+// POST /create route with role check
+router.post('/create', checkUserRole, (req, res) => {
   const { 
     firstName, 
     lastName, 
@@ -91,7 +115,7 @@ router.post('/create', (req, res) => {
     leadScore, 
     lead_status_id, 
     lead_source_id, 
-    lead_category_id // Get the category ID from the form
+    lead_category_id 
   } = req.body; 
 
   const userId = req.session.user.id; 
@@ -122,10 +146,10 @@ router.post('/create', (req, res) => {
     companyName || null, 
     leadScore || 0, 
     userId, 
-    userId, // Set `created_by` to the currently logged-in user
+    userId, 
     lead_status_id,
     lead_source_id,
-    lead_category_id // Add the category ID to the values
+    lead_category_id 
   ];
 
   pool.getConnection((err, connection) => {
@@ -154,20 +178,44 @@ router.post('/create', (req, res) => {
 //viewing leads
 
 router.get('/', (req, res) => {
-    if (!req.session.user) {
-      return res.render('unauthorized')
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database');
+      return;
     }
-  
-    pool.getConnection((err, connection) => {
+
+    // Query to check the user's role and admin status
+    const checkRoleQuery = 'SELECT user_role_id, is_admin FROM users WHERE user_id = ?';
+    connection.query(checkRoleQuery, [req.session.user.id], (err, roleResult) => {
       if (err) {
-        console.error('Error getting connection from pool:', err);
-        res.status(500).send('Error connecting to database');
-        return;
+        console.error('Error retrieving user role:', err);
+        connection.release();
+        return res.status(500).send('Error retrieving user role');
       }
-  
+
+      if (roleResult.length === 0) {
+        connection.release();
+        return res.status(404).send('User not found');
+      }
+
+      const userRoleId = roleResult[0].user_role_id;
+      const isAdmin = roleResult[0].is_admin;
+
+      // Check if the user is either an authorized user (user_role_id = 2) or an admin
+      if (userRoleId !== 2 && isAdmin !== 1) {
+        connection.release();
+        return res.status(403).send('Forbidden: You do not have permission to view leads');
+      }
+
+      // If user is valid and has the correct role (2) or is an admin, proceed to query the leads
       let sql;
-      if (req.session.user && req.session.user.is_admin === 1) { 
-        // If user is admin, fetch all leads
+      if (isAdmin === 1) { 
+        // If the user is admin, fetch all leads
         sql = `
           SELECT 
             l.*, 
@@ -197,15 +245,15 @@ router.get('/', (req, res) => {
             l.lead_owner_id = ?
         `;
       }
-  
-      connection.query(sql, req.session.user.is_admin === 1 ? [] : [req.session.user.id], (err, leadsResults) => {
+
+      connection.query(sql, isAdmin === 1 ? [] : [req.session.user.id], (err, leadsResults) => {
         if (err) {
           console.error('Error retrieving leads:', err);
           connection.release();
           res.status(500).send('Error retrieving leads');
           return;
         }
-  
+
         connection.query('SELECT user_id, CONCAT(first_name, " ", last_name) AS full_name FROM users', (err, usersResults) => {
           if (err) {
             console.error('Error retrieving users:', err);
@@ -213,24 +261,25 @@ router.get('/', (req, res) => {
             res.status(500).send('Error retrieving users');
             return;
           }
-  
+
           if (Array.isArray(leadsResults) && leadsResults.length > 0) {
             res.render('leadMainPage', { 
               leads: leadsResults, 
               users: usersResults, 
-              currentUser: req.session.user ,
+              currentUser: req.session.user,
               currentUserId: req.session.user.id
-
             });
           } else {
             console.error('No leads found.');
             connection.release();
-            res.status(404).send('No leads found.'); 
+            res.status(404).send('No leads found.');
           }
         });
       });
     });
   });
+});
+
 
 
 router.post('/:leadId/assign', (req, res) => {

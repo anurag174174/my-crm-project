@@ -4,88 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDIT USER</title>
+    <title>EDIT PROFILE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
 </head>
 
 <body class="bg-gray-100">
-  
-    
+
     <!-- Main Wrapper -->
     <div class="relative flex min-h-screen bg-gray-100">
         <!-- Menu Button (Visible only on smaller screens) -->
-        <button id="toggleNav"
-            class="lg:hidden fixed top-4 left-4 z-20 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-            ☰ 
-        </button>
+        <button id="toggleNav" class="lg:hidden fixed top-4 left-4 z-20 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">☰</button>
 
         <!-- Navigation Menu -->
-        <nav id="navMenu"
-            class="w-64 bg-white p-6 space-y-4 shadow-md fixed top-0 left-0 h-full transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 z-50">
-            <!-- Close Button (Visible only on smaller screens) -->
-            <button id="closeNav" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800">
-                ✕ Close
-            </button>
-
+        <nav id="navMenu" class="w-64 bg-white p-6 space-y-4 shadow-md fixed top-0 left-0 h-full transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 z-50">
+            <button id="closeNav" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800">✕ Close</button>
             <div class="text-center">
-                <!-- Profile Image -->
-                <img src="https://via.placeholder.com/100" alt="Profile Picture"
-                    class="w-16 sm:w-24 h-16 sm:h-24 mx-auto rounded-full mb-4 shadow-md">
-                    <p class="text-md sm:text-lg font-bold text-gray-800 capitalize"><%= user.first_name%> <%= user.last_name%></p>
+                <img src="https://via.placeholder.com/100" alt="Profile Picture" class="w-16 sm:w-24 h-16 sm:h-24 mx-auto rounded-full mb-4 shadow-md">
+                <p class="text-md sm:text-lg font-bold text-gray-800 capitalize"><%= user.first_name %> <%= user.last_name %></p>
             </div>
-
-            <!-- Navigation Links -->
             <ul class="space-y-2">
-                <li>
-                    <a href="/user/<%= user.user_id %>/dashboard"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>🏠</span>
-                        <span class="ml-2 sm:ml-3">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/user/<%= user.user_id %>/"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">User Details</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/user/<%= user.user_id %>/edit"
-                        class="flex items-center px-2 sm:px-4 py-2 bg-blue-100 text-blue-600 font-medium rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">Edit Users</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/leads/create"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">Add leads</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/leads"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>📋</span>
-                        <span class="ml-2 sm:ml-3">View Leads</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/logout"
-                        class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
-                        <span>🚪</span>
-                        <span class="ml-2 sm:ml-3">Logout</span>
-                    </a>
-                </li>
+                <li><a href="/user/<%= user.user_id %>/dashboard" class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition"><span>🏠</span><span class="ml-2 sm:ml-3">Dashboard</span></a></li>
+                <li><a href="/user/<%= user.user_id %>/" class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition"><span>📋</span><span class="ml-2 sm:ml-3">User Details</span></a></li>
+                <li><a href="/user/<%= user.user_id %>/edit" class="flex items-center px-2 sm:px-4 py-2 bg-blue-100 text-blue-600 font-medium rounded-md transition"><span>📋</span><span class="ml-2 sm:ml-3">Update Profile</span></a></li>
+                <li><a href="/leads/create" class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition"><span>📋</span><span class="ml-2 sm:ml-3">Add leads</span></a></li>
+                <li><a href="/leads" class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition"><span>📋</span><span class="ml-2 sm:ml-3">View Leads</span></a></li>
+                <li><a href="/logout" class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition"><span>🚪</span><span class="ml-2 sm:ml-3">Logout</span></a></li>
             </ul>
         </nav>
 
         <!-- Main Content -->
         <div class="w-full sm:w-3/5 md:w-full lg:w-full p-6 bg-gray-50 rounded-lg ">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-center tracking-wider">Edit User</h1>
-        
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-center tracking-wider">Update Profile</h1>
+
             <form method="POST" action="/user/<%= user.user_id %>/edit" class="space-y-6">
                 <!-- First Name -->
                 <div class="mb-4">
@@ -93,35 +43,88 @@
                     <input type="text" id="firstName" name="firstName" value="<%= user.first_name %>"
                         class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-        
+
                 <!-- Last Name -->
                 <div class="mb-4">
                     <label for="lastName" class="block text-gray-700 font-medium mb-2">Last name</label>
                     <input type="text" id="lastName" name="lastName" value="<%= user.last_name %>"
                         class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-        
+
                 <!-- Email Address -->
                 <div class="mb-4">
                     <label for="email" class="block text-gray-700 font-medium mb-2">Email address</label>
                     <input type="email" id="email" name="email" value="<%= user.email %>"
                         class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-        
+
                 <!-- Role Dropdown -->
-                <div class="mb-4">
-                    <label for="role" class="block text-gray-700 font-medium mb-2">Role</label>
-                    <select id="role" name="roleId" required
+                <% if (user.is_admin === 1) { %> <!-- Only show and enable role selection for admins -->
+                    <div class="mb-4">
+                      <label for="role" class="block text-gray-700 font-medium mb-2">Role</label>
+                      <select id="role" name="roleId" required
                         class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">Select Role</option>
                         <% roles.forEach(role => { %>
-                        <option value="<%= role.role_id %>" <% if (user.user_role_id === role.role_id) { %>selected<% } %>>
+                          <option value="<%= role.role_id %>" <% if (user.user_role_id === role.role_id) { %>selected<% } %>>
                             <%= role.roles_name %>
-                        </option>
+                          </option>
                         <% }); %>
-                    </select>
-                </div>
-        
+                      </select>
+                    </div>
+                  <% } else { %> <!-- For non-admin users, the role field will be visible but disabled -->
+                    <div class="mb-4">
+                      <label for="role" class="block text-gray-700 font-medium mb-2">Role</label>
+                      <select id="role" name="roleId" disabled
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-200 cursor-not-allowed">
+                        <option value="<%= user.user_role_id %>">
+                          <%= roles.find(role => role.role_id === user.user_role_id).roles_name %>
+                        </option>
+                      </select>
+                    </div>
+                  <% } %>
+                  
+
+                <!-- Update Contact Details Section -->
+                <% if (user.is_admin === 1) { %> <!-- Check if user is an admin -->
+                    <div class="mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800">Update Contact Details</h2>
+                    
+                        <!-- Permanent Address -->
+                        <div class="mb-4">
+                            <label for="permanentAddress" class="block text-gray-700 font-medium mb-2">Permanent Address</label>
+                            <input id="permanentAddress" name="permanentAddress" rows="4" value="<%= user.user_current_address || '' %> "
+                                      class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                               
+                        </input>
+                        </div>
+                    
+                        <!-- Current Address -->
+                        <div class="mb-4">
+                            <label for="currentAddress" class="block text-gray-700 font-medium mb-2">Current Address</label>
+                            <input id="currentAddress" name="currentAddress" rows="4" value="<%= user.user_permanent_address || '' %> "
+                                      class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                
+                        </input>
+                        </div>
+                    
+                        <!-- Phone Number -->
+                        <div class="mb-4">
+                            <label for="phoneNumber" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                            <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.user_phone_number || '' %>"
+                                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    
+                        <!-- Emergency Contact Number -->
+                        <div class="mb-4">
+                            <label for="emergencyContact" class="block text-gray-700 font-medium mb-2">Emergency Contact Number</label>
+                            <input type="text" id="emergencyContact" name="emergencyContact" value="<%= user.user_emergency_number  %>"
+                                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+                    
+                    <% } %> <!-- End of admin check -->
+                    
                 <!-- Save Button -->
                 <div class="mt-6">
                     <button type="submit"
@@ -131,15 +134,12 @@
                 </div>
             </form>
         </div>
-        
-        
+
     </div>
 
     <!-- JavaScript for Menu Toggle -->
     <script src="/javascripts/editUser.js"></script>
+
 </body>
-
-
-
 
 </html>
