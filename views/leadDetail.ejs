@@ -82,8 +82,13 @@
       <p>No activities available.</p>
     <% } %>
 
-    <!-- Tasks Section -->
-    <h2 class="text-2xl font-semibold text-gray-800 mt-6 mb-4">Tasks</h2>
+    
+  
+    <!-- Tasks and Email Sections -->
+<div class="flex flex-col md:flex-row gap-6 mt-6">
+  <!-- Tasks Section -->
+  <div class="w-full md:w-1/2">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tasks</h2>
     <form action="/leads/<%= lead.lead_id %>/addTask" method="POST" class="space-y-4">
       <div>
         <label for="task_name" class="block text-gray-700">Task Name:</label>
@@ -126,24 +131,73 @@
     <% } else { %>
       <p>No tasks available.</p>
     <% } %>
+  </div>
 
-    <!-- Separate Email Section -->
-    <h3 class="text-xl font-semibold text-gray-800 mt-6">Email Section</h3>
-    <form action="/leads/<%= lead.lead_id %>/sendEmail" method="POST" class="space-y-4">
-      <div>
-        <label for="email_subject" class="block text-gray-700">Email Subject:</label>
-        <input type="text" name="subject" id="email_subject" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
-      </div>
+<!-- Email Section -->
+<div class="w-full md:w-1/2">
+  <h3 class="text-2xl font-semibold text-gray-800 mb-4">Email Section</h3>
 
-      <div>
-        <label for="email_body" class="block text-gray-700">Email Body: </label>
-        <textarea name="body" id="email_body" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+  <!-- Dropdown for Email Templates -->
+  <form action="/leads/<%= lead.lead_id %>" method="GET" class="space-y-4">
+    <div>
+      <label for="email_template" class="block text-gray-700">Email Template:</label>
+      <select
+        id="email_template"
+        name="template_id"
+        class="w-full px-4 py-2 border border-gray-300 rounded-md"
+        onchange="this.form.submit()"
+      >
+        <option value="">Select a template</option>
+        <% emailTemplates.forEach(template => { %>
+          <option value="<%= template.email_template_id %>" <%= selectedTemplate && selectedTemplate.email_template_id == template.email_template_id ? 'selected' : '' %>>
+            <%= template.template_name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+  </form>
 
-        </textarea>
-      </div>
+  <!-- Form for Sending Email -->
+  <form action="/leads/<%= lead.lead_id %>/sendEmail" method="POST" class="space-y-4">
+    <!-- Email Subject Field -->
+    <div>
+      <label for="email_subject" class="block text-gray-700">Email Subject:</label>
+      <input
+        type="text"
+        name="subject"
+        id="email_subject"
+        required
+        value="<%= selectedTemplate ? selectedTemplate.template_subject : '' %>"
+        class="w-full px-4 py-2 border border-gray-300 rounded-md"
+      />
+    </div>
 
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Send Email</button>
-    </form>
+    <!-- Email Body Field -->
+    <div>
+      <label for="email_body" class="block text-gray-700">Email Body:</label>
+      <textarea
+        name="body"
+        id="email_body"
+        required
+        class="w-full px-4 py-2 border border-gray-300 rounded-md"
+      ><%= selectedTemplate ? selectedTemplate.template_description : '' %></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+    >
+      Send Email
+    </button>
+  </form>
+</div>
+
+
+
+
+</div>
+
 
   </div>
   <script>
@@ -153,6 +207,8 @@
     menuToggle.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden");
     });
+
+    
   </script>
 </body>
 </html>

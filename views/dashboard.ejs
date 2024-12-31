@@ -24,9 +24,17 @@
                     class="absolute left-0 top-full mt-2 bg-white shadow-md rounded-lg w-48 hidden">
                     <li><a href="/user/<%= user.user_id %>/dashboard" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
                     <li><a href="/user/<%= user.user_id %>/" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Profile</a></li>
+                    <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                     <li><a href="/leads/create" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add Leads</a></li>
+                    <% } %>
+                    <% if ( user.is_admin===1 ) { %>
+                    <li><a href="/user/admin/users" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Users</a></li>
+                    <% } %>
+                    <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                     <li><a href="/leads" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Leads</a></li>
+                    <% } %>
                     <li><a href="/logout" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
+                   
                 </ul>
             </div>
         

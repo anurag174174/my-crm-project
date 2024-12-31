@@ -272,7 +272,7 @@ router.get('/', (req, res) => {
           } else {
             console.error('No leads found.');
             connection.release();
-            res.status(404).send('No leads found.');
+            res.render('noLeadFoundPage',{currentUserId: req.session.user.id})
           }
         });
       });
@@ -453,8 +453,10 @@ router.post('/:leadId/edit', (req, res) => {
 
 
 // Route to render lead page (including tasks and activities)
+
 router.get('/:lead_id', (req, res) => {
   const { lead_id } = req.params;
+  const { template_id } = req.query; // Get the selected template_id from the query string
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -477,32 +479,53 @@ router.get('/:lead_id', (req, res) => {
         }
 
         connection.query('SELECT * FROM lead_activities WHERE lead_id = ?', [lead_id], (err, activities) => {
-          connection.release();
           if (err) {
+            connection.release();
             console.error(err);
             return res.status(500).send('Failed to fetch activities.');
           }
 
-          // Format the activity_date to remove time
-          activities = activities.map(activity => {
-            activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN'); // Modify the format if needed
-            return activity;
-          });
-          tasks = tasks.map(task => {
-            task.due_date = new Date(task.due_date).toLocaleDateString('en-IN'); // Modify the format if needed
-            return task;
-          });
+          // Fetch all email templates
+          connection.query('SELECT * FROM email_template', (err, emailTemplates) => {
+            if (err) {
+              connection.release();
+              console.error(err);
+              return res.status(500).send('Failed to fetch email templates.');
+            }
 
-          res.render('leadDetail', {
-            lead: lead[0],
-            tasks,
-            activities,
+            // Set the selected template if any
+            let selectedTemplate = null;
+            if (template_id) {
+              selectedTemplate = emailTemplates.find(template => template.email_template_id == template_id);
+            }
+
+            // Format the activity_date to remove time
+            activities = activities.map(activity => {
+              activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN');
+              return activity;
+            });
+
+            tasks = tasks.map(task => {
+              task.due_date = new Date(task.due_date).toLocaleDateString('en-IN');
+              return task;
+            });
+
+            // Render the lead details page with the email templates and selected template if any
+            res.render('leadDetail', {
+              lead: lead[0],
+              tasks,
+              activities,
+              emailTemplates,  // Pass the email templates to the view
+              selectedTemplate, // Pass the selected template (if any)
+            });
           });
         });
       });
     });
   });
 });
+
+
 // Route to add a new task
 router.post('/:lead_id/addTask', (req, res) => {
   const { lead_id } = req.params;
@@ -616,7 +639,7 @@ router.post('/tasks/:task_id/delete', (req, res) => {
 
 router.post('/:lead_id/sendEmail', (req, res) => {
   const { lead_id } = req.params;
-  const { subject, body } = req.body;
+  const { subject, body, email_template_id } = req.body;
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -624,48 +647,69 @@ router.post('/:lead_id/sendEmail', (req, res) => {
       return res.status(500).send('Failed to connect to database.');
     }
 
+    // Fetch lead details
     connection.query('SELECT email, first_name, last_name FROM leads WHERE lead_id = ?', [lead_id], (err, lead) => {
-      connection.release();
       if (err || lead.length === 0) {
+        connection.release();
         console.error(err || 'Lead not found.');
         return res.status(500).send('Failed to fetch lead details.');
       }
 
       const { email, first_name, last_name } = lead[0];
-      const personalizedBody = `Dear ${first_name} ${last_name},\n\n${body}`;
 
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'anuragpokhriyal174@gmail.com',  // company mail address
-          pass: 'gxet sasg qmli qrhx' 
-        },
-        tls: {
-          rejectUnauthorized: false  // This allows self-signed certificates
-        }
-      });
+      if (email_template_id) {
+        // Fetch email template details if a template is selected
+        connection.query('SELECT template_subject, template_description FROM email_template WHERE email_template_id = ?', [email_template_id], (err, template) => {
+          if (err || template.length === 0) {
+            connection.release();
+            console.error(err || 'Email template not found.');
+            return res.status(500).send('Failed to fetch email template details.');
+          }
 
-      const mailOptions = {
-        from: 'anuragpokhriyal174@gmail.com',   // Sender's email (logged-in user)
-        to: email,          // Lead's email
-        subject,
-        text: personalizedBody,
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Error sending email:', error);
-          return res.status(500).send('Failed to send email.');
-        }
-        console.log('Email sent:', info.response);
-        res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
-      });
+          const { subject: templateSubject, description: templateDescription } = template[0];
+          sendEmail(connection, email, first_name, last_name, templateSubject, templateDescription, res, lead_id);
+        });
+      } else {
+        // If no template is selected, use the provided subject and body
+        sendEmail(connection, email, first_name, last_name, subject, body, res, lead_id);
+      }
     });
   });
 });
 
+// Function to send the email
+function sendEmail(connection, email, first_name, last_name, subject, body, res, lead_id) {
+  const personalizedBody =`Dear ${first_name} ${last_name},\n\n${body}\n\nYours faithfully,\nCRM Team`;
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'anuragpokhriyal174@gmail.com', // Company email
+      pass: 'lteg spzm fjjn qkvt',         // App-specific password
+    },
+    tls: {
+      rejectUnauthorized: false,           // Allow self-signed certificates
+    },
+  });
 
+  const mailOptions = {
+    from: 'anuragpokhriyal174@gmail.com',  // Sender's email
+    to: email,                             // Lead's email
+    subject,
+    text: personalizedBody,
+  };
 
+  transporter.sendMail(mailOptions, (error, info) => {
+    connection.release(); // Release the connection back to the pool
+
+    if (error) {
+      console.error('Error sending email:', error);
+      return res.status(500).send('Failed to send email.');
+    }
+    console.log('Email sent:', info.response);
+    res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
+  });
+}
+                    
 module.exports = router;
 
 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Registration Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Header Section -->
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+    <div class="container mx-auto flex justify-between items-center p-5">
+      <!-- Logo -->
+      <div>
+        <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-6">
+        <a href="/user/<%= user.user_id %>/dashboard" class="text-gray-800 hover:text-blue-500">Dashboard</a>
+        <a href="/logout" class="text-gray-800 hover:text-blue-500">Logout</a>
+      </nav>
+      
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+      <a href="/user/<%= user.user_id %>/dashboard"  class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+      <a href="/logout" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
+    </div>
+  </header>
+  
+  <!-- Main Registration Section -->
+  <div class="flex flex-col w-full max-w-6xl h-auto bg-white shadow-lg rounded-lg overflow-hidden mx-auto mt-24">
+    
+    <div class="w-full p-6 md:p-12 flex flex-col justify-center space-y-6">
+      <h2 class="text-3xl font-bold text-gray-800 text-center ">Welcome back</h2>
+      <h2 class="text-2xl font-semibold text-gray-500 text-center ">Please enter details you want to update</h2>
+      <form action="/user/admin/users/<%= user.user_id %>/edit" method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- First Name & Last Name in the same row -->
+          <div>
+            <label for="firstName" class="block text-gray-700 text-sm">First Name</label>
+            <input type="text" id="firstName" name="firstName" value="<%= user.first_name %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+          <div>
+            <label for="lastName" class="block text-gray-700 text-sm">Last Name</label>
+            <input type="text" id="lastName" name="lastName" value="<%= user.last_name %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+        </div>
+  
+        <!-- Email & PIP in the same row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="email" class="block text-gray-700 text-sm">Email Address</label>
+            <input type="email" id="email" name="email" value="<%= user.email %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+          <div>
+            <label for="phoneNumber" class="block text-gray-700 text-sm">Phone Number</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phoneNumber || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+          
+        </div>
+  
+        <!-- Role & Address in the same row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="mb-4">
+            <label for="role" class="block text-gray-700 font-medium mb-2">Please select your role</label>
+            <select id="role" name="roleId" required class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-auto">
+              <option value="" <%= !user.user_role_id ? 'selected' : '' %>>Select Role</option>
+              <% roles.forEach(role => { %>
+                <option value="<%= role.role_id %>" <%= user.user_role_id === role.role_id ? 'selected' : '' %>><%= role.roles_name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label for="pip" class="block text-gray-700 font-medium mb-2"> Performance Improvement Plan</label>
+            <select id="pip" name="pip" required class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-auto">
+              <option value="1" <%= user.pip && user.pip === 1 ? 'selected' : '' %>>1</option>
+              <option value="2" <%= user.pip && user.pip === 2 ? 'selected' : '' %>>2</option>
+              <option value="3" <%= user.pip && user.pip === 3 ? 'selected' : '' %>>3</option>
+            </select>
+          </div>
+  
+          
+        </div>
+  
+        <!-- Permanent Address & Phone Number in the same row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="permanentAddress" class="block text-gray-700 text-sm">Permanent Address</label>
+            <input type="text" id="permanentAddress" name="permanentAddress" value="<%= user.permanentAddress || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+         
+          <div>
+            <label for="currentAddress" class="block text-gray-700 text-sm">Current Address</label>
+            <input type="text" id="currentAddress" name="currentAddress" value="<%= user.currentAddress || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+         
+        </div>
+  
+        <!-- Emergency Contact & Bank Details in the same row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="emergencyContact" class="block text-gray-700 text-sm">Emergency Phone Number</label>
+            <input type="text" id="emergencyContact" name="emergencyContact" value="<%= user.emergencyContact || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+  
+          <!-- Bank Details Section -->
+          <div>
+            <label for="bankName" class="block text-gray-700 text-sm">Bank Name</label>
+            <input type="text" id="bankName" name="userBankName" value="<%=  bankDetails.user_bank_name || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+        </div>
+  
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="ifscCode" class="block text-gray-700 text-sm">IFSC Code</label>
+            <input type="text" id="ifscCode" name="userIfscCode" value="<%=  bankDetails.user_ifsc_code || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+  
+          <div>
+            <label for="accountNumber" class="block text-gray-700 text-sm">Account Number</label>
+            <input type="text" id="accountNumber" name="userAccountNumber" value="<%=  bankDetails.user_account_number || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+        </div>
+  
+        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  
+  
+  <!-- JavaScript for Mobile Menu Toggle -->
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden', !isHidden);
+    });
+  </script>
+
+</body>
+</html>

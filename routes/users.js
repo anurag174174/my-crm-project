@@ -474,4 +474,215 @@ router.get('/creator/:creatorId', (req, res) => {
   });
 });
 
+
+//admin panel 
+router.get('/admin/users', (req, res) => {
+  if (!req.session.user || req.session.user.is_admin !== 1) {
+    return res.render('unauthorized');
+  }
+  currentLoginUser=req.session.user.id; // taking the login users
+  console.log(currentLoginUser)
+  
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error connecting to database:', err);
+      res.status(500).send('Database connection error');
+      return;
+    }
+
+    const query = `
+      SELECT 
+        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, 
+        r.roles_name AS roleName, 
+        c.user_current_address AS currentAddress, c.user_permanent_address AS permanentAddress,
+        c.user_phone_number AS phoneNumber, c.user_emergency_number AS emergencyContact
+      FROM users u
+      LEFT JOIN roles r ON u.user_role_id = r.role_id
+      LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
+    `;
+
+    connection.query(query, (err, users) => {
+      connection.release();
+      if (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).send('Error fetching users');
+        return;
+      }
+
+      res.render('allUserAdmin', { users ,currentLoginUser });
+    });
+  });
+});
+
+//edit all user admin details
+router.get('/admin/users/:userId/edit', (req, res) => {
+  const userId = req.params.userId;
+
+  if (!req.session.user || req.session.user.is_admin !== 1) {
+    return res.render('unauthorized');
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error connecting to database:', err);
+      res.status(500).send('Database connection error');
+      return;
+    }
+
+    // Query to get user details
+    const userQuery = `
+      SELECT 
+        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, u.pip, 
+        c.user_current_address AS currentAddress, c.user_permanent_address AS permanentAddress,
+        c.user_phone_number AS phoneNumber, c.user_emergency_number AS emergencyContact
+      FROM users u
+      LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
+      WHERE u.user_id = ?
+    `;
+
+    // Query to get bank details
+    const bankQuery = `
+      SELECT 
+        b.user_bank_name, b.user_ifsc_code, b.user_account_number
+      FROM bank_details b
+      WHERE b.user_id = ?
+    `;
+
+    // Query to get all roles
+    const rolesQuery = 'SELECT role_id, roles_name FROM roles';
+
+    connection.query(userQuery, [userId], (err, userResults) => {
+      if (err) {
+        connection.release();
+        console.error('Error fetching user details:', err);
+        res.status(500).send('Error fetching user details');
+        return;
+      }
+
+      if (userResults.length === 0) {
+        connection.release();
+        res.status(404).send('User not found');
+        return;
+      }
+
+      const user = userResults[0];
+
+      // Fetch bank details
+      connection.query(bankQuery, [userId], (err, bankResults) => {
+        if (err) {
+          connection.release();
+          console.error('Error fetching bank details:', err);
+          res.status(500).send('Error fetching bank details');
+          return;
+        }
+
+        const bankDetails = bankResults[0] || {}; // Handle if no bank details exist for this user
+
+        connection.query(rolesQuery, (err, rolesResults) => {
+          connection.release();
+          if (err) {
+            console.error('Error fetching roles:', err);
+            res.status(500).send('Error fetching roles');
+            return;
+          }
+
+          // Pass both user details, roles, bank details, and PIP value to the template
+          res.render('editAllUserAdmin', { user, roles: rolesResults, bankDetails });
+        });
+      });
+    });
+  });
+});
+
+
+
+router.post('/admin/users/:userId/edit', (req, res) => {
+  const userId = req.params.userId;
+  const { 
+    firstName, 
+    lastName, 
+    email, 
+    pip, 
+    roleId, 
+    currentAddress, 
+    permanentAddress, 
+    phoneNumber, 
+    emergencyContact, 
+    userBankName, 
+    userIfscCode, 
+    userAccountNumber 
+  } = req.body;
+
+  if (!req.session.user || req.session.user.is_admin !== 1) {
+    return res.render('unauthorized');
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error connecting to database:', err);
+      res.status(500).send('Database connection error');
+      return;
+    }
+
+    // Update user details
+    const updateUserQuery = `
+      UPDATE users 
+      SET first_name = ?, last_name = ?, email = ?, pip = ?, user_role_id = ? 
+      WHERE user_id = ?
+    `;
+    connection.query(updateUserQuery, [firstName, lastName, email, pip || null, roleId || null, userId], (err) => {
+      if (err) {
+        connection.release();
+        console.error('Error updating user:', err);
+        res.status(500).send('Error updating user');
+        return;
+      }
+
+      // Update or insert contact details
+      const updateContactQuery = `
+        INSERT INTO contact_details (contact_user_id, user_current_address, user_permanent_address, user_phone_number, user_emergency_number)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          user_current_address = VALUES(user_current_address),
+          user_permanent_address = VALUES(user_permanent_address),
+          user_phone_number = VALUES(user_phone_number),
+          user_emergency_number = VALUES(user_emergency_number)
+      `;
+      connection.query(updateContactQuery, [userId, currentAddress, permanentAddress, phoneNumber, emergencyContact], (err) => {
+        if (err) {
+          connection.release();
+          console.error('Error updating contact details:', err);
+          res.status(500).send('Error updating contact details');
+          return;
+        }
+
+        // Update or insert bank details
+        const updateBankQuery = `
+          INSERT INTO bank_details (user_id, user_bank_name, user_ifsc_code, user_account_number)
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            user_bank_name = VALUES(user_bank_name),
+            user_ifsc_code = VALUES(user_ifsc_code),
+            user_account_number = VALUES(user_account_number)
+        `;
+        connection.query(updateBankQuery, [userId, userBankName, userIfscCode, userAccountNumber], (err) => {
+          connection.release();
+          
+          if (err) {
+            console.error('Error updating bank details:', err);
+            res.status(500).send('Error updating bank details');
+            return;
+          }
+          
+          // Redirect back to the admin user list
+          res.redirect('/user/admin/users');
+        });
+      });
+    });
+  });
+});
+
+
+
+
 module.exports = router;

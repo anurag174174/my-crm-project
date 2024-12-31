@@ -57,6 +57,7 @@
                         <span class="ml-2 sm:ml-3">Update Profile</span>
                     </a>
                 </li>
+                <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                 <li>
                     <a href="/leads/create"
                         class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
@@ -64,6 +65,8 @@
                         <span class="ml-2 sm:ml-3">Add leads</span>
                     </a>
                 </li>
+                <%} %>
+                <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                 <li>
                     <a href="/leads"
                         class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
@@ -71,6 +74,7 @@
                         <span class="ml-2 sm:ml-3">View Leads</span>
                     </a>
                 </li>
+                <%} %>
                 <li>
                     <a href="/logout"
                         class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
