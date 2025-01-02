@@ -454,6 +454,76 @@ router.post('/:leadId/edit', (req, res) => {
 
 // Route to render lead page (including tasks and activities)
 
+// router.get('/:lead_id', (req, res) => {
+//   const { lead_id } = req.params;
+//   const { template_id } = req.query; // Get the selected template_id from the query string
+
+//   pool.getConnection((err, connection) => {
+//     if (err) {
+//       console.error(err);
+//       return res.status(500).send('Failed to connect to database.');
+//     }
+
+//     connection.query('SELECT * FROM leads WHERE lead_id = ?', [lead_id], (err, lead) => {
+//       if (err) {
+//         connection.release();
+//         console.error(err);
+//         return res.status(500).send('Failed to fetch lead details.');
+//       }
+
+//       connection.query('SELECT * FROM tasks WHERE lead_id = ?', [lead_id], (err, tasks) => {
+//         if (err) {
+//           connection.release();
+//           console.error(err);
+//           return res.status(500).send('Failed to fetch tasks.');
+//         }
+
+//         connection.query('SELECT * FROM lead_activities WHERE lead_id = ?', [lead_id], (err, activities) => {
+//           if (err) {
+//             connection.release();
+//             console.error(err);
+//             return res.status(500).send('Failed to fetch activities.');
+//           }
+
+//           // Fetch all email templates
+//           connection.query('SELECT * FROM email_template', (err, emailTemplates) => {
+//             if (err) {
+//               connection.release();
+//               console.error(err);
+//               return res.status(500).send('Failed to fetch email templates.');
+//             }
+
+//             // Set the selected template if any
+//             let selectedTemplate = null;
+//             if (template_id) {
+//               selectedTemplate = emailTemplates.find(template => template.email_template_id == template_id);
+//             }
+
+//             // Format the activity_date to remove time
+//             activities = activities.map(activity => {
+//               activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN');
+//               return activity;
+//             });
+
+//             tasks = tasks.map(task => {
+//               task.due_date = new Date(task.due_date).toLocaleDateString('en-IN');
+//               return task;
+//             });
+
+//             // Render the lead details page with the email templates and selected template if any
+//             res.render('leadDetail', {
+//               lead: lead[0],
+//               tasks,
+//               activities,
+//               emailTemplates,  // Pass the email templates to the view
+//               selectedTemplate, // Pass the selected template (if any)
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
+// });
 router.get('/:lead_id', (req, res) => {
   const { lead_id } = req.params;
   const { template_id } = req.query; // Get the selected template_id from the query string
@@ -485,38 +555,48 @@ router.get('/:lead_id', (req, res) => {
             return res.status(500).send('Failed to fetch activities.');
           }
 
-          // Fetch all email templates
-          connection.query('SELECT * FROM email_template', (err, emailTemplates) => {
+          // Fetch permissions for the lead owner (lead.lead_owner_id)
+          connection.query('SELECT * FROM permissions WHERE user_id = ?', [lead[0].lead_owner_id], (err, permissions) => {
             if (err) {
               connection.release();
               console.error(err);
-              return res.status(500).send('Failed to fetch email templates.');
+              return res.status(500).send('Failed to fetch permissions.');
             }
 
-            // Set the selected template if any
-            let selectedTemplate = null;
-            if (template_id) {
-              selectedTemplate = emailTemplates.find(template => template.email_template_id == template_id);
-            }
+            // Fetch all email templates
+            connection.query('SELECT * FROM email_template', (err, emailTemplates) => {
+              if (err) {
+                connection.release();
+                console.error(err);
+                return res.status(500).send('Failed to fetch email templates.');
+              }
 
-            // Format the activity_date to remove time
-            activities = activities.map(activity => {
-              activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN');
-              return activity;
-            });
+              // Set the selected template if any
+              let selectedTemplate = null;
+              if (template_id) {
+                selectedTemplate = emailTemplates.find(template => template.email_template_id == template_id);
+              }
 
-            tasks = tasks.map(task => {
-              task.due_date = new Date(task.due_date).toLocaleDateString('en-IN');
-              return task;
-            });
+              // Format the activity_date to remove time
+              activities = activities.map(activity => {
+                activity.activity_date = new Date(activity.activity_date).toLocaleDateString('en-IN');
+                return activity;
+              });
 
-            // Render the lead details page with the email templates and selected template if any
-            res.render('leadDetail', {
-              lead: lead[0],
-              tasks,
-              activities,
-              emailTemplates,  // Pass the email templates to the view
-              selectedTemplate, // Pass the selected template (if any)
+              tasks = tasks.map(task => {
+                task.due_date = new Date(task.due_date).toLocaleDateString('en-IN');
+                return task;
+              });
+
+              // Render the lead details page with the permissions and other data
+              res.render('leadDetail', {
+                lead: lead[0],
+                tasks,
+                activities,
+                permissions,  // Pass the permissions to the view
+                emailTemplates,  // Pass the email templates to the view
+                selectedTemplate, // Pass the selected template (if any)
+              });
             });
           });
         });
@@ -657,8 +737,8 @@ router.post('/:lead_id/sendEmail', (req, res) => {
 
       const { email, first_name, last_name } = lead[0];
 
+      // Fetch email template if provided
       if (email_template_id) {
-        // Fetch email template details if a template is selected
         connection.query('SELECT template_subject, template_description FROM email_template WHERE email_template_id = ?', [email_template_id], (err, template) => {
           if (err || template.length === 0) {
             connection.release();
@@ -666,12 +746,23 @@ router.post('/:lead_id/sendEmail', (req, res) => {
             return res.status(500).send('Failed to fetch email template details.');
           }
 
-          const { subject: templateSubject, description: templateDescription } = template[0];
-          sendEmail(connection, email, first_name, last_name, templateSubject, templateDescription, res, lead_id);
+          const { template_subject, template_description } = template[0];
+
+       
+
+          const emailSubject = hasEditMailPermission ? subject : template_subject;
+          const emailBody = hasEditMailPermission ? body : template_description;
+
+          // Send email
+          sendEmail(connection, email, first_name, last_name, emailSubject, emailBody, res, lead_id);
         });
       } else {
-        // If no template is selected, use the provided subject and body
-        sendEmail(connection, email, first_name, last_name, subject, body, res, lead_id);
+        // If no template is selected, use the provided subject and body (they will be populated by the user or template)
+        const emailSubject = subject;
+        const emailBody = body;
+
+        // Send email
+        sendEmail(connection, email, first_name, last_name, emailSubject, emailBody, res, lead_id);
       }
     });
   });

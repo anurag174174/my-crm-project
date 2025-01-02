@@ -105,6 +105,9 @@
                 <h2 class="text-2xl sm:text-3xl font-semibold mb-2">Contact Information</h2>
                 <ul class="list-disc pl-6 space-y-2 text-wrap">
                     <li><strong>Email:</strong> <%= user.email %></li>
+                    <li><strong>Phone Number:</strong> <%= user.user_phone_number %></li>
+                    <li><strong>Emergency Phone Number:</strong> <%= user.user_emergency_number %></li>
+
                 </ul>
             </section>
         
@@ -112,7 +115,9 @@
             <section class="mb-6">
                 <h2 class="text-2xl sm:text-3xl font-semibold mb-2">Other Information</h2>
                 <ul class="list-disc pl-6 space-y-2">
-                    <li><strong>Role:</strong> <%= user.roleName %></li>
+                    <li><strong>Department:</strong> <%= user.roleName %></li>
+                    <li><strong>Current Address:</strong> <%= user.user_current_address %></li>
+                    <li><strong>Permanent Address:</strong> <%= user.user_permanent_address %></li>
                     <li><strong>Joined On:</strong> <%= new Date(user.created_at).toLocaleString() %></li>
                 </ul>
             </section>

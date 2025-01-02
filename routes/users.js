@@ -237,13 +237,21 @@ router.get('/:userId', (req, res) => {
 
     connection.query(`
         SELECT 
-          u.*, 
-          r.roles_name as roleName 
-        FROM 
-          users u
-        JOIN 
-          roles r ON u.user_role_id = r.role_id 
-        WHERE u.user_id = ?`,
+    u.*, 
+    r.roles_name AS roleName, 
+    cd.user_current_address, 
+    cd.user_permanent_address, 
+    cd.user_phone_number, 
+    cd.user_emergency_number
+FROM 
+    users u
+JOIN 
+    roles r ON u.user_role_id = r.role_id
+LEFT JOIN 
+    contact_details cd ON u.user_id = cd.contact_user_id
+WHERE 
+    u.user_id = ?
+`,
       [userId],
       (error, results) => {
         connection.release();
@@ -447,14 +455,22 @@ router.get('/creator/:creatorId', (req, res) => {
     }
 
     connection.query(`
-        SELECT 
-          u.*, 
-          r.roles_name as roleName 
-        FROM 
-          users u
-        JOIN 
-          roles r ON u.user_role_id = r.role_id 
-        WHERE u.user_id = ?`,
+      SELECT 
+    u.*, 
+    r.roles_name AS roleName, 
+    cd.user_current_address, 
+    cd.user_permanent_address, 
+    cd.user_phone_number, 
+    cd.user_emergency_number
+FROM 
+    users u
+JOIN 
+    roles r ON u.user_role_id = r.role_id
+LEFT JOIN 
+    contact_details cd ON u.user_id = cd.contact_user_id
+WHERE 
+    u.user_id = ?
+`,
       [creatorId],
       (error, results) => {
         connection.release();
@@ -514,25 +530,26 @@ router.get('/admin/users', (req, res) => {
   });
 });
 
-//edit all user admin details
+
+
 router.get('/admin/users/:userId/edit', (req, res) => {
   const userId = req.params.userId;
 
+  // Check for admin privileges
   if (!req.session.user || req.session.user.is_admin !== 1) {
     return res.render('unauthorized');
   }
 
   pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error connecting to database:', err);
-      res.status(500).send('Database connection error');
-      return;
+      console.error('Error connecting to the database:', err);
+      return res.status(500).send('Database connection error');
     }
 
-    // Query to get user details
+    // Queries for fetching user, contact, bank, and role details
     const userQuery = `
       SELECT 
-        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, u.pip, 
+        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, u.pip,
         c.user_current_address AS currentAddress, c.user_permanent_address AS permanentAddress,
         c.user_phone_number AS phoneNumber, c.user_emergency_number AS emergencyContact
       FROM users u
@@ -540,60 +557,177 @@ router.get('/admin/users/:userId/edit', (req, res) => {
       WHERE u.user_id = ?
     `;
 
-    // Query to get bank details
     const bankQuery = `
       SELECT 
-        b.user_bank_name, b.user_ifsc_code, b.user_account_number
-      FROM bank_details b
-      WHERE b.user_id = ?
+       *
+      FROM bank_details 
+      WHERE user_id = ?
     `;
 
-    // Query to get all roles
     const rolesQuery = 'SELECT role_id, roles_name FROM roles';
 
+    const permissionsQuery = `
+      SELECT 
+       *
+      FROM permissions 
+    `;
+
+    // Execute user query
     connection.query(userQuery, [userId], (err, userResults) => {
       if (err) {
         connection.release();
         console.error('Error fetching user details:', err);
-        res.status(500).send('Error fetching user details');
-        return;
+        return res.status(500).send('Error fetching user details');
       }
 
       if (userResults.length === 0) {
         connection.release();
-        res.status(404).send('User not found');
-        return;
+        return res.status(404).send('User not found');
       }
 
-      const user = userResults[0];
+      const user = userResults[0]; // Fetch user details
 
-      // Fetch bank details
+      // Execute bank query
       connection.query(bankQuery, [userId], (err, bankResults) => {
         if (err) {
           connection.release();
           console.error('Error fetching bank details:', err);
-          res.status(500).send('Error fetching bank details');
-          return;
+          return res.status(500).send('Error fetching bank details');
         }
 
         const bankDetails = bankResults[0] || {}; // Handle if no bank details exist for this user
 
+        // Execute roles query
         connection.query(rolesQuery, (err, rolesResults) => {
-          connection.release();
           if (err) {
+            connection.release();
             console.error('Error fetching roles:', err);
-            res.status(500).send('Error fetching roles');
-            return;
+            return res.status(500).send('Error fetching roles');
           }
 
-          // Pass both user details, roles, bank details, and PIP value to the template
-          res.render('editAllUserAdmin', { user, roles: rolesResults, bankDetails });
+          // Execute permissions query
+          connection.query(permissionsQuery, [userId], (err, permissionsResults) => {
+            connection.release();
+            if (err) {
+              console.error('Error fetching permissions:', err);
+              return res.status(500).send('Error fetching permissions');
+            }
+
+            // Filter granted permissions
+            const grantedPermissions = permissionsResults.filter(permission => permission.granted);
+
+            // Pass all data to the template
+            res.render('editAllUserAdmin', {
+              user,
+              bankDetails,
+              roles: rolesResults,
+              permissions: permissionsResults,
+              grantedPermissions: grantedPermissions, // Pass grantedPermissions to template
+            });
+          });
         });
       });
     });
   });
 });
 
+
+router.post('/admin/users/:userId/permissions/grant', (req, res) => {
+  const userId = req.params.userId;
+  const permissionName = req.body.permission_name; // Permission name from the form
+
+  // Check if permission_name is provided
+  if (!permissionName) {
+    return res.status(400).send('No permission name provided');
+  }
+
+  // Check for admin privileges
+  if (!req.session.user || req.session.user.is_admin !== 1) {
+    return res.render('unauthorized');
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error connecting to the database:', err);
+      return res.status(500).send('Database connection error');
+    }
+
+    // Check if the permission is already granted to the user
+    const checkPermissionQuery = `
+      SELECT * FROM permissions 
+      WHERE user_id = ? AND permission_name = ?
+    `;
+    
+    connection.query(checkPermissionQuery, [userId, permissionName], (err, results) => {
+      if (err) {
+        connection.release();
+        console.error('Error checking permission:', err);
+        return res.status(500).send('Error checking permission');
+      }
+
+      if (results.length > 0) {
+        // Permission already granted
+        connection.release();
+        return res.status(400).send('This permission has already been granted to the user.');
+      }
+
+      // If not already granted, insert the new permission
+      const insertPermissionQuery = `
+        INSERT INTO permissions (user_id, permission_name, granted)
+        VALUES (?, ?, 1)  -- granted is set to 1
+      `;
+
+      connection.query(insertPermissionQuery, [userId, permissionName], (err, result) => {
+        connection.release();
+
+        if (err) {
+          console.error('Error granting permission:', err);
+          return res.status(500).send('Error granting permission');
+        }
+
+        // Redirect back to the user edit page
+        res.redirect(`/user/admin/users/${userId}/edit`);
+      });
+    });
+  });
+});
+
+
+// Route to handle deleting a permission from a user
+router.post('/admin/users/:userId/permissions/:permissionName/delete', (req, res) => {
+  const userId = req.params.userId;
+  const permissionName = req.params.permissionName;
+
+  // Check for admin privileges
+  if (!req.session.user || req.session.user.is_admin !== 1) {
+    return res.render('unauthorized');
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error connecting to the database:', err);
+      return res.status(500).send('Database connection error');
+    }
+
+    // Delete the permission from the permissions table
+    const deleteQuery = `
+      DELETE FROM permissions
+      WHERE user_id = ? AND permission_name = ?
+    `;
+
+    connection.query(deleteQuery, [userId, permissionName], (err, result) => {
+      connection.release();
+
+      if (err) {
+        console.error('Error deleting permission:', err);
+        return res.status(500).send('Error deleting permission');
+      }
+
+      // Redirect back to the user edit page
+      res.redirect(`/user/admin/users/${userId}/edit`);
+    });
+  });
+});
 
 
 router.post('/admin/users/:userId/edit', (req, res) => {
