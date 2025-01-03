@@ -156,6 +156,7 @@
               <option value="">Select a Permission</option>
               <option value="edit_mail">Edit mail</option>
               <option value="edit_user">Edit User</option>
+            
               
               <!-- Add more permissions as required -->
             </select>
@@ -179,32 +180,39 @@
     <div class="w-full p-6 md:p-12 flex flex-col justify-center space-y-6 mt-8">
       <% if (grantedPermissions.length > 0) { %> 
         <h3 class="text-2xl font-bold text-gray-800 text-center">Granted Permissions</h3>
-        <ul class="space-y-3">
-          <% grantedPermissions.forEach(permission => { %>
-            <% if (permission.user_id === user.user_id) { %> <!-- Check if permission is for the selected user -->
-              <li class="flex items-center justify-between px-4 py-2 bg-gray-100 rounded-lg border">
-                <span class="text-gray-700"><%= permission.permission_name %></span>
-                
-                <!-- Form to delete permission with user_id and permission_name -->
-                <form action="/user/admin/users/<%= user.user_id %>/permissions/<%= permission.permission_name %>/delete" method="POST">
-                  <input type="hidden" name="user_id" value="<%= user.user_id %>">
-                  <input type="hidden" name="permission_name" value="<%= permission.permission_name %>">
+        
+        <!-- Scrollable container -->
+        <div class="max-h-32 overflow-y-auto">
+          <ul class="space-y-3">
+            <% grantedPermissions.forEach(permission => { %>
+              <% if (permission.user_id === user.user_id) { %> <!-- Check if permission is for the selected user -->
+                <li class="flex items-center justify-between px-4 py-2 bg-gray-100 rounded-lg border">
+                  <span class="text-gray-700"><%= permission.permission_name %></span>
                   
-                  <button
-                    type="submit"
-                    class="text-red-500 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </form>
-              </li>
-            <% } %> <!-- End if condition for matching user_id -->
-          <% }) %>
-        </ul>
+                  <!-- Form to delete permission with user_id and permission_name -->
+                  <form action="/user/admin/users/<%= user.user_id %>/permissions/<%= permission.permission_name %>/delete" method="POST">
+                    <input type="hidden" name="user_id" value="<%= user.user_id %>">
+                    <input type="hidden" name="permission_name" value="<%= permission.permission_name %>">
+                    
+                    <button
+                      type="submit"
+                      class="text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </li>
+              <% } %> <!-- End if condition for matching user_id -->
+            <% }) %>
+          </ul>
+        </div>
       <% } else { %>
         <p class="text-gray-500 text-center">No permissions granted yet.</p>
       <% } %>
     </div>
+
+    
+    
     
   </div>
   

@@ -56,6 +56,9 @@
       <p class="text-lg mb-4"><strong>Email:</strong>
         <%= lead.email %>
       </p>
+      <p class="text-lg mb-4"><strong>Phone number:</strong>
+        <%= lead.phone_number %>
+      </p>
 
       <!-- Activities Section -->
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activities</h2>
@@ -93,23 +96,34 @@
       </form>
 
       <h3 class="text-xl font-semibold text-gray-800 mt-6">Activity List</h3>
-      <% if (activities.length> 0) { %>
-      <% activities.forEach(activity=> { %>
-      <div class="bg-gray-100 p-4 rounded-md shadow-md mb-4">
-        <p><strong>Type:</strong>
-          <%= activity.activity_type %>
-        </p>
-        <p><strong>Date:</strong>
-          <%= activity.activity_date %>
-        </p>
-        <p><strong>Details:</strong>
-          <%= activity.activity_details %>
-        </p>
+      <div class="mb-4">
+        <label for="activityFilter" class="block text-gray-700 font-medium mb-2">Filter by Type:</label>
+        <select id="activityFilter" class="p-2 border border-gray-300 rounded-md">
+          <option value="all">All</option>
+          <% 
+            const activityTypes = [...new Set(activities.map(activity => activity.activity_type))];
+          %>
+          <% activityTypes.forEach(type => { %>
+            <option value="<%= type %>"><%= type %></option>
+          <% }) %>
+        </select>
       </div>
-      <% }) %>
-      <% } else { %>
-      <p>No activities available.</p>
-      <% } %>
+      
+      <!-- Scrollable activity list -->
+      <div id="activityList" class="max-h-52 overflow-y-auto">
+        <% if (activities.length > 0) { %>
+          <% activities.slice().reverse().forEach(activity => { %>
+            <div class="activity-item bg-gray-100 p-4 rounded-md shadow-md mb-4" data-type="<%= activity.activity_type %>">
+              <p><strong>Type:</strong> <%= activity.activity_type %></p>
+              <p><strong>Date:</strong> <%= activity.activity_date %></p>
+              <p><strong>Details:</strong> <%= activity.activity_details %></p>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p>No activities available.</p>
+        <% } %>
+      </div>
+      
 
       <!-- Tasks and Email Sections -->
       <div class="flex flex-col md:flex-row gap-6 mt-6">
@@ -258,6 +272,21 @@
     menuToggle.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden");
     });
+
+    //filter function 
+    document.getElementById('activityFilter').addEventListener('change', function () {
+    const filterValue = this.value;
+    const activities = document.querySelectorAll('.activity-item');
+
+    activities.forEach(activity => {
+      const activityType = activity.getAttribute('data-type');
+      if (filterValue === 'all' || activityType === filterValue) {
+        activity.style.display = '';
+      } else {
+        activity.style.display = 'none';
+      }
+    });
+  });
 
 
   </script>

@@ -668,9 +668,9 @@ router.post('/admin/users/:userId/permissions/grant', (req, res) => {
       if (results.length > 0) {
         // Permission already granted
         connection.release();
-        return res.status(400).send('This permission has already been granted to the user.');
+        
       }
-
+      
       // If not already granted, insert the new permission
       const insertPermissionQuery = `
         INSERT INTO permissions (user_id, permission_name, granted)
