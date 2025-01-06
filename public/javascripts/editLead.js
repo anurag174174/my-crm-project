@@ -1,7 +1,8 @@
 const navMenu = document.getElementById('navMenu');
 const toggleNav = document.getElementById('toggleNav');
 const closeNav = document.getElementById('closeNav');
-
+const leadStatus = document.getElementById("leadStatus");
+const contactDetails = document.getElementById("contactDetails");
 // Toggle navigation on Menu button click
 toggleNav.addEventListener('click', () => {
     navMenu.classList.toggle('-translate-x-full');
@@ -16,5 +17,14 @@ closeNav.addEventListener('click', () => {
 document.addEventListener('click', (e) => {
     if (!navMenu.contains(e.target) && !toggleNav.contains(e.target)) {
         navMenu.classList.add('-translate-x-full');
+    }
+});
+
+leadStatus.addEventListener("change", function () {
+    const selectedText = this.options[this.selectedIndex].text;
+    if (selectedText === "won") {
+        contactDetails.classList.remove("hidden");
+    } else {
+        contactDetails.classList.add("hidden");
     }
 });

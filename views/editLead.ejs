@@ -46,6 +46,7 @@
                             <span class="ml-2 sm:ml-3">Dashboard</span>
                         </a>
                     </li>
+                   
                     <li>
                         <a href="/user/<%= lead.owner_user_id %>/"
                             class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
@@ -53,6 +54,7 @@
                             <span class="ml-2 sm:ml-3">User Details</span>
                         </a>
                     </li>
+                 
                     <li>
                         <a href="/user/<%= lead.owner_user_id %>/edit"
                             class="flex items-center px-2 sm:px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-md transition">
@@ -153,21 +155,49 @@
 
                     <!-- Status Dropdown -->
                     <div class="mb-4">
-                        <label for="leadStatus"
-                            class="block text-gray-700 font-medium mb-2">Status</label>
+                        <label for="leadStatus" class="block text-gray-700 font-medium mb-2">Status</label>
                         <select id="leadStatus" name="lead_status_id" required
                             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <option value>Select Status</option>
                             <% statuses.forEach(status => { %>
-
-                            <option value="<%= status.lead_status_id %>" <% if
-                                (lead.lead_status_id === status.lead_status_id)
-                                { %>selected<% } %>>
+                            <option value="<%= status.lead_status_id %>" <% if (lead.lead_status_id === status.lead_status_id) { %>selected<% } %>>
                                 <%= status.status_name %>
                             </option>
                             <% }); %>
                         </select>
                     </div>
+    
+                    <!-- Contact Details (Initially Hidden) -->
+                    <div id="contactDetails" class="hidden">
+    <div class="mb-4">
+        <label for="currentAddress" class="block text-gray-700 font-medium mb-2">Current Address</label>
+        <input type="text" id="currentAddress" name="current_address"
+            value="<%= contactDetails.current_address || '' %>"
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    </div>
+    <div class="mb-4">
+        <label for="permanentAddress" class="block text-gray-700 font-medium mb-2">Permanent Address</label>
+        <input type="text" id="permanentAddress" name="permanent_address"
+            value="<%= contactDetails.permanent_address || '' %>"
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    </div>
+    <div class="mb-4">
+        <label for="phoneNumber" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+        <input type="text" id="phoneNumber" name="phone_number"
+            value="<%= contactDetails.phone_number || '' %>"
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    </div>
+    <div class="mb-4">
+        <label for="emergencyNumber" class="block text-gray-700 font-medium mb-2">Emergency Number</label>
+        <input type="text" id="emergencyNumber" name="emergency_number"
+            value="<%= contactDetails.emergency_number || '' %>"
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    </div>
+</div>
+
+    
+                    <!-- Save Button -->
+                    
                     <div class="mb-4">
                         <label for="leadCategory" class="block text-gray-700 font-medium mb-2">Lead Category:</label>
                         <select id="leadCategory" name="lead_category_id"  class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
