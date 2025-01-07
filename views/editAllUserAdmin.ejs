@@ -95,24 +95,23 @@
         <!-- Permanent Address & Phone Number in the same row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
+            <label for="emergencyContact" class="block text-gray-700 text-sm">Emergency Phone Number</label>
+            <input type="text" id="emergencyContact" name="emergencyContact" value="<%= user.emergencyContact || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+          </div>
+
+          <div>
             <label for="permanentAddress" class="block text-gray-700 text-sm">Permanent Address</label>
             <input type="text" id="permanentAddress" name="permanentAddress" value="<%= user.permanentAddress || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
           </div>
-         
-          <div>
-            <label for="currentAddress" class="block text-gray-700 text-sm">Current Address</label>
-            <input type="text" id="currentAddress" name="currentAddress" value="<%= user.currentAddress || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
-          </div>
-         
         </div>
   
         <!-- Emergency Contact & Bank Details in the same row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
           <div>
-            <label for="emergencyContact" class="block text-gray-700 text-sm">Emergency Phone Number</label>
-            <input type="text" id="emergencyContact" name="emergencyContact" value="<%= user.emergencyContact || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
+            <label for="currentAddress" class="block text-gray-700 text-sm">Current Address</label>
+            <input type="text" id="currentAddress" name="currentAddress" value="<%= user.currentAddress || '' %>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg">
           </div>
-  
           <!-- Bank Details Section -->
           <div>
             <label for="bankName" class="block text-gray-700 text-sm">Bank Name</label>
@@ -171,6 +170,7 @@
         </button>
       </form>
     </div>
+    
     
     
   

@@ -46,6 +46,9 @@ function checkUserRole(req, res, next) {
 
 // GET /create route with role check
 router.get('/create', checkUserRole, (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const userId = req.session.user.id; // Get the logged-in user's ID
 
   pool.getConnection((err, connection) => {
@@ -174,9 +177,7 @@ router.post('/create', checkUserRole, (req, res) => {
   });
 });
 
-
 //viewing leads
-
 router.get('/', (req, res) => {
   if (!req.session.user) {
     return res.render('unauthorized'); // If user is not logged in, render unauthorized page
@@ -212,38 +213,49 @@ router.get('/', (req, res) => {
         return res.status(403).send('Forbidden: You do not have permission to view leads');
       }
 
-      // If user is valid and has the correct role (2) or is an admin, proceed to query the leads
+      // Get the filter value from query parameters (if provided), default to 'all'
+      const filterStatus = req.query.status || 'all';
+
+      // SQL query based on user role and filter
       let sql;
       if (isAdmin === 1) { 
         // If the user is admin, fetch all leads
-        sql = `
-          SELECT 
-            l.*, 
-            CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
-            CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
-          FROM 
-            leads l
-          LEFT JOIN 
-            users u ON l.lead_owner_id = u.user_id
-          LEFT JOIN 
-            users c ON l.created_by = c.user_id
-        `;
+        sql = `SELECT 
+                l.*, 
+                CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
+                CONCAT(c.first_name, " ", c.last_name) AS createdByFullName,
+                ls.status_name AS leadStatusName
+               FROM leads l
+               LEFT JOIN users u ON l.lead_owner_id = u.user_id
+               LEFT JOIN users c ON l.created_by = c.user_id
+               LEFT JOIN lead_statuses ls ON l.lead_status_id = ls.lead_status_id`;
+        
+        // Apply filter based on status
+        if (filterStatus === 'open') {
+          sql += ` WHERE ls.lead_status_categories = 'open'`;
+        } else if (filterStatus === 'close') {
+          sql += ` WHERE ls.lead_status_categories = 'close'`;
+        }
+
       } else { 
         // If user is not admin, fetch only leads assigned to them
-        sql = `
-          SELECT 
-            l.*, 
-            CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
-            CONCAT(c.first_name, " ", c.last_name) AS createdByFullName
-          FROM 
-            leads l
-          LEFT JOIN 
-            users u ON l.lead_owner_id = u.user_id
-          LEFT JOIN 
-            users c ON l.created_by = c.user_id
-          WHERE 
-            l.lead_owner_id = ?
-        `;
+        sql = `SELECT 
+                l.*, 
+                CONCAT(u.first_name, " ", u.last_name) AS ownerFullName,
+                CONCAT(c.first_name, " ", c.last_name) AS createdByFullName,
+                ls.status_name AS leadStatusName
+               FROM leads l
+               LEFT JOIN users u ON l.lead_owner_id = u.user_id
+               LEFT JOIN users c ON l.created_by = c.user_id
+               LEFT JOIN lead_statuses ls ON l.lead_status_id = ls.lead_status_id
+               WHERE l.lead_owner_id = ?`;
+        
+        // Apply filter based on status
+        if (filterStatus === 'open') {
+          sql += ` AND ls.lead_status_categories = 'open'`;
+        } else if (filterStatus === 'close') {
+          sql += ` AND ls.lead_status_categories = 'close'`;
+        }
       }
 
       connection.query(sql, isAdmin === 1 ? [] : [req.session.user.id], (err, leadsResults) => {
@@ -267,12 +279,17 @@ router.get('/', (req, res) => {
               leads: leadsResults, 
               users: usersResults, 
               currentUser: req.session.user,
-              currentUserId: req.session.user.id
+              currentUserId: req.session.user.id,
+              selectedFilter: filterStatus // Pass the filter status to EJS
             });
           } else {
-            console.error('No leads found.');
+            
             connection.release();
-            res.render('noLeadFoundPage',{currentUserId: req.session.user.id})
+            res.render('leadMainPage',{leads: leadsResults, 
+              users: usersResults, 
+              currentUser: req.session.user,
+              currentUserId: req.session.user.id,
+              selectedFilter: filterStatus});
           }
         });
       });
@@ -281,7 +298,7 @@ router.get('/', (req, res) => {
 });
 
 
-
+//assign lead to user
 router.post('/:leadId/assign', (req, res) => {
     const leadId = req.params.leadId;
     const selectedUserId = req.body.selectedUserId;
@@ -317,7 +334,11 @@ router.post('/:leadId/assign', (req, res) => {
 
 //lead udpate 
 router.get('/:leadId/edit', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const leadId = req.params.leadId;
+  
 
   console.log("Received leadId:", leadId);
   
@@ -540,6 +561,9 @@ router.post('/:leadId/edit', (req, res) => {
 
 // Route to render lead page (including tasks and activities)
 router.get('/:lead_id', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { lead_id } = req.params;
   const { template_id } = req.query; // Get the selected template_id from the query string
 
@@ -619,7 +643,6 @@ router.get('/:lead_id', (req, res) => {
     });
   });
 });
-
 
 // Route to add a new task
 router.post('/:lead_id/addTask', (req, res) => {
