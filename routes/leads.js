@@ -351,7 +351,7 @@ router.get('/:leadId/edit', (req, res) => {
 
       // Fetch the lead details, including its current category
       connection.query(
-          `SELECT l.*, s.status_name, u.user_id as owner_user_id, u.first_name as owner_first_name, 
+          `SELECT l.*, s.status_name, s.lead_status_categories,u.user_id as owner_user_id, u.first_name as owner_first_name, 
                   u.last_name as owner_last_name, u.email as owner_email, c.category_name 
            FROM leads l 
            LEFT JOIN lead_statuses s ON l.lead_status_id = s.lead_status_id 
@@ -408,7 +408,8 @@ router.get('/:leadId/edit', (req, res) => {
 
                               // Render the editLead page with all data
                               res.render('editLead', {
-                                  lead,sessionUser: req.session.user ,
+                                  lead,
+                                  sessionUser: req.session.user ,
                                   statuses: statusesResults,
                                   categories: categoriesResults,
                                   contactDetails, // Pass contact details to the template

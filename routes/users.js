@@ -243,7 +243,8 @@ router.get('/:userId/edit', (req, res) => {
     return res.render('unauthorized');
   }
 
-  pool.getConnection((err, connection) => {
+  pool.getConnection((err, connection) => 
+  {
     if (err) {
       console.error('Error getting connection from pool:', err);
       res.status(500).send('Error connecting to database');
