@@ -13,151 +13,198 @@
     </head>
     <body class="w-full h-screen " id="container">
         <!-- header here -->
-        <div class="w-full h-16 flex items-center justify-between shadow-md px-4 relative">
+        <div
+            class="w-full h-16 flex items-center justify-between shadow-md px-4 relative">
             <!-- Menu Icon -->
             <div id="menu-container" class="relative">
-                <button id="menuButton" class="text-blue-700 material-symbols-outlined text-2xl cursor-pointer">
+                <button id="menuButton"
+                    class="text-blue-700 material-symbols-outlined text-2xl cursor-pointer">
                     menu
                 </button>
                 <!-- Dropdown Menu -->
-                <ul id="menuDropdown" 
+                <ul id="menuDropdown"
                     class="absolute left-0 top-full mt-2 bg-white shadow-md rounded-lg w-48 hidden">
-                    <li><a href="/user/<%= user.user_id %>/dashboard" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
-                    <li><a href="/user/<%= user.user_id %>/" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Profile</a></li>
+                    <li><a href="/user/<%= user.user_id %>/dashboard"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
+                    <li><a href="/user/<%= user.user_id %>/"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                            Profile</a></li>
                     <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
-                    <li><a href="/leads/create" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add Leads</a></li>
+                    <li><a href="/leads/create"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add
+                            Leads</a></li>
                     <% } %>
                     <% if ( user.is_admin===1 ) { %>
-                    <li><a href="/user/admin/users" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Users</a></li>
+                    <li><a href="/user/admin/users"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                            Users</a></li>
                     <% } %>
                     <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
-                    <li><a href="/leads" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View Leads</a></li>
+                    <li><a href="/leads"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                            Leads</a></li>
                     <% } %>
-                    <li><a href="/logout" class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
-                   
+
+                    <li><a href="/logout"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
+
                 </ul>
             </div>
-        
+
             <!-- Page Title -->
             <h1 class="text-white text-lg font-bold">Responsive Header</h1>
-        
+
             <!-- Profile Icon -->
             <div id="profile-container" class="relative">
-                <img id="profileButton" 
-                     class="w-10 h-10 rounded-full cursor-pointer"
-                     src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
-                     alt="Profile">
+                <img id="profileButton"
+                    class="w-10 h-10 rounded-full cursor-pointer"
+                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                    alt="Profile">
                 <!-- Side Toolbar -->
-                <div id="profileSidebar" 
-                     class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
+                <div id="profileSidebar"
+                    class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
                     <div class="p-4">
                         <h2 class="text-lg font-bold mb-4">User Details</h2>
-                        <p class="mb-2">Name: <%=user.first_name%> <%=user.last_name%></p>
+                        <p class="mb-2">Name: <%=user.first_name%>
+                            <%=user.last_name%></p>
                         <p class="mb-2">Email: <%=user.email%></p>
                         <p class="mb-4">Role: <%=user.roleName%></p>
                         <div>
-                            <a href="/user/<%= user.user_id %>/" class=" my-auto px-3 py-2 bg-blue-500 rounded-md text-white font-semibold">View Profile</a>
-                            <a href="/users/login" class=" my-auto px-4 py-2 bg-blue-500 rounded-md text-white font-semibold">Logout</a>
+                            <a href="/user/<%= user.user_id %>/"
+                                class=" my-auto px-3 py-2 bg-blue-500 rounded-md text-white font-semibold">View
+                                Profile</a>
+                            <a href="/users/login"
+                                class=" my-auto px-4 py-2 bg-blue-500 rounded-md text-white font-semibold">Logout</a>
                         </div>
-                       
+
                     </div>
                 </div>
             </div>
         </div>
-       
-<div class="w-full mt-16 flex flex-col md:flex-row md:items-center px-4 md:px-16">
-    <!-- Profile Image -->
-    <div class="w-full md:w-[10%] flex justify-center md:justify-start mb-4 md:mb-0">
-        <img class="w-20 h-20 md:w-16 md:h-16 rounded-full"
-             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-             alt="Profile">
-    </div>
-    <!-- Welcome Text -->
-    <div class="w-full md:w-[70%] text-center md:text-left">
-        <h1 class="text-gray-500 text-xl md:text-3xl capitalize tracking-wide font-semibold">
-            Hello, <%= user.first_name %>
-        </h1>
-        <h1 class="text-blue-600 text-lg md:text-2xl capitalize font-semibold">
-            Welcome back to <%= user.first_name %> <%= user.last_name %>
-        </h1>
-    </div>
-</div>
 
-<!-- Getting Start Div -->
-<div class="w-full mt-6 px-4 md:px-16">
-    <h1 class="text-xl md:text-3xl tracking-tight text-gray-700 font-semibold text-center md:text-left">
-        Getting Started
-    </h1>
-</div>
-<div class="w-full h-auto flex flex-col items-start justify-start">
-    <!-- Card Container -->
-
-    <div class="w-[90%] mx-auto p-4 flex flex-wrap gap-6">
-        <!-- Last Lead Card -->
-        <% if (user.user_role_id === 2 || user.is_admin===1 ) { %> <!-- Only show for admin users -->
-            <div class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
-              <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
-              
-              <% if (lastLead) { %>
-                <div class="mx-3 mt-3 w-full h-[20%]">
-                  <h6 class="text-sm text-gray-500">Contact name</h6>
-                  <h6><%= lastLead.leadFirstName %> <%= lastLead.leadLastName %></h6>
-                </div>
-                <div class="mx-3 mt-3 w-full h-[20%]">
-                  <h6 class="text-sm text-gray-500">Organisation name</h6>
-                  <h6><%= lastLead.leadCompanyName %></h6>
-                </div>
-                <div class="mx-3 mt-3 w-full h-[20%]">
-                  <h6 class="text-sm text-gray-500">Email</h6>
-                  <h6><%= lastLead.leadEmail %></h6>
-                </div>
-                <a href="/leads"
-                  class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                  View Leads</a>
-              <% } else { %>
-                <div class="flex flex-col my-auto items-center justify-between h-full">
-                  <h6 class="text-center text-gray-500">You haven't created any leads yet.</h6>
-                  <a href="/leads/create"
-                    class="cursor-pointer mb-3 w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                    Create New Lead</a>
-                </div>
-              <% } %>
-            </div>
-          <% } %> <!-- End of userRoleId check -->
-          
-          
-        
-
-        <!-- Profile Card -->
         <div
-            class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
-            <h1 class="text-center mt-2 text-gray-600">Profile</h1>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Name</h6>
-                <h6><%=user.first_name%> <%=user.last_name%></h6>
+            class="w-full mt-16 flex flex-col md:flex-row md:items-center px-4 md:px-16">
+            <!-- Profile Image -->
+            <div
+                class="w-full md:w-[10%] flex justify-center md:justify-start mb-4 md:mb-0">
+                <img class="w-20 h-20 md:w-16 md:h-16 rounded-full"
+                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                    alt="Profile">
             </div>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Role</h6>
-                <h6><%=user.roleName%></h6>
+            <!-- Welcome Text -->
+            <div class="w-full md:w-[70%] text-center md:text-left">
+                <h1
+                    class="text-gray-500 text-xl md:text-3xl capitalize tracking-wide font-semibold">
+                    Hello, <%= user.first_name %>
+                </h1>
+                <h1
+                    class="text-blue-600 text-lg md:text-2xl capitalize font-semibold">
+                    Welcome back to <%= user.first_name %> <%= user.last_name %>
+                </h1>
             </div>
-            <div class="mx-3 mt-3 w-full h-[20%]">
-                <h6 class="text-sm text-gray-500">Email</h6>
-                <h6><%=user.email%></h6>
-            </div>
-            <a href="/users/<%= user.user_id %>"
-                class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
-                View Profile</a>
         </div>
-    </div>
-</div>
 
+        <!-- Getting Start Div -->
+        <div class="w-full mt-6 px-4 md:px-16">
+            <h1
+                class="text-xl md:text-3xl tracking-tight text-gray-700 font-semibold text-center md:text-left">
+                Getting Started
+            </h1>
+        </div>
+        <div class="w-full h-auto flex flex-col items-start justify-start">
 
+            <!-- Card Container -->
+            <div class="w-[90%] mx-auto p-4 flex flex-wrap gap-6">
+                <!-- Last Lead Card -->
+                <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
+                <!-- Only show for admin users -->
+                <div
+                    class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+                    <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
+                        
+                    <% if (lastLead) { %>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Contact name</h6>
+                        <h6><%= lastLead.leadFirstName %> <%=
+                            lastLead.leadLastName %></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Organisation name</h6>
+                        <h6><%= lastLead.leadCompanyName %></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Email</h6>
+                        <h6><%= lastLead.leadEmail %></h6>
+                    </div>
+                    <a href="/leads"
+                        class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                        View Leads</a>
+                    <% } else { %>
+                    <div
+                        class="flex flex-col my-auto items-center justify-between h-full">
+                        <h6 class="text-center text-gray-500">You haven't
+                            created any leads yet.</h6>
+                        <a href="/leads/create"
+                            class="cursor-pointer mb-3 w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                            Create New Lead</a>
+                    </div>
+                    <% } %>
+                </div>
+                <% } %> 
+                <!-- End of userRoleId check -->
 
+                
+                <!-- view last won leads -->
+                <% if (user.user_role_id === 2 || user.is_admin === 1) { %>
+                <% if (wonLeads) { %>
+                <!-- Show this section only if the user has a 'won' lead -->
+                <div
+                    class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+                    <h1 class="text-center mt-2 text-gray-600">Your Last Won
+                        Lead</h1>
 
-        
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Contact name</h6>
+                        <h6><%= wonLeads.leadFirstName %> <%=
+                            wonLeads.leadLastName %></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Organisation name</h6>
+                        <h6><%= wonLeads.leadCompanyName %></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Email</h6>
+                        <h6><%= wonLeads.leadEmail %></h6>
+                    </div>
+                    <a href="/leads/opportunities"
+                        class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                        View Opportunities</a>
+                </div>
+                <% } %>
+                <% } %>
+                <!-- Profile Card -->
+                <div
+                    class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
+                    <h1 class="text-center mt-2 text-gray-600">Profile</h1>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Name</h6>
+                        <h6><%=user.first_name%> <%=user.last_name%></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Role</h6>
+                        <h6><%=user.roleName%></h6>
+                    </div>
+                    <div class="mx-3 mt-3 w-full h-[20%]">
+                        <h6 class="text-sm text-gray-500">Email</h6>
+                        <h6><%=user.email%></h6>
+                    </div>
+                    <a href="/users/<%= user.user_id %>"
+                        class="cursor-pointer w-[90%] py-1 border-[1px] border-blue-500 rounded-md mx-auto text-blue-600 font-semibold text-center hover:bg-blue-500 hover:text-white">
+                        View Profile</a>
+                </div>
+            </div>
 
-       
+        </div>
         <script src="/javascripts/dashboard.js"></script>
-
     </body>
 </html>

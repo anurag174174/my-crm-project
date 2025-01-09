@@ -1,116 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leads</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/stylesheets/tailwind.css">
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/stylesheets/tailwind.css">
+  </head>
 
-<body class="p-6">
-  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
-    <div class="container mx-auto flex justify-between items-center p-5">
-      <div>
-        <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+  <body class="p-6">
+    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+      <div class="container mx-auto flex justify-between items-center p-5">
+        <div>
+          <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+        </div>
+        <nav class="hidden md:flex space-x-6">
+          <a href="/user/<%= currentUserId %>/dashboard"
+            class="text-gray-800 hover:text-blue-500">Dashboard</a>
+          <a href="/users/login"
+            class="text-gray-800 hover:text-blue-500">Logout</a>
+        </nav>
+        <button id="menu-toggle"
+          class="md:hidden text-gray-800 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
       </div>
-      <nav class="hidden md:flex space-x-6">
-        <a href="/user/<%= currentUserId %>/dashboard" class="text-gray-800 hover:text-blue-500">Dashboard</a>
-        <a href="/users/login" class="text-gray-800 hover:text-blue-500">Logout</a>
-      </nav>
-      <button id="menu-toggle" class="md:hidden text-gray-800 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-    </div>
-    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
-      <a href="/user/<%= currentUserId %>/dashboard" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
-      <a href="/users/login" class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
-    </div>
-  </header>
-
-  <h1 class="text-2xl font-bold text-center mb-6 text-gray-800 mt-20 capitalize">Leads: <%= currentUser.firstName %></h1>
-
-  <!-- Filter Dropdown -->
-  <form action="/leads" method="GET">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <label for="leadFilter" class="font-semibold text-gray-700">Filter by Status:</label>
-        <select name="status" id="leadFilter" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option  value="all" <%= selectedFilter === 'all' ? 'selected' : '' %>>All Leads</option>
-          <option value="open" <%= selectedFilter === 'open' ? 'selected' : '' %>>Open Leads</option>
-          <option value="close" <%= selectedFilter === 'close' ? 'selected' : '' %>>Close Leads</option>
-        </select>
+      <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+        <a href="/user/<%= currentUserId %>/dashboard"
+          class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+        <a href="/users/login"
+          class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
       </div>
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Apply Filter</button>
-    </div>
-  </form>
+    </header>
 
-  <!-- Table Container -->
-  <div id="leadsTableContainer" class="overflow-x-auto bg-white shadow-md rounded-lg">
-    <table class="w-full border-collapse border border-gray-200">
-      <thead class="bg-blue-500 text-white">
-        <tr>
-          <th class="py-2 px-4 text-center">Contact Name</th>
-          <th class="py-2 px-4 text-center">Email</th>
-          <th class="py-2 px-4 text-center">Phone</th>
-          <th class="py-2 px-4 text-center">Company</th>
-          <th class="py-2 px-4 text-center">Created by</th>
-          <th class="py-2 px-4 text-center">Assign To</th>
-          <th class="py-2 px-4 text-center">Score</th>
-          <th class="py-2 px-4 text-center">Status</th>
-          <th class="py-2 px-4 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-800">
-        <% if (leads.length > 0) { %>
-          <% leads.forEach(lead => { %>
-            <tr class="border-b hover:bg-gray-50">
-              <td class="py-3 px-6">
-                <a href="/leads/<%= lead.lead_id %>" class="text-blue-500 hover:underline text-center">
-                  <%= lead.first_name %> <%= lead.last_name %>
-                </a>
-              </td>
-              <td class="py-3 px-6 text-center"><%= lead.email %></td>
-              <td class="py-3 px-6 text-center"><%= lead.phone_number %></td>
-              <td class="py-3 px-6 text-center"><%= lead.company_name %></td>
-              <td class="py-3 px-6 text-center">
-                <a href="/users/creator/<%= lead.created_by %>" class="text-blue-500 hover:underline">
-                  <%= lead.createdByFullName %>
-                </a>
-              </td>
-              <td class="py-3 px-6 flex items-center justify-center">
-                <select name="lead_owner_id" id="assignToDropdown" data-lead-id="<%= lead.lead_id %>" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 <% if (currentUser.is_admin !== 1) { %>bg-gray-100 cursor-not-allowed<% } %>" <% if (currentUser.is_admin !== 1) { %>disabled<% } %>>
-                  <option value="">Select User</option>
-                  <% users.forEach(user => { %>
-                    <option value="<%= user.user_id %>" <% if (lead.lead_owner_id === user.user_id) { %>selected<% } %>>
-                      <%= user.full_name %>
-                    </option>
-                  <% }); %>
-                </select>
-                <% if (lead.lead_owner_id && currentUser.is_admin === 1) { %>
-                  <a href="/users/assign/<%= lead.lead_owner_id %>" class="text-blue-500 hover:underline ml-2">View</a>
-                <% } %>
-              </td>
-              <td class="py-3 px-6 text-center"><%= lead.lead_score %></td>
-              <td class="py-3 px-6 text-center"><%= lead.leadStatusName %></td>
-              <td class="py-3 px-6 text-center">
-                <a href="/leads/<%= lead.lead_id %>/edit" class="text-blue-500 hover:underline">Update</a>
-              </td>
-            </tr>
-          <% }); %>
-        <% } else { %>
+    <h1
+      class="text-2xl font-bold text-center mb-6 text-gray-800 mt-20 capitalize">Leads:
+      <%= currentUser.firstName %></h1>
+
+    <!-- Filter Dropdown -->
+    <form action="/leads" method="GET">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <label for="leadFilter" class="font-semibold text-gray-700">Filter by
+            Status:</label>
+          <select name="status" id="leadFilter"
+            class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="all" <%=selectedFilter === 'all' ? 'selected' : ''
+              %>>All Leads</option>
+            <option value="open" <%=selectedFilter === 'open' ? 'selected' : ''
+              %>>Open Leads</option>
+            <option value="close" <%=selectedFilter === 'close' ? 'selected' :
+              '' %>>Close Leads</option>
+          </select>
+        </div>
+        <button type="submit"
+          class="bg-blue-500 text-white px-4 py-2 rounded">Apply Filter</button>
+      </div>
+    </form>
+
+    <!-- Table Container -->
+    <div id="leadsTableContainer"
+      class="overflow-x-auto bg-white shadow-md rounded-lg">
+      <table class="w-full border-collapse border border-gray-200">
+        <thead class="bg-blue-500 text-white">
           <tr>
-            <td colspan="9" class="py-3 px-6 text-center text-gray-500">No leads found.</td>
+            <th class="py-2 px-4 text-center">Contact Name</th>
+            <th class="py-2 px-4 text-center">Email</th>
+            <th class="py-2 px-4 text-center">Phone</th>
+            <th class="py-2 px-4 text-center">Company</th>
+            <th class="py-2 px-4 text-center">Created by</th>
+            <th class="py-2 px-4 text-center">Assign To</th>
+            <th class="py-2 px-4 text-center">Score</th>
+            <th class="py-2 px-4 text-center">Status</th>
+            <th class="py-2 px-4 text-center">Actions</th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody class="text-gray-800">
+          <% if (leads.length > 0) { %>
+          <% leads.forEach(lead => { %>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-3 px-6">
+              <a href="/leads/<%= lead.lead_id %>"
+                class="text-blue-500 hover:underline text-center">
+                <%= lead.first_name %> <%= lead.last_name %>
+              </a>
+            </td>
+            <td class="py-3 px-6 text-center"><%= lead.email %></td>
+            <td class="py-3 px-6 text-center"><%= lead.phone_number %></td>
+            <td class="py-3 px-6 text-center"><%= lead.company_name %></td>
+            <td class="py-3 px-6 text-center">
 
-  <script>
+              <% if (lead.created_by) { %>
+              <a href="/users/creator/<%= lead.created_by %>"
+                class="text-blue-500 hover:underline">
+                <%= lead.createdByFullName %>
+              </a>
+              <% } else { %>
+              <span class="text-gray-500">Direct Lead</span>
+              <% } %>
+
+            </td>
+            <td class="py-3 px-6 flex items-center justify-center">
+              <select name="lead_owner_id" id="assignToDropdown"
+                data-lead-id="<%= lead.lead_id %>"
+                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 <% if (currentUser.is_admin !== 1) { %>bg-gray-100 cursor-not-allowed<% } %>"
+                <% if (currentUser.is_admin !== 1) { %>disabled<% } %>>
+                <option value>Select User</option>
+                <% users.forEach(user => { %>
+                <option value="<%= user.user_id %>" <% if (lead.lead_owner_id
+                  === user.user_id) { %>selected<% } %>>
+                  <%= user.full_name %>
+                </option>
+                <% }); %>
+              </select>
+              <% if (lead.lead_owner_id && currentUser.is_admin === 1) { %>
+              <a href="/users/assign/<%= lead.lead_owner_id %>"
+                class="text-blue-500 hover:underline ml-2">View</a>
+              <% } %>
+            </td>
+            <td class="py-3 px-6 text-center"><%= lead.lead_score %></td>
+            <td class="py-3 px-6 text-center"><%= lead.leadStatusName %></td>
+            <td class="py-3 px-6 text-center">
+              <a href="/leads/<%= lead.lead_id %>/edit"
+                class="text-blue-500 hover:underline">Update</a>
+            </td>
+          </tr>
+          <% }); %>
+          <% } else { %>
+          <tr>
+            <td colspan="9" class="py-3 px-6 text-center text-gray-500">No leads
+              found.</td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
 
     const menuToggle = document.getElementById("menu-toggle");
     const mobileMenu = document.getElementById("mobile-menu");
@@ -150,6 +181,6 @@
       });
     });
   </script>
-</body>
+  </body>
 
 </html>

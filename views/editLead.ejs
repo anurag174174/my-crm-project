@@ -98,15 +98,15 @@
                         <div class="mb-4">
                             <label for="firstName" class="block text-gray-700 font-medium mb-2">First name</label>
                             <input type="text" id="firstName" name="firstName" value="<%= lead.first_name %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
-                                class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
+                                class="w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none hover:cursor-no">
                         </div>
                     
                         <!-- Last Name -->
                         <div class="mb-4">
                             <label for="lastName" class="block text-gray-700 font-medium mb-2">Last name</label>
                             <input type="text" id="lastName" name="lastName" value="<%= lead.last_name %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                 class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     
@@ -114,7 +114,7 @@
                         <div class="mb-4">
                             <label for="email" class="block text-gray-700 font-medium mb-2">Email address</label>
                             <input type="email" id="email" name="email" value="<%= lead.email %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                 class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     
@@ -122,7 +122,7 @@
                         <div class="mb-4">
                             <label for="company" class="block text-gray-700 font-medium mb-2">Company Name</label>
                             <input type="text" id="company" name="company" value="<%= lead.company_name %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                 class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     
@@ -130,7 +130,7 @@
                         <div class="mb-4">
                             <label for="leadScore" class="block text-gray-700 font-medium mb-2">Lead Score</label>
                             <input type="text" id="leadScore" name="leadScore" value="<%= lead.lead_score %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                 class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     
@@ -138,7 +138,7 @@
                         <div class="mb-4">
                             <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
                             <input type="text" id="phone" name="phone" value="<%= lead.phone_number %>"
-                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                 class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     
@@ -163,7 +163,7 @@
                                 <label for="currentAddress" class="block text-gray-700 font-medium mb-2">Current Address</label>
                                 <input type="text" id="currentAddress" name="current_address"
                                     value="<%= contactDetails.current_address || '' %>"
-                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                     
@@ -171,7 +171,7 @@
                                 <label for="permanentAddress" class="block text-gray-700 font-medium mb-2">Permanent Address</label>
                                 <input type="text" id="permanentAddress" name="permanent_address"
                                     value="<%= contactDetails.permanent_address || '' %>"
-                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                     
@@ -179,7 +179,7 @@
                                 <label for="phoneNumber" class="block text-gray-700 font-medium mb-2">Phone Number</label>
                                 <input type="text" id="phoneNumber" name="phone_number"
                                     value="<%= contactDetails.phone_number || '' %>"
-                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                     
@@ -187,7 +187,7 @@
                                 <label for="emergencyNumber" class="block text-gray-700 font-medium mb-2">Emergency Number</label>
                                 <input type="text" id="emergencyNumber" name="emergency_number"
                                     value="<%= contactDetails.emergency_number || '' %>"
-                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input" <% } %>
+                                    <% if (lead.lead_status_categories === 'close') { %> readonly class="readonly-input cursor-not-allowed w-full px-4 py-2  border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" <% } %>
                                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                         </div>

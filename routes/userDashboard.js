@@ -45,10 +45,9 @@ router.get('/:userId/dashboard', (req, res) => {
 
         const user = userResults[0];
 
-        // Fetch the last created lead for all users with aliases
+        // Fetch the last created lead for the user
         connection.query(
-          `
-            SELECT 
+          `SELECT 
               l.lead_id as leadId, 
               l.first_name as leadFirstName, 
               l.last_name as leadLastName, 
@@ -72,17 +71,49 @@ router.get('/:userId/dashboard', (req, res) => {
               return;
             }
 
-            connection.release();
-            // Pass both userRoleId and lastLead to the template
-            res.render('dashboard', { user: user, lastLead: lastLeadResults[0] || null});
+            // Fetch all leads with 'won' status for the user
+            connection.query(
+              `SELECT 
+                  l.lead_id as leadId, 
+                  l.first_name as leadFirstName, 
+                  l.last_name as leadLastName, 
+                  l.email as leadEmail, 
+                  l.phone_number as leadPhoneNumber, 
+                  l.company_name as leadCompanyName, 
+                  l.lead_score as leadScore, 
+                  l.created_at as leadCreatedAt 
+                FROM 
+                  leads l
+                JOIN 
+                  lead_statuses ls ON l.lead_status_id = ls.lead_status_id
+                WHERE 
+                  ls.status_name = 'won' AND 
+                  l.lead_owner_id = ?
+                ORDER BY l.updated_at DESC  LIMIT 1 `,
+              [userId],
+              (err, wonLeadsResults) => {
+                if (err) {
+                  console.error('Error fetching won leads:', err);
+                  connection.release();
+                  res.status(500).send('Error fetching won leads');
+                  return;
+                }
+
+                connection.release();
+                
+                // Pass user, lastLead, and wonLeads to the template
+                res.render('dashboard', { 
+                  user: user, 
+                  lastLead: lastLeadResults[0] || null, 
+                  wonLeads: wonLeadsResults[0] 
+                });
+              }
+            );
           }
         );
       }
     );
   });
 });
-
-
-
 
 module.exports = router;

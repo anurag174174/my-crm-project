@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 
 const pool = require('../database/connection');
 
+
+
+
 router.get('/register', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
@@ -856,5 +859,7 @@ router.post('/admin/users/:userId/permissions/:permissionName/delete', (req, res
     });
   });
 });
+
+
 
 module.exports = router;

@@ -44,6 +44,9 @@ function checkUserRole(req, res, next) {
   });
 }
 
+
+
+
 // GET /create route with role check
 router.get('/create', checkUserRole, (req, res) => {
   if (!req.session.user) {
@@ -109,19 +112,19 @@ router.get('/create', checkUserRole, (req, res) => {
 
 // POST /create route with role check
 router.post('/create', checkUserRole, (req, res) => {
-  const { 
-    firstName, 
-    lastName, 
-    email, 
-    phoneNumber, 
-    companyName, 
-    leadScore, 
-    lead_status_id, 
-    lead_source_id, 
-    lead_category_id 
-  } = req.body; 
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    companyName,
+    leadScore,
+    lead_status_id,
+    lead_source_id,
+    lead_category_id
+  } = req.body;
 
-  const userId = req.session.user.id; 
+  const userId = req.session.user.id;
 
   const sql = `
     INSERT INTO leads (
@@ -142,17 +145,17 @@ router.post('/create', checkUserRole, (req, res) => {
   `;
 
   let values = [
-    firstName, 
-    lastName || null, 
-    email, 
-    phoneNumber || null, 
-    companyName || null, 
-    leadScore || 0, 
-    userId, 
-    userId, 
+    firstName,
+    lastName || null,
+    email,
+    phoneNumber || null,
+    companyName || null,
+    leadScore || 0,
+    userId,
+    userId,
     lead_status_id,
     lead_source_id,
-    lead_category_id 
+    lead_category_id
   ];
 
   pool.getConnection((err, connection) => {
@@ -172,7 +175,7 @@ router.post('/create', checkUserRole, (req, res) => {
       }
 
       console.log('Data inserted successfully');
-      res.redirect('/leads'); 
+      res.redirect('/leads');
     });
   });
 });
@@ -218,7 +221,7 @@ router.get('/', (req, res) => {
 
       // SQL query based on user role and filter
       let sql;
-      if (isAdmin === 1) { 
+      if (isAdmin === 1) {
         // If the user is admin, fetch all leads
         sql = `SELECT 
                 l.*, 
@@ -229,7 +232,7 @@ router.get('/', (req, res) => {
                LEFT JOIN users u ON l.lead_owner_id = u.user_id
                LEFT JOIN users c ON l.created_by = c.user_id
                LEFT JOIN lead_statuses ls ON l.lead_status_id = ls.lead_status_id`;
-        
+
         // Apply filter based on status
         if (filterStatus === 'open') {
           sql += ` WHERE ls.lead_status_categories = 'open'`;
@@ -237,7 +240,7 @@ router.get('/', (req, res) => {
           sql += ` WHERE ls.lead_status_categories = 'close'`;
         }
 
-      } else { 
+      } else {
         // If user is not admin, fetch only leads assigned to them
         sql = `SELECT 
                 l.*, 
@@ -249,7 +252,7 @@ router.get('/', (req, res) => {
                LEFT JOIN users c ON l.created_by = c.user_id
                LEFT JOIN lead_statuses ls ON l.lead_status_id = ls.lead_status_id
                WHERE l.lead_owner_id = ?`;
-        
+
         // Apply filter based on status
         if (filterStatus === 'open') {
           sql += ` AND ls.lead_status_categories = 'open'`;
@@ -275,21 +278,23 @@ router.get('/', (req, res) => {
           }
 
           if (Array.isArray(leadsResults) && leadsResults.length > 0) {
-            res.render('leadMainPage', { 
-              leads: leadsResults, 
-              users: usersResults, 
+            res.render('leadMainPage', {
+              leads: leadsResults,
+              users: usersResults,
               currentUser: req.session.user,
               currentUserId: req.session.user.id,
               selectedFilter: filterStatus // Pass the filter status to EJS
             });
           } else {
-            
+
             connection.release();
-            res.render('leadMainPage',{leads: leadsResults, 
-              users: usersResults, 
+            res.render('leadMainPage', {
+              leads: leadsResults,
+              users: usersResults,
               currentUser: req.session.user,
               currentUserId: req.session.user.id,
-              selectedFilter: filterStatus});
+              selectedFilter: filterStatus
+            });
           }
         });
       });
@@ -300,36 +305,36 @@ router.get('/', (req, res) => {
 
 //assign lead to user
 router.post('/:leadId/assign', (req, res) => {
-    const leadId = req.params.leadId;
-    const selectedUserId = req.body.selectedUserId;
+  const leadId = req.params.leadId;
+  const selectedUserId = req.body.selectedUserId;
 
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Error getting connection from pool:', err);
-            res.status(500).send('Error connecting to database: ' + err.message);
-            return;
-        }
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database: ' + err.message);
+      return;
+    }
 
-        // Update the lead owner_id directly using the provided selectedUserId
-        const updateQuery = 'UPDATE leads SET lead_owner_id = ? WHERE lead_id = ?';
-        connection.query(updateQuery, [selectedUserId, leadId], (err, results) => {
-            connection.release();
+    // Update the lead owner_id directly using the provided selectedUserId
+    const updateQuery = 'UPDATE leads SET lead_owner_id = ? WHERE lead_id = ?';
+    connection.query(updateQuery, [selectedUserId, leadId], (err, results) => {
+      connection.release();
 
-            if (err) {
-                console.error('Error updating lead owner:', err);
-                res.status(500).send('Error updating lead owner: ' + err.message);
-                return;
-            }
+      if (err) {
+        console.error('Error updating lead owner:', err);
+        res.status(500).send('Error updating lead owner: ' + err.message);
+        return;
+      }
 
-            if (results.affectedRows === 0) {
-                console.error('No rows were affected by the UPDATE query.');
-                res.status(404).send('Lead not found or update failed.');
-                return;
-            }
+      if (results.affectedRows === 0) {
+        console.error('No rows were affected by the UPDATE query.');
+        res.status(404).send('Lead not found or update failed.');
+        return;
+      }
 
-            res.json({ message: 'Lead owner updated successfully' });
-        });
+      res.json({ message: 'Lead owner updated successfully' });
     });
+  });
 });
 
 //lead udpate 
@@ -338,88 +343,88 @@ router.get('/:leadId/edit', (req, res) => {
     return res.render('unauthorized'); // If user is not logged in, render unauthorized page
   }
   const leadId = req.params.leadId;
-  
+
 
   console.log("Received leadId:", leadId);
-  
-  pool.getConnection((err, connection) => {
-      if (err) {
-          console.error('Error getting connection from pool:', err);
-          res.status(500).send('Error connecting to database');
-          return;
-      }
 
-      // Fetch the lead details, including its current category
-      connection.query(
-          `SELECT l.*, s.status_name, s.lead_status_categories,u.user_id as owner_user_id, u.first_name as owner_first_name, 
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database');
+      return;
+    }
+
+    // Fetch the lead details, including its current category
+    connection.query(
+      `SELECT l.*, s.status_name, s.lead_status_categories,u.user_id as owner_user_id, u.first_name as owner_first_name, 
                   u.last_name as owner_last_name, u.email as owner_email, c.category_name 
            FROM leads l 
            LEFT JOIN lead_statuses s ON l.lead_status_id = s.lead_status_id 
            LEFT JOIN users u ON l.lead_owner_id = u.user_id 
            LEFT JOIN lead_categories c ON l.lead_category_id = c.lead_category_id 
            WHERE l.lead_id = ?;`,
-          [leadId],
-          (error, leadResults) => {
-              if (error) {
-                  console.error('Error fetching lead:', error);
-                  connection.release();
-                  res.status(500).send('Error fetching lead data');
-                  return;
-              }
+      [leadId],
+      (error, leadResults) => {
+        if (error) {
+          console.error('Error fetching lead:', error);
+          connection.release();
+          res.status(500).send('Error fetching lead data');
+          return;
+        }
 
-              if (leadResults.length === 0) {
-                  connection.release();
-                  return res.status(404).send('Lead not found');
-              }
+        if (leadResults.length === 0) {
+          connection.release();
+          return res.status(404).send('Lead not found');
+        }
 
-              const lead = leadResults[0];
+        const lead = leadResults[0];
 
-              // Fetch all lead statuses
-              connection.query('SELECT * FROM lead_statuses', (err, statusesResults) => {
-                  if (err) {
-                      console.error('Error fetching lead statuses:', err);
-                      connection.release();
-                      res.status(500).send('Error fetching lead statuses');
-                      return;
-                  }
-
-                  // Fetch all lead categories
-                  connection.query('SELECT * FROM lead_categories', (err, categoriesResults) => {
-                      if (err) {
-                          console.error('Error fetching lead categories:', err);
-                          connection.release();
-                          res.status(500).send('Error fetching lead categories');
-                          return;
-                      }
-
-                      // Fetch contact details for the lead
-                      connection.query(
-                          `SELECT * FROM contact_details WHERE lead_id = ?`,
-                          [leadId],
-                          (err, contactDetailsResults) => {
-                              connection.release(); // Release the connection here
-                              if (err) {
-                                  console.error('Error fetching contact details:', err);
-                                  res.status(500).send('Error fetching contact details');
-                                  return;
-                              }
-
-                              const contactDetails = contactDetailsResults[0] || {}; // Ensure contactDetails is an object
-
-                              // Render the editLead page with all data
-                              res.render('editLead', {
-                                  lead,
-                                  sessionUser: req.session.user ,
-                                  statuses: statusesResults,
-                                  categories: categoriesResults,
-                                  contactDetails, // Pass contact details to the template
-                              });
-                          }
-                      );
-                  });
-              });
+        // Fetch all lead statuses
+        connection.query('SELECT * FROM lead_statuses', (err, statusesResults) => {
+          if (err) {
+            console.error('Error fetching lead statuses:', err);
+            connection.release();
+            res.status(500).send('Error fetching lead statuses');
+            return;
           }
-      );
+
+          // Fetch all lead categories
+          connection.query('SELECT * FROM lead_categories', (err, categoriesResults) => {
+            if (err) {
+              console.error('Error fetching lead categories:', err);
+              connection.release();
+              res.status(500).send('Error fetching lead categories');
+              return;
+            }
+
+            // Fetch contact details for the lead
+            connection.query(
+              `SELECT * FROM contact_details WHERE lead_id = ?`,
+              [leadId],
+              (err, contactDetailsResults) => {
+                connection.release(); // Release the connection here
+                if (err) {
+                  console.error('Error fetching contact details:', err);
+                  res.status(500).send('Error fetching contact details');
+                  return;
+                }
+
+                const contactDetails = contactDetailsResults[0] || {}; // Ensure contactDetails is an object
+
+                // Render the editLead page with all data
+                res.render('editLead', {
+                  lead,
+                  sessionUser: req.session.user,
+                  statuses: statusesResults,
+                  categories: categoriesResults,
+                  contactDetails, // Pass contact details to the template
+                });
+              }
+            );
+          });
+        });
+      }
+    );
   });
 });
 
@@ -427,28 +432,28 @@ router.get('/:leadId/edit', (req, res) => {
 router.post('/:leadId/edit', (req, res) => {
   const leadId = req.params.leadId;
   const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      company,
-      leadScore,
-      lead_status_id,
-      lead_category_id, // Get the category ID from the form
-      current_address,
-      permanent_address,
-      phone_number,
-      emergency_number // Additional fields for contact details
+    firstName,
+    lastName,
+    email,
+    phone,
+    company,
+    leadScore,
+    lead_status_id,
+    lead_category_id, // Get the category ID from the form
+    current_address,
+    permanent_address,
+    phone_number,
+    emergency_number // Additional fields for contact details
   } = req.body;
 
   pool.getConnection((err, connection) => {
-      if (err) {
-          console.error('Error getting connection from pool:', err);
-          res.status(500).send('Error connecting to database');
-          return;
-      }
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      res.status(500).send('Error connecting to database');
+      return;
+    }
 
-      const leadUpdateSql = `
+    const leadUpdateSql = `
           UPDATE leads 
           SET 
               first_name = ?, 
@@ -462,45 +467,45 @@ router.post('/:leadId/edit', (req, res) => {
           WHERE lead_id = ?
       `;
 
-      const leadUpdateValues = [
-          firstName || null,
-          lastName || null,
-          email,
-          phone || null,
-          company || null,
-          leadScore || null,
-          lead_status_id,
-          lead_category_id, // Add the category ID to the query
-          leadId
-      ];
+    const leadUpdateValues = [
+      firstName || null,
+      lastName || null,
+      email,
+      phone || null,
+      company || null,
+      leadScore || null,
+      lead_status_id,
+      lead_category_id, // Add the category ID to the query
+      leadId
+    ];
 
-      // Update the leads table
-      connection.query(leadUpdateSql, leadUpdateValues, (leadError, leadResults) => {
-          if (leadError) {
-              connection.release();
-              console.error('Error updating lead:', leadError);
-              res.status(500).send('Error updating lead data');
-              return;
-          }
+    // Update the leads table
+    connection.query(leadUpdateSql, leadUpdateValues, (leadError, leadResults) => {
+      if (leadError) {
+        connection.release();
+        console.error('Error updating lead:', leadError);
+        res.status(500).send('Error updating lead data');
+        return;
+      }
 
-          if (leadResults.affectedRows === 0) {
-              connection.release();
-              return res.status(404).send('Lead not found');
-          }
+      if (leadResults.affectedRows === 0) {
+        connection.release();
+        return res.status(404).send('Lead not found');
+      }
 
-          // Check if contact_details exist for this lead
-          const contactDetailsCheckSql = `SELECT * FROM contact_details WHERE lead_id = ?`;
-          connection.query(contactDetailsCheckSql, [leadId], (contactError, contactResults) => {
-              if (contactError) {
-                  connection.release();
-                  console.error('Error checking contact details:', contactError);
-                  res.status(500).send('Error checking contact details');
-                  return;
-              }
+      // Check if contact_details exist for this lead
+      const contactDetailsCheckSql = `SELECT * FROM contact_details WHERE lead_id = ?`;
+      connection.query(contactDetailsCheckSql, [leadId], (contactError, contactResults) => {
+        if (contactError) {
+          connection.release();
+          console.error('Error checking contact details:', contactError);
+          res.status(500).send('Error checking contact details');
+          return;
+        }
 
-              if (contactResults.length > 0) {
-                  // Update contact_details if they exist
-                  const contactUpdateSql = `
+        if (contactResults.length > 0) {
+          // Update contact_details if they exist
+          const contactUpdateSql = `
                       UPDATE contact_details 
                       SET 
                           current_address = ?, 
@@ -510,55 +515,104 @@ router.post('/:leadId/edit', (req, res) => {
                       WHERE lead_id = ?
                   `;
 
-                  const contactUpdateValues = [
-                      current_address || null,
-                      permanent_address || null,
-                      phone_number || null,
-                      emergency_number || null,
-                      leadId
-                  ];
+          const contactUpdateValues = [
+            current_address || null,
+            permanent_address || null,
+            phone_number || null,
+            emergency_number || null,
+            leadId
+          ];
 
-                  connection.query(contactUpdateSql, contactUpdateValues, (updateError) => {
-                      connection.release();
-                      if (updateError) {
-                          console.error('Error updating contact details:', updateError);
-                          res.status(500).send('Error updating contact details');
-                          return;
-                      }
+          connection.query(contactUpdateSql, contactUpdateValues, (updateError) => {
+            connection.release();
+            if (updateError) {
+              console.error('Error updating contact details:', updateError);
+              res.status(500).send('Error updating contact details');
+              return;
+            }
 
-                      res.redirect('/leads'); // Redirect after successful update
-                  });
-              } else {
-                  // Insert new contact_details if they do not exist
-                  const contactInsertSql = `
+            res.redirect('/leads'); // Redirect after successful update
+          });
+        } else {
+          // Insert new contact_details if they do not exist
+          const contactInsertSql = `
                       INSERT INTO contact_details 
                       (lead_id, current_address, permanent_address, phone_number, emergency_number) 
                       VALUES (?, ?, ?, ?, ?)
                   `;
 
-                  const contactInsertValues = [
-                      leadId,
-                      current_address || null,
-                      permanent_address || null,
-                      phone_number || null,
-                      emergency_number || null
-                  ];
+          const contactInsertValues = [
+            leadId,
+            current_address || null,
+            permanent_address || null,
+            phone_number || null,
+            emergency_number || null
+          ];
 
-                  connection.query(contactInsertSql, contactInsertValues, (insertError) => {
-                      connection.release();
-                      if (insertError) {
-                          console.error('Error inserting contact details:', insertError);
-                          res.status(500).send('Error inserting contact details');
-                          return;
-                      }
+          connection.query(contactInsertSql, contactInsertValues, (insertError) => {
+            connection.release();
+            if (insertError) {
+              console.error('Error inserting contact details:', insertError);
+              res.status(500).send('Error inserting contact details');
+              return;
+            }
 
-                      res.redirect('/leads'); // Redirect after successful update
-                  });
-              }
+            res.redirect('/leads'); // Redirect after successful update
           });
+        }
       });
+    });
   });
 });
+
+//when lead is won , this opportunitites route will run
+router.get('/opportunities', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); 
+  }
+  var currentUserId = req.session.user.id;
+  console.log(currentUserId)
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Query to fetch leads where status_name = 'won'
+    const query = `
+     SELECT 
+    leads.lead_id,
+    leads.first_name,
+    leads.last_name,
+    leads.phone_number,
+    leads.email,
+    leads.company_name,
+    contact_details.*  
+FROM leads
+JOIN lead_statuses 
+    ON leads.lead_status_id = lead_statuses.lead_status_id
+JOIN contact_details
+    ON leads.lead_id = contact_details.lead_id
+WHERE lead_statuses.status_name = 'won';
+    `;
+    // Execute the query
+    connection.query(query, (queryErr, results) => {
+      // Release the connection back to the pool
+      connection.release();
+
+      if (queryErr) {
+        console.error('Error executing query:', queryErr);
+        return res.status(500).send('Internal Server Error');
+      }
+      console.log(results.length)
+
+      // Render the opportunities.ejs template with data
+      res.render('opportunities', { leads: results, currentUserId });
+    });
+  });
+});
+
 
 // Route to render lead page (including tasks and activities)
 router.get('/:lead_id', (req, res) => {
@@ -724,12 +778,11 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
           console.error(err);
           return res.status(500).send('Failed to update task status.');
         }
-         res.redirect(`/leads/${task[0].lead_id}`);
+        res.redirect(`/leads/${task[0].lead_id}`);
       });
     });
   });
 });
-
 
 // Route to delete a task
 router.post('/tasks/:task_id/delete', (req, res) => {
@@ -782,9 +835,6 @@ router.post('/:lead_id/sendEmail', (req, res) => {
           }
 
           const { template_subject, template_description } = template[0];
-
-       
-
           const emailSubject = hasEditMailPermission ? subject : template_subject;
           const emailBody = hasEditMailPermission ? body : template_description;
 
@@ -805,7 +855,7 @@ router.post('/:lead_id/sendEmail', (req, res) => {
 
 // Function to send the email
 function sendEmail(connection, email, first_name, last_name, subject, body, res, lead_id) {
-  const personalizedBody =`Dear ${first_name} ${last_name},\n\n${body}\n\nYours faithfully,\nCRM Team`;
+  const personalizedBody = `Dear ${first_name} ${last_name},\n\n${body}\n\nYours faithfully,\nCRM Team`;
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -835,6 +885,8 @@ function sendEmail(connection, email, first_name, last_name, subject, body, res,
     res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
   });
 }
+
+
 
 module.exports = router;
 
