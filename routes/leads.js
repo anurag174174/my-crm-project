@@ -568,7 +568,7 @@ router.post('/:leadId/edit', (req, res) => {
 //when lead is won , this opportunitites route will run
 router.get('/opportunities', (req, res) => {
   if (!req.session.user) {
-    return res.render('unauthorized'); 
+    return res.render('unauthorized');
   }
   var currentUserId = req.session.user.id;
   console.log(currentUserId)
@@ -612,6 +612,44 @@ WHERE lead_statuses.status_name = 'won';
     });
   });
 });
+
+//view won lead contact
+router.get('/opportunities/contact', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized');
+  }
+  var currentUserId = req.session.user.id;
+  console.log(currentUserId)
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const query = `SELECT 
+    l.first_name,
+    l.last_name,
+    l.email,
+    cd.phone_number,
+    cd.emergency_number,
+    cd.current_address,
+    cd.permanent_address
+FROM 
+    leads l
+JOIN 
+    contact_details cd ON l.lead_id = cd.lead_id;`
+    connection.query(query,(error,result)=>{
+      connection.release();
+      console.log(result)
+      if (error) {
+        console.error('Error executing query:', queryErr);
+        return res.status(500).send('Internal Server Error');
+      }
+      wonLeads=result[0];
+      res.render('leadContact',{wonLeads,currentUserId})
+    }) 
+  })
+})
 
 
 // Route to render lead page (including tasks and activities)

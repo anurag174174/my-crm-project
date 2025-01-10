@@ -58,7 +58,7 @@
             <% leads.forEach(lead => { %>
             <tr class="border-b hover:bg-gray-50">
               <td class="py-3 px-6 text-center">
-                <a href="/leads/<%= lead.lead_id %>"
+                <a href="/leads/opportunities/contact"
                   class="text-blue-500 hover:underline  capitalize">
                   <%= lead.first_name %> <%= lead.last_name %>
                 </a>
@@ -84,7 +84,7 @@
        
     </div>
     <script>
-         const menuToggle = document.getElementById("menu-toggle");
+    const menuToggle = document.getElementById("menu-toggle");
     const mobileMenu = document.getElementById("mobile-menu");
 
     menuToggle.addEventListener("click", () => {
