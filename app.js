@@ -8,7 +8,9 @@ var session = require('express-session')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var leadRouter = require('./routes/leads')
+var credentialRouter=require('./routes/credentails')
 var userDashboardRouter = require('./routes/userDashboard')
+var requrestCredentialRouter=require('./routes/requestCredential')
 
 var app = express();
 app.use(session({
@@ -48,6 +50,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/leads', leadRouter)
 app.use('/user', userDashboardRouter)
+app.use('/credential',credentialRouter)
+app.use('/request',requrestCredentialRouter)
 
 
 // catch 404 and forward to error handler

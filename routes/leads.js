@@ -19,7 +19,7 @@ function checkUserRole(req, res, next) {
       return res.status(500).send('Internal Server Error');
     }
 
-    connection.query(query, [userId], (err, results) => {
+      connection.query(query, [userId], (err, results) => {
       connection.release(); // Always release the connection back to the pool
 
       if (err) {
@@ -430,6 +430,10 @@ router.get('/:leadId/edit', (req, res) => {
 
 // lead update
 router.post('/:leadId/edit', (req, res) => {
+
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const leadId = req.params.leadId;
   const {
     firstName,
@@ -651,7 +655,6 @@ JOIN
   })
 })
 
-
 // Route to render lead page (including tasks and activities)
 router.get('/:lead_id', (req, res) => {
   if (!req.session.user) {
@@ -739,6 +742,9 @@ router.get('/:lead_id', (req, res) => {
 
 // Route to add a new task
 router.post('/:lead_id/addTask', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { lead_id } = req.params;
   const { task_name, task_description, due_date } = req.body;
 
@@ -765,6 +771,9 @@ router.post('/:lead_id/addTask', (req, res) => {
 
 // Route to add a new activity
 router.post('/:lead_id/addActivity', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { lead_id } = req.params;
   const { activity_type, activity_date, activity_detail } = req.body;
 
@@ -791,6 +800,9 @@ router.post('/:lead_id/addActivity', (req, res) => {
 
 // Route to toggle task completion
 router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { task_id } = req.params;
 
   pool.getConnection((err, connection) => {
@@ -824,6 +836,9 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
 
 // Route to delete a task
 router.post('/tasks/:task_id/delete', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { task_id } = req.params;
 
   pool.getConnection((err, connection) => {
@@ -843,7 +858,12 @@ router.post('/tasks/:task_id/delete', (req, res) => {
   });
 });
 // Route to send an email
+
+
 router.post('/:lead_id/sendEmail', (req, res) => {
+  if (!req.session.user) {
+    return res.render('unauthorized'); // If user is not logged in, render unauthorized page
+  }
   const { lead_id } = req.params;
   const { subject, body, email_template_id } = req.body;
 
@@ -923,8 +943,6 @@ function sendEmail(connection, email, first_name, last_name, subject, body, res,
     res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
   });
 }
-
-
 
 module.exports = router;
 

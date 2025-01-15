@@ -29,6 +29,11 @@
                     <li><a href="/user/<%= user.user_id %>/"
                             class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
                             Profile</a></li>
+                    <% if (! user.is_admin ) { %>
+                    <li><a href="/request/request-credential/"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Request
+                            Credential</a></li>
+                    <% } %>
                     <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                     <li><a href="/leads/create"
                             class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add
@@ -38,6 +43,11 @@
                     <li><a href="/user/admin/users"
                             class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
                             Users</a></li>
+                    <% } %>
+                    <% if ( user.is_admin===1 ) { %>
+                    <li><a href="/credential"
+                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                            Credentials</a></li>
                     <% } %>
                     <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
                     <li><a href="/leads"
@@ -120,8 +130,9 @@
                 <!-- Only show for admin users -->
                 <div
                     class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
-                    <h1 class="text-center mt-2 text-gray-600">Your Last Lead</h1>
-                        
+                    <h1 class="text-center mt-2 text-gray-600">Your Last
+                        Lead</h1>
+
                     <% if (lastLead) { %>
                     <div class="mx-3 mt-3 w-full h-[20%]">
                         <h6 class="text-sm text-gray-500">Contact name</h6>
@@ -150,10 +161,9 @@
                     </div>
                     <% } %>
                 </div>
-                <% } %> 
+                <% } %>
                 <!-- End of userRoleId check -->
 
-                
                 <!-- view last won leads -->
                 <% if (user.user_role_id === 2 || user.is_admin === 1) { %>
                 <% if (wonLeads) { %>
