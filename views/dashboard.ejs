@@ -14,83 +14,92 @@
     <body class="w-full h-screen " id="container">
         <!-- header here -->
         <div
-            class="w-full h-16 flex items-center justify-between shadow-md px-4 relative">
-            <!-- Menu Icon -->
-            <div id="menu-container" class="relative">
-                <button id="menuButton"
-                    class="text-blue-700 material-symbols-outlined text-2xl cursor-pointer">
-                    menu
-                </button>
-                <!-- Dropdown Menu -->
-                <ul id="menuDropdown"
-                    class="absolute left-0 top-full mt-2 bg-white shadow-md rounded-lg w-48 hidden">
-                    <li><a href="/user/<%= user.user_id %>/dashboard"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
-                    <li><a href="/user/<%= user.user_id %>/"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
-                            Profile</a></li>
-                    <% if (! user.is_admin ) { %>
-                    <li><a href="/request/request-credential/"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Request
-                            Credential</a></li>
-                    <% } %>
-                    <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
-                    <li><a href="/leads/create"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add
-                            Leads</a></li>
-                    <% } %>
-                    <% if ( user.is_admin===1 ) { %>
-                    <li><a href="/user/admin/users"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
-                            Users</a></li>
-                    <% } %>
-                    <% if ( user.is_admin===1 ) { %>
-                    <li><a href="/credential"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
-                            Credentials</a></li>
-                    <% } %>
-                    <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
-                    <li><a href="/leads"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
-                            Leads</a></li>
-                    <% } %>
+    class="w-full h-20 flex items-center justify-between shadow-md px-4 relative">
+    <!-- Menu Icon -->
+    <div id="menu-container" class="relative flex items-center">
+        <button id="menuButton"
+            class="text-blue-700 material-symbols-outlined text-2xl cursor-pointer">
+            menu
+        </button>
+        <!-- Logo Image -->
+        <div class="h-16 w-44    ">
+            <img 
+              class="h-full w-full object-cover" 
+              src="/images/knoqlogicologico.svg" 
+              alt="Company Logo" 
+            />
+          </div>
+        <!-- Dropdown Menu -->
+        <ul id="menuDropdown"
+            class="absolute left-0 top-full mt-2 bg-white shadow-md rounded-lg w-48 hidden">
+            <li><a href="/user/<%= user.user_id %>/dashboard"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Dashboard</a></li>
+            <li><a href="/user/<%= user.user_id %>/"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                    Profile</a></li>
+            <% if (! user.is_admin ) { %>
+            <li><a href="/request/request-credential/"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Request
+                    Credential</a></li>
+            <% } %>
+            <% if (user.user_role_id === 2 || user.is_admin===1 || user.is_manager===1) { %>
+            <li><a href="/leads/create"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Add
+                    Leads</a></li>
+            <% } %>
+            <% if ( user.is_admin===1 ) { %>
+            <li><a href="/user/admin/users"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                    Users</a></li>
+            <% } %>
+            <% if ( user.is_admin===1 ) { %>
+            <li><a href="/credential"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                    Credentials</a></li>
+            <% } %>
+            <% if (user.user_role_id === 2 || user.is_admin===1 || user.is_manager===1 ) { %>
+            <li><a href="/leads"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">View
+                    Leads</a></li>
+            <% } %>
 
-                    <li><a href="/logout"
-                            class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
+            <li><a href="/logout"
+                    class="block px-4 py-2 hover:bg-blue-100 cursor-pointer">Logout</a></li>
 
-                </ul>
-            </div>
+        </ul>
+    </div>
 
-            <!-- Page Title -->
-            <h1 class="text-white text-lg font-bold">Responsive Header</h1>
+    <!-- Page Title -->
+    <h1 class="text-white text-lg font-bold">Responsive Header</h1>
 
-            <!-- Profile Icon -->
-            <div id="profile-container" class="relative">
-                <img id="profileButton"
-                    class="w-10 h-10 rounded-full cursor-pointer"
-                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                    alt="Profile">
-                <!-- Side Toolbar -->
-                <div id="profileSidebar"
-                    class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
-                    <div class="p-4">
-                        <h2 class="text-lg font-bold mb-4">User Details</h2>
-                        <p class="mb-2">Name: <%=user.first_name%>
-                            <%=user.last_name%></p>
-                        <p class="mb-2">Email: <%=user.email%></p>
-                        <p class="mb-4">Role: <%=user.roleName%></p>
-                        <div>
-                            <a href="/user/<%= user.user_id %>/"
-                                class=" my-auto px-3 py-2 bg-blue-500 rounded-md text-white font-semibold">View
-                                Profile</a>
-                            <a href="/users/login"
-                                class=" my-auto px-4 py-2 bg-blue-500 rounded-md text-white font-semibold">Logout</a>
-                        </div>
-
-                    </div>
+    <!-- Profile Icon -->
+    <div id="profile-container" class="relative">
+        <img id="profileButton"
+            class="w-10 h-10 rounded-full cursor-pointer"
+            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+            alt="Profile">
+        <!-- Side Toolbar -->
+        <div id="profileSidebar"
+            class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300">
+            <div class="p-4">
+                <h2 class="text-lg font-bold mb-4">User Details</h2>
+                <p class="mb-2">Name: <%=user.first_name%>
+                    <%=user.last_name%></p>
+                <p class="mb-2">Email: <%=user.email%></p>
+                <p class="mb-4">Role: <%=user.roleName%></p>
+                <div>
+                    <a href="/user/<%= user.user_id %>/"
+                        class=" my-auto px-3 py-2 bg-blue-500 rounded-md text-white font-semibold">View
+                        Profile</a>
+                    <a href="/users/login"
+                        class=" my-auto px-4 py-2 bg-blue-500 rounded-md text-white font-semibold">Logout</a>
                 </div>
+
             </div>
         </div>
+    </div>
+</div>
+
 
         <div
             class="w-full mt-16 flex flex-col md:flex-row md:items-center px-4 md:px-16">
@@ -105,11 +114,11 @@
             <div class="w-full md:w-[70%] text-center md:text-left">
                 <h1
                     class="text-gray-500 text-xl md:text-3xl capitalize tracking-wide font-semibold">
-                    Hello, <%= user.first_name %>
+                    Hi, <%= user.first_name %>
                 </h1>
                 <h1
-                    class="text-blue-600 text-lg md:text-2xl capitalize font-semibold">
-                    Welcome back to <%= user.first_name %> <%= user.last_name %>
+                    class="text-blue-600 text-lg md:text-2xl  font-semibold">
+                    Welcome back to <%= user.first_name %> <%= user.last_name %>  <h1>
                 </h1>
             </div>
         </div>
@@ -126,7 +135,7 @@
             <!-- Card Container -->
             <div class="w-[90%] mx-auto p-4 flex flex-wrap gap-6">
                 <!-- Last Lead Card -->
-                <% if (user.user_role_id === 2 || user.is_admin===1 ) { %>
+                <% if (user.user_role_id === 2 || user.is_admin===1 || user.is_manager===1 ) { %>
                 <!-- Only show for admin users -->
                 <div
                     class="w-full sm:w-72 h-72 rounded-lg border-2 flex flex-col hover:shadow-2xl hover:border-3">
@@ -165,7 +174,7 @@
                 <!-- End of userRoleId check -->
 
                 <!-- view last won leads -->
-                <% if (user.user_role_id === 2 || user.is_admin === 1) { %>
+                <% if (user.user_role_id === 2 || user.is_admin === 1 || user.is_manager===1) { %>
                 <% if (wonLeads) { %>
                 <!-- Show this section only if the user has a 'won' lead -->
                 <div

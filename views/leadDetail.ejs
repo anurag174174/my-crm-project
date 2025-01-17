@@ -1,271 +1,236 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Details</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-
-  <body class="bg-gray-50">
-
-    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10 ">
-      <div class="container mx-auto flex justify-between items-center p-5">
-        <!-- Logo -->
-        <div>
-          <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
-        </div>
-
-        <!-- Desktop Navigation -->
-        <nav class="hidden md:flex space-x-6">
-
-          <a href="/user/<%= lead.lead_owner_id %>/dashboard"
-            class="text-gray-800 hover:text-blue-500">Dashboard</a>
-          <a href="/users/login"
-            class="text-gray-800 hover:text-blue-500">Logout</a>
-        </nav>
-
-        <!-- Mobile Menu Button -->
-        <button id="menu-toggle"
-          class="md:hidden text-gray-800 focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lead Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10 h-20">
+    <div class="container h-full min-w-full flex justify-between items-center p-4">
+      <!-- Logo Wrapper -->
+      <div class="h-full w-44  ">
+        <img 
+          class="h-full w-full object-cover" 
+          src="/images/knoqlogicologico.svg" 
+          alt="Company Logo" 
+        />
       </div>
 
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-6">
 
         <a href="/user/<%= lead.lead_owner_id %>/dashboard"
-          class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+          class="text-gray-800 hover:text-blue-500">Dashboard</a>
         <a href="/users/login"
-          class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
-      </div>
-    </header>
-    <!-- Container -->
-    <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-20 ">
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lead
-        Management</h1>
-      <p class="text-lg mb-4"><strong>Lead Name:</strong>
-        <%= lead.first_name %>
-      </p>
-      <p class="text-lg mb-4"><strong>Email:</strong>
-        <%= lead.email %>
-      </p>
-      <p class="text-lg mb-4"><strong>Phone number:</strong>
-        <%= lead.phone_number %>
-      </p>
+          class="text-gray-800 hover:text-blue-500">Logout</a>
+      </nav>
 
-      <!-- Activities Section -->
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activities</h2>
-      <form action="/leads/<%= lead.lead_id %>/addActivity" method="POST"
-        class="space-y-4">
-        <div>
-          <label for="activity_type" class="block text-gray-700">Activity
-            Type:</label>
-          <select name="activity_type" id="activity_type" required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md">
-            <option value="Call">Call</option>
-            <option value="Email">Email</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Follow-up">Follow-up</option>
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle"
+        class="md:hidden text-gray-800 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden bg-gray-100 md:hidden">
+
+      <a href="/user/<%= lead.lead_owner_id %>/dashboard"
+        class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Dashboard</a>
+      <a href="/users/login"
+        class="block px-5 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
+    </div>
+  </header>
+  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-20">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lead Management</h1>
+    <p class="text-lg mb-4"><strong>Lead Name:</strong> <%= lead.first_name %></p>
+    <p class="text-lg mb-4"><strong>Email:</strong> <%= lead.email %></p>
+    <p class="text-lg mb-4"><strong>Phone Number:</strong> <%= lead.phone_number %></p><hr>
+
+    <!-- Activity Management Section -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Activity Management</h1>
+    <div class="flex space-x-8 mt-6">
+      <!-- Left Side: Activities Form -->
+      <div class="w-1/2">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add Activity</h2>
+        <form action="/leads/<%= lead.lead_id %>/addActivity" method="POST" class="space-y-4">
+          <div>
+            <label for="activity_type" class="block text-gray-700">Activity Type:</label>
+            <select name="activity_type" id="activity_type" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+              <option value="Call">Call</option>
+              <option value="Email">Email</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Follow-up">Follow-up</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="activity_date" class="block text-gray-700">Activity Date:</label>
+            <input type="date" name="activity_date" id="activity_date" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+          </div>
+
+          <div>
+            <label for="activity_detail" class="block text-gray-700">Activity Detail:</label>
+            <textarea name="activity_detail" id="activity_detail" class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add Activity</button>
+        </form>
+      </div>
+
+      <!-- Right Side: Activity List -->
+      <div class="w-1/2">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activity List</h2>
+
+        <!-- Filter Section -->
+        <div class="mb-4">
+          <label for="activityFilter" class="block text-gray-700 font-medium mb-2">Filter by Type:</label>
+          <select id="activityFilter" class="p-2 border border-gray-300 rounded-md w-full">
+            <option value="all">All</option>
+            <% const activityTypes = [...new Set(activities.map(activity => activity.activity_type))]; %>
+            <% activityTypes.forEach(type => { %>
+              <option value="<%= type %>"><%= type %></option>
+            <% }) %>
           </select>
         </div>
 
-        <div>
-          <label for="activity_date" class="block text-gray-700">Activity
-            Date:</label>
-          <input type="date" name="activity_date" id="activity_date" required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md">
-        </div>
-
-        <div>
-          <label for="activity_detail" class="block text-gray-700">Activity
-            Detail:</label>
-          <textarea name="activity_detail" id="activity_detail"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
-        </div>
-
-        <button type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add
-          Activity</button>
-      </form>
-
-      <h3 class="text-xl font-semibold text-gray-800 mt-6">Activity List</h3>
-      <div class="mb-4">
-        <label for="activityFilter" class="block text-gray-700 font-medium mb-2">Filter by Type:</label>
-        <select id="activityFilter" class="p-2 border border-gray-300 rounded-md">
-          <option value="all">All</option>
-          <% 
-            const activityTypes = [...new Set(activities.map(activity => activity.activity_type))];
-          %>
-          <% activityTypes.forEach(type => { %>
-            <option value="<%= type %>"><%= type %></option>
-          <% }) %>
-        </select>
-      </div>
-      
-      <!-- Scrollable activity list -->
-      <div id="activityList" class="max-h-52 overflow-y-auto">
-        <% if (activities.length > 0) { %>
-          <% activities.slice().reverse().forEach(activity => { %>
-            <div class="activity-item bg-gray-100 p-4 rounded-md shadow-md mb-4" data-type="<%= activity.activity_type %>">
-              <p><strong>Type:</strong> <%= activity.activity_type %></p>
-              <p><strong>Date:</strong> <%= activity.activity_date %></p>
-              <p><strong>Details:</strong> <%= activity.activity_details %></p>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p>No activities available.</p>
-        <% } %>
-      </div>
-      
-
-      <!-- Tasks and Email Sections -->
-      <div class="flex flex-col md:flex-row gap-6 mt-6">
-        <!-- Tasks Section -->
-        <div class="w-full md:w-1/2">
-          <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tasks</h2>
-          <form action="/leads/<%= lead.lead_id %>/addTask" method="POST"
-            class="space-y-4">
-            <div>
-              <label for="task_name" class="block text-gray-700">Task
-                Name:</label>
-              <input type="text" name="task_name" id="task_name" required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md">
-            </div>
-
-            <div>
-              <label for="task_description" class="block text-gray-700">Task
-                Description:</label>
-              <textarea name="task_description" id="task_description"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
-            </div>
-
-            <div>
-              <label for="due_date" class="block text-gray-700">Due
-                Date:</label>
-              <input type="date" name="due_date" id="due_date" required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md">
-            </div>
-
-            <button type="submit"
-              class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add
-              Task</button>
-          </form>
-
-          <h3 class="text-xl font-semibold text-gray-800 mt-6">Task List</h3>
-          <% if (tasks.length> 0) { %>
-          <% tasks.forEach(task=> { %>
-          <div class="bg-gray-100 p-4 rounded-md shadow-md mb-4">
-            <h4 class="text-lg font-semibold text-gray-800">
-              <%= task.task_name %>
-            </h4>
-            <p class="text-gray-700">
-              <%= task.task_description %>
-            </p>
-            <p><strong>Due Date:</strong>
-              <%= task.due_date %>
-            </p>
-            <p><strong>Completed:</strong>
-              <%= task.completed==1 ? "Yes" : "No" %>
-            </p>
-
-            <form action="/leads/tasks/<%= task.task_id %>/toggleCompletion"
-              method="POST"
-              class="inline-block mt-2">
-              <button type="submit"
-                class="bg-blue-600 text-white py-1 px-4 rounded-md hover:bg-blue-700 transition">
-                <%= task.completed ? "Mark Incomplete" : "Mark Complete" %>
-              </button>
-            </form>
-
-            <form action="/leads/tasks/<%= task.task_id %>/delete" method="POST"
-              class="inline-block mt-2 ml-4">
-              <button type="submit"
-                class="bg-red-600 text-white py-1 px-4 rounded-md hover:bg-red-700 transition">Delete</button>
-            </form>
-          </div>
-          <% }) %>
+        <!-- Scrollable Activity List -->
+        <div id="activityList" class="max-h-72 overflow-y-auto">
+          <% if (activities.length > 0) { %>
+            <% activities.slice().reverse().forEach(activity => { %>
+              <div class="activity-item bg-gray-100 p-4 rounded-md shadow-md mb-4" data-type="<%= activity.activity_type %>">
+                <p><strong>Type:</strong> <%= activity.activity_type %></p>
+                <p><strong>Date:</strong> <%= activity.activity_date %></p>
+                <p><strong>Details:</strong> <%= activity.activity_details %></p>
+              </div>
+            <% }) %>
           <% } else { %>
-          <p>No tasks available.</p>
+            <p>No activities available.</p>
           <% } %>
         </div>
+      </div>
+    </div>
 
-        <!-- Email Section -->
-        <div class="w-full md:w-1/2">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-4">Email
-            Section</h3>
+    <br><hr>
 
-          <!-- Dropdown for Email Templates -->
-          <form action="/leads/<%= lead.lead_id %>" method="GET"
-            class="space-y-4">
-            <div>
-              <label for="email_template" class="block text-gray-700">Email
-                Template:</label>
-              <select id="email_template" name="template_id"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md"
-                onchange="this.form.submit()">
-                <option value>Select a template</option>
-                <% emailTemplates.forEach(template=> { %>
-                <option value="<%= template.email_template_id %>"
-                  <%=selectedTemplate &&
-                  selectedTemplate.email_template_id==template.email_template_id
-                  ? 'selected' : '' %>>
-                  <%= template.template_name %>
-                </option>
-                <% }) %>
-              </select>
-            </div>
-          </form>
+    <!-- Tasks and Task List Sections -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Tasks Management</h1>
+    <div class="flex space-x-8 mt-6">
+      <!-- Tasks Section (Left) -->
+      <div class="w-1/2">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tasks</h2>
+        <form action="/leads/<%= lead.lead_id %>/addTask" method="POST" class="space-y-4">
+          <div>
+            <label for="task_name" class="block text-gray-700">Task Name:</label>
+            <input type="text" name="task_name" id="task_name" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+          </div>
 
-          <!-- Form for Sending Email -->
-          <form action="/leads/<%= lead.lead_id %>/sendEmail" method="POST"
-            class="space-y-4">
-            <!-- Email Subject Field -->
-            <div>
-              <label for="email_subject" class="block text-gray-700">Email
-                Subject:</label>
-              <input type="text" name="subject" id="email_subject" required
-                value="<%= selectedTemplate ? selectedTemplate.template_subject : '' %>"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md" <% if
-                (!permissions.some(permission=>
-              permission.permission_name === 'edit_mail')) { %>
-              readonly
-              style="cursor: not-allowed;"
-              <% } %>
-              />
-            </div>
+          <div>
+            <label for="task_description" class="block text-gray-700">Task Description:</label>
+            <textarea name="task_description" id="task_description" class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+          </div>
 
-            <!-- Email Body Field -->
-            <div>
-              <label for="email_body" class="block text-gray-700">Email
-                Body:</label>
-              <textarea name="body" id="email_body" required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md" <% if
-                (!permissions.some(permission=> permission.permission_name === 'edit_mail')) { %> 
-          readonly 
-          style="cursor: not-allowed;" 
-        <% } %>
-      ><%= selectedTemplate ? selectedTemplate.template_description : '' %></textarea>
-            </div>
+          <div>
+            <label for="due_date" class="block text-gray-700">Due Date:</label>
+            <input type="date" name="due_date" id="due_date" required class="w-full px-4 py-2 border border-gray-300 rounded-md">
+          </div>
 
-            <!-- Submit Button -->
-            <button type="submit"
-              class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-              Send Email
-            </button>
-          </form>
-        </div>
-
+          <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Add Task</button>
+        </form>
       </div>
 
+      <!-- Task List Section (Right) -->
+      <div class="w-1/2">
+        <h3 class="text-2xl font-semibold text-gray-800 mt-4">Task List</h3>
+
+        <!-- Scrollable Task List Container -->
+        <div id="taskList" class="max-h-72 overflow-y-auto space-y-4">
+          <% if (tasks.length > 0) { %>
+            <% tasks.forEach(task => { %>
+              <div class="bg-gray-100 p-4 rounded-md shadow-md">
+                <h4 class="text-lg font-semibold text-gray-800"><%= task.task_name %></h4>
+                <p class="text-gray-700"><%= task.task_description %></p>
+                <p><strong>Due Date:</strong> <%= task.due_date %></p>
+                <p><strong>Completed:</strong> <%= task.completed == 1 ? "Yes" : "No" %></p>
+
+                <div class="flex space-x-4 mt-2">
+                  <form action="/leads/tasks/<%= task.task_id %>/toggleCompletion" method="POST">
+                    <button type="submit" class="bg-blue-600 text-white py-1 px-4 rounded-md hover:bg-blue-700 transition">
+                      <%= task.completed ? "Mark Incomplete" : "Mark Complete" %>
+                    </button>
+                  </form>
+
+                  <form action="/leads/tasks/<%= task.task_id %>/delete" method="POST">
+                    <button type="submit" class="bg-red-600 text-white py-1 px-4 rounded-md hover:bg-red-700 transition">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-gray-700">No tasks available.</p>
+          <% } %>
+        </div>
+      </div>
     </div>
-    <script>
+
+    <br><hr>
+
+    <!-- Email Section -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Email Management</h1>
+    <div class="w-full mt-6">
+      <h3 class="text-2xl font-semibold text-gray-800 mb-4">Email Section</h3>
+
+      <!-- Dropdown for Email Templates -->
+      <form action="/leads/<%= lead.lead_id %>" method="GET" class="space-y-4">
+        <div>
+          <label for="email_template" class="block text-gray-700">Email Template:</label>
+          <select id="email_template" name="template_id" class="w-full px-4 py-2 border border-gray-300 rounded-md" onchange="this.form.submit()">
+            <option value>Select a template</option>
+            <% emailTemplates.forEach(template => { %>
+              <option value="<%= template.email_template_id %>" <%= selectedTemplate && selectedTemplate.email_template_id == template.email_template_id ? 'selected' : '' %>>
+                <%= template.template_name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+      </form>
+
+      <!-- Form for Sending Email -->
+      <form action="/leads/<%= lead.lead_id %>/sendEmail" method="POST" class="space-y-4">
+        <!-- Email Subject Field -->
+        <div>
+          <label for="email_subject" class="block text-gray-700">Email Subject:</label>
+          <input type="text" name="subject" id="email_subject" required value="<%= selectedTemplate ? selectedTemplate.template_subject : '' %>"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md" 
+            <% if (!permissions.some(permission => permission.permission_name === 'edit_mail')) { %> readonly style="cursor: not-allowed;" <% } %> />
+        </div>
+
+        <!-- Email Body Field -->
+        <div>
+          <label for="email_body" class="block text-gray-700">Email Body:</label>
+          <textarea name="body" id="email_body" required class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            <% if (!permissions.some(permission => permission.permission_name === 'edit_mail')) { %> readonly style="cursor: not-allowed;" <% } %> ><%= selectedTemplate ? selectedTemplate.template_description : '' %></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+          Send Email
+        </button>
+      </form>
+    </div>
+  </div>
+  <script>
     const menuToggle = document.getElementById("menu-toggle");
     const mobileMenu = document.getElementById("mobile-menu");
 
@@ -290,6 +255,6 @@
 
 
   </script>
-  </body>
+</body>
 
 </html>

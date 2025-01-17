@@ -10,10 +10,15 @@
   </head>
 
   <body class="p-6">
-    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
-      <div class="container mx-auto flex justify-between items-center p-5">
-        <div>
-          <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
+    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10 h-20">
+      <div class="container h-full min-w-full flex justify-between items-center p-4">
+        <!-- Logo Wrapper -->
+        <div class="h-full w-44  ">
+          <img 
+            class="h-full w-full object-cover" 
+            src="/images/knoqlogicologico.svg" 
+            alt="Company Logo" 
+          />
         </div>
         <nav class="hidden md:flex space-x-6">
           <a href="/user/<%= currentUserId %>/dashboard"
@@ -112,8 +117,8 @@
             <td class="py-3 px-6 flex items-center justify-center">
               <select name="lead_owner_id" id="assignToDropdown"
                 data-lead-id="<%= lead.lead_id %>"
-                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 <% if (currentUser.is_admin !== 1) { %>bg-gray-100 cursor-not-allowed<% } %>"
-                <% if (currentUser.is_admin !== 1) { %>disabled<% } %>>
+                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 <% if (currentUser.is_admin !== 1  && currentUser.is_manager!==1) { %>bg-gray-100 cursor-not-allowed<% } %>"
+                <% if (currentUser.is_admin !== 1 && currentUser.is_manager!==1 ) { %>disabled<% } %>>
                 <option value>Select User</option>
                 <% users.forEach(user => { %>
                 <option value="<%= user.user_id %>" <% if (lead.lead_owner_id
@@ -122,7 +127,8 @@
                 </option>
                 <% }); %>
               </select>
-              <% if (lead.lead_owner_id && currentUser.is_admin === 1) { %>
+              
+              <% if ((lead.lead_owner_id && currentUser.is_admin === 1)||currentUser.is_manager===1 ) { %>
               <a href="/users/assign/<%= lead.lead_owner_id %>"
                 class="text-blue-500 hover:underline ml-2">View</a>
               <% } %>

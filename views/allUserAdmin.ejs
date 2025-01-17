@@ -7,13 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class=" p-6">
-    <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10">
-        <div class="container mx-auto flex justify-between items-center p-5">
-          <!-- Logo -->
-          <div>
-            <a href="#" class="text-2xl font-bold text-gray-800">Logo</a>
-          </div>
-          
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-10 h-20">
+    <div class="container h-full min-w-full flex justify-between items-center p-4">
+      <!-- Logo Wrapper -->
+      <div class="h-full w-44  ">
+        <img 
+          class="h-full w-full object-cover" 
+          src="/images/knoqlogicologico.svg" 
+          alt="Company Logo" 
+        />
+      </div>
           <!-- Desktop Navigation -->
           <nav class="hidden md:flex space-x-6">
             <a href="/user/<%= currentLoginUser %>/dashboard" class="text-gray-800 hover:text-blue-500">Dashboard</a>

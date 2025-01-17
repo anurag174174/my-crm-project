@@ -4,184 +4,212 @@ const bcrypt = require('bcrypt');
 
 const pool = require('../database/connection');
 
-
-
-
+// Register page
+// Register page
 router.get('/register', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
+      res.status(500).render('error', { errorMessage: 'Error connecting to database' });
       return;
     }
 
-    connection.query('SELECT * FROM roles', (err, results) => {
-      if (err) {
-        console.error('Error fetching roles:', err);
-        connection.release();
-        res.status(500).send('Error fetching roles');
-        return;
-      }
+    try {
+      connection.query('SELECT * FROM roles', (err, results) => {
+        if (err) {
+          console.error('Error fetching roles:', err);
+          connection.release();
+          res.render('error', { errorMessage: 'Error fetching roles' });
+          return;
+        }
 
+        connection.release();
+        res.render('userRegistration', { roles: results });
+      });
+    } catch (error) {
+      console.error('Error in /register route:', error);
       connection.release();
-      res.render('userRegistration', { roles: results });
-    });
+      res.status(500).render('error', { errorMessage: 'Unexpected error occurred' });
+    }
   });
 });
 
-// registering users
+// Register user
 router.post('/register', (req, res) => {
-  var firstName = req.body.firstName;
-  var lastName = req.body.lastName;
-  var email = req.body.email;
-  //var role = req.body.role;
-  var password = req.body.password;
-  var roleId = req.body.roleId
+  const { firstName, lastName, email, password, roleId } = req.body;
 
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+      return res.render('error', { errorMessage: 'Error connecting to database' });
     }
 
-    // Check if email already exists
-    connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-      if (err) {
-        console.error('Error checking for existing email:', err);
-        res.status(500).send('Error checking for existing email');
-        return;
-      }
-
-      if (results.length > 0) {
-        return res.status(400).send('Email already exists');
-      }
-
-      // Hash the password
-      bcrypt.hash(password, 10, (err, hash) => {
+    try {
+      // Check if email already exists
+      connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
         if (err) {
-          console.error('Error hashing password:', err);
-          res.status(500).send('Error hashing password');
-          return;
+          console.error('Error checking for existing email:', err);
+          connection.release();
+          return res.render('error', { errorMessage: 'Error checking for existing email' });
         }
 
-        // Insert user with hashed password
-        var sql = "INSERT INTO users(first_name, last_name, email, user_role_id, password_hash) VALUES(?,?,?,?,?)";
-        connection.query(sql, [firstName, lastName, email, roleId, hash], (error, results) => {
-          connection.release(); // Release the connection back to the pool
+        if (results.length > 0) {
+          connection.release();
+          return res.render('error', { errorMessage: 'Email already exists' });
+        }
 
-          if (error) {
-            console.error('Error inserting data:', error);
-            res.status(500).send('Error inserting data');
-            return;
+        // Hash the password
+        bcrypt.hash(password, 10, (err, hash) => {
+          if (err) {
+            console.error('Error hashing password:', err);
+            connection.release();
+            return res.status(500).send('Error hashing password');
           }
-          const userId = results.insertId;
 
-          req.session.user = {
-            id: userId,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            //role: role,
+          // Insert user with hashed password
+          const sql = "INSERT INTO users(first_name, last_name, email, user_role_id, password_hash) VALUES(?,?,?,?,?)";
+          connection.query(sql, [firstName, lastName, email, roleId, hash], (error, results) => {
+            connection.release();
 
-          };
-
-          // console.log('User ID after registration:', userId);
-          req.session.save((err) => {
-            if (err) {
-              console.error('Error saving session:', err);
-              res.status(500).send('Error saving session');
-              return;
+            if (error) {
+              console.error('Error inserting data:', error);
+              return res.status(500).send('Error inserting data');
             }
-            res.redirect('/users/login');
+
+            const userId = results.insertId;
+
+            req.session.user = {
+              id: userId,
+              firstName,
+              lastName,
+              email,
+            };
+
+            req.session.save((err) => {
+              if (err) {
+                console.error('Error saving session:', err);
+                return res.status(500).send('Error saving session');
+              }
+              res.redirect('/users/login');
+            });
           });
-
-
         });
       });
-    });
+    } catch (error) {
+      console.error('Unexpected error occurred in /register route:', error);
+      connection.release();
+      res.render('error', { errorMessage: 'Unexpected error occurred' });
+    }
   });
 });
 
 //render login page
+// Login page
 router.get('/login', (req, res) => {
   res.render('login');
 });
 
-//login with credentials
+// Login with credentials
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
     }
 
-    connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-      if (err) {
-        console.error('Error fetching user:', err);
-        res.status(500).send('Error fetching user');
-        connection.release();
-        return;
-      }
-
-      if (results.length === 0) {
-        connection.release();
-        return res.status(401).send('Invalid email or password');
-      }
-
-      const user = results[0];
-
-      bcrypt.compare(password, user.password_hash, (err, isMatch) => {
+    try {
+      connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
         if (err) {
-          console.error('Error comparing passwords:', err);
-          res.status(500).send('Error comparing passwords');
-          return;
-        }
-
-        if (isMatch) {
-          // Store user data in session
-          req.session.user = {
-            id: user.user_id,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            email: user.email,  // Store email here
-            roleId: user.user_role_id,
-            is_admin: user.is_admin,
-            user_role_id: user.user_role_id
-          };
-
-          req.session.save((err) => {
-            if (err) {
-              console.error('Error saving session:', err);
-              res.status(500).send('Error saving session');
-              return;
-            }
-
-            console.log('Session user after login:', req.session.user);
-            res.redirect(`/user/${req.session.user.id}/dashboard`);
-          });
-        } else {
+          console.error('Error fetching user:', err);
           connection.release();
-          res.status(401).send('Invalid email or password');
+          
+          const errorMessage='Error connecting to database'
+          return res.render('error',{errorMessage})
+         
         }
+
+        if (results.length === 0) {
+          connection.release();
+          const errorMessage='Invalid email or password'
+          return res.render('error',{errorMessage})
+          
+          
+        }
+
+        const user = results[0];
+
+        bcrypt.compare(password, user.password_hash, (err, isMatch) => {
+          if (err) {
+            console.error('Error comparing passwords:', err);
+            connection.release();
+
+            const errorMessage='Wrong passwords'
+            return res.render('error',{errorMessage})
+           
+          }
+
+          if (isMatch) {
+            // Store user data in session
+            req.session.user = {
+              id: user.user_id,
+              firstName: user.first_name,
+              lastName: user.last_name,
+              email: user.email,  // Store email here
+              roleId: user.user_role_id,
+              is_admin: user.is_admin,
+              is_manager:user.is_manager,
+              user_role_id: user.user_role_id
+            };
+
+            req.session.save((err) => {
+              if (err) {
+                console.error('Error saving session:', err);
+                connection.release();
+
+                const errorMessage='Error saving session'
+                return res.render('error',{errorMessage})
+                
+              }
+
+              console.log('Session user after login:', req.session.user);
+              connection.release();
+              res.redirect(`/user/${req.session.user.id}/dashboard`);
+            });
+          } else {
+            connection.release();
+
+            const errorMessage='Invalid email or password'
+            return res.render('error',{errorMessage})
+           
+          }
+        });
       });
-    });
+    } catch (error) {
+      console.error('Unexpected error in /login route:', error);
+      connection.release();
+
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+      
+    }
   });
 });
 
 
 
-//view user details
-router.get('/:userId', (req, res) => {
-  const userId = req.params.userId;
 
+//view user details
+// Viewing user details
+router.get('/:userId', (req, res) => {
   const userIdFromUrl = parseInt(req.params.userId, 10);
 
   if (!req.session.user) {
-    return res.render('unauthorized');
+
+    return res.render('error', { errorMessage: 'User not authenticated' });
   }
 
   if (req.session.user.id !== userIdFromUrl && req.session.user.is_admin !== 1) {
@@ -191,117 +219,147 @@ router.get('/:userId', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
+      
     }
 
-    connection.query(`
-      SELECT 
-        u.*, 
-        r.roles_name AS roleName, 
-        cd.current_address, 
-        cd.permanent_address, 
-        cd.phone_number, 
-        cd.emergency_number
-      FROM 
-        users u
-      JOIN 
-        roles r ON u.user_role_id = r.role_id
-      LEFT JOIN 
-        contact_details cd ON u.user_id = cd.contact_user_id
-      WHERE 
-        u.user_id = ?
-    `,
-    [userId],
-    (error, results) => {
-      connection.release();
+    try {
+      connection.query(`
+        SELECT 
+          u.*, 
+          r.roles_name AS roleName, 
+          cd.current_address, 
+          cd.permanent_address, 
+          cd.phone_number, 
+          cd.emergency_number
+        FROM 
+          users u
+        JOIN 
+          roles r ON u.user_role_id = r.role_id
+        LEFT JOIN 
+          contact_details cd ON u.user_id = cd.contact_user_id
+        WHERE 
+          u.user_id = ?
+      `, [userIdFromUrl], (error, results) => {
+        connection.release();
 
-      if (error) {
-        console.error('Error fetching user:', error);
-        res.status(500).send('Error fetching user data');
-        return;
-      }
+        if (error) {
 
-      if (results.length === 0) {
-        return res.status(404).send('User not found');
-      }
-      const isCurrentUser = req.session.user.id === userId;
+          console.error('Error fetching user:', error);
 
-      // Passing user data and session info to the template
-      res.render('userDetail', { 
-        user: results[0], 
-        isCurrentUser, 
-        sessionUser: req.session.user 
+          const errorMessage='Error fetching user data'
+          return res.render('error',{errorMessage})
+          
+        }
+
+        if (results.length === 0) {
+          const errorMessage='user not found'
+          return res.render('error',{errorMessage})
+        }
+
+        const isCurrentUser = req.session.user.id === userIdFromUrl;
+
+        // Passing user data and session info to the template
+        res.render('userDetail', { 
+          user: results[0], 
+          isCurrentUser, 
+          sessionUser: req.session.user 
+        });
       });
-    });
+    } catch (error) {
+      console.error('Unexpected error occurred in fetching user data:', error);
+      connection.release();
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+     
+    }
   });
 });
 
-//editing user and render edit user page
+// Editing user details
 router.get('/:userId/edit', (req, res) => {
-  const userId = req.params.userId;
-
+  const userIdFromUrl = req.params.userId;
 
   if (!req.session.user) {
     return res.render('unauthorized');
   }
 
-  pool.getConnection((err, connection) => 
-  {
+  pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
+      
     }
 
-    // Fetch user details along with role name and contact information (if it exists)
-    connection.query(`
-          SELECT 
-              u.*, 
-              r.roles_name as roleName, 
-              c.*
-          FROM 
-              users u
-          JOIN 
-              roles r ON u.user_role_id = r.role_id
-          LEFT JOIN 
-              contact_details c ON u.user_id = c.contact_user_id
-          WHERE 
-              u.user_id = ?`,
-      [userId],
-      (err, userResults) => {
-        if (err) {
-          console.error('Error fetching user:', err);
-          connection.release();
-          res.status(500).send('Error fetching user data');
-          return;
-        }
-
-        console.log(userResults[0]);
-
-        if (userResults.length === 0) {
-          connection.release();
-          return res.status(404).send('User not found');
-        }
-
-        // Fetch all roles for the dropdown
-        connection.query('SELECT * FROM roles', (err, rolesResults) => {
+    try {
+      // Fetch user details along with role name and contact information (if it exists)
+      connection.query(`
+        SELECT 
+            u.*, 
+            r.roles_name as roleName, 
+            c.*
+        FROM 
+            users u
+        JOIN 
+            roles r ON u.user_role_id = r.role_id
+        LEFT JOIN 
+            contact_details c ON u.user_id = c.contact_user_id
+        WHERE 
+            u.user_id = ?`, 
+        [userIdFromUrl], (err, userResults) => {
           if (err) {
-            console.error('Error fetching roles:', err);
+            console.error('Error fetching user:', err);
             connection.release();
-            res.status(500).send('Error fetching roles');
-            return;
+
+            const errorMessage='Error fetching user data'
+             return res.render('error',{errorMessage})
+           
           }
 
-          connection.release();
-          // Pass the user data and roles to the view
-          res.render('editUser', { user: userResults[0], roles: rolesResults, sessionUser: req.session.user  });
+          if (userResults.length === 0) {
+            connection.release();
+
+            const errorMessage='User not found'
+             return res.render('error',{errorMessage})
+            
+          }
+
+          // Fetch all roles for the dropdown
+          connection.query('SELECT * FROM roles', (err, rolesResults) => {
+            if (err) {
+              console.error('Error fetching roles:', err);
+              connection.release();
+              const errorMessage='Error fetching roles'
+             return res.render('error',{errorMessage})
+             
+            }
+
+            connection.release();
+            // Pass the user data and roles to the view
+            res.render('editUser', { 
+              user: userResults[0], 
+              roles: rolesResults, 
+              sessionUser: req.session.user 
+            });
+          });
         });
-      });
+    } catch (error) {
+      console.error('Unexpected error occurred in editing user data:', error);
+      connection.release();
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+      
+    }
   });
 });
 
+
 //store edited user details
+// Updating user details
 router.post('/:userId/edit', (req, res) => {
   const userId = req.params.userId;
   const { firstName, lastName, email, roleId, permanentAddress, currentAddress, phoneNumber, emergencyContact } = req.body;
@@ -313,193 +371,189 @@ router.post('/:userId/edit', (req, res) => {
     return res.render('unauthorized');
   }
 
-  // Get the role of the logged-in user
   const isAdmin = req.session.user.is_admin; // If is_admin is 1, the user is an admin
 
-  // Establish DB connection
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
+     
     }
 
-    // If the user is an admin, update the user details and role, otherwise only update user details
-    if (isAdmin) {
-      // Update user details along with the role for admins
-      connection.query(
-        'UPDATE users SET first_name = ?, last_name = ?, email = ?, user_role_id = ? WHERE user_id = ?',
-        [firstName, lastName, email, roleId, userId],
-        (err, result) => {
+    try {
+      // If the user is an admin, update the user details and role
+      const updateUserQuery = isAdmin
+        ? 'UPDATE users SET first_name = ?, last_name = ?, email = ?, user_role_id = ? WHERE user_id = ?'
+        : 'UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE user_id = ?';
+
+      const updateUserParams = isAdmin
+        ? [firstName, lastName, email, roleId, userId]
+        : [firstName, lastName, email, userId];
+
+      connection.query(updateUserQuery, updateUserParams, (err, result) => {
+        if (err) {
+          connection.release();
+          console.error('Error updating user:', err);
+
+          const errorMessage='Error updating user data'
+          return res.render('error',{errorMessage})
+         
+        }
+
+        if (result.affectedRows === 0) {
+          connection.release();
+
+          const errorMessage='User not found'
+          return res.render('error',{errorMessage})
+         
+        }
+
+        // Now update the contact details (if exists)
+        const checkContactQuery = 'SELECT * FROM contact_details WHERE contact_user_id = ?';
+        connection.query(checkContactQuery, [userId], (err, contactResult) => {
           if (err) {
             connection.release();
-            console.error('Error updating user:', err);
-            return res.status(500).send('Error updating user data');
+            console.error('Error checking contact details:', err);
+
+            const errorMessage='Error checking contact details'
+            return res.render('error',{errorMessage})
+
           }
 
-          if (result.affectedRows === 0) {
+          let contactQuery;
+          let contactParams;
+
+          if (contactResult.length > 0) {
+            // If contact exists, update it
+            contactQuery = `
+              UPDATE contact_details 
+              SET current_address = ?, permanent_address = ?, phone_number = ?, emergency_number = ? 
+              WHERE contact_user_id = ?
+            `;
+            contactParams = [currentAddress, permanentAddress, phoneNumber, emergencyContact, userId];
+          } else {
+            // If contact doesn't exist, insert it
+            contactQuery = `
+              INSERT INTO contact_details (contact_user_id, current_address, permanent_address, phone_number, emergency_number)
+              VALUES (?, ?, ?, ?, ?)
+            `;
+            contactParams = [userId, currentAddress, permanentAddress, phoneNumber, emergencyContact];
+          }
+
+          // Insert or update contact details
+          connection.query(contactQuery, contactParams, (err, contactResult) => {
             connection.release();
-            return res.status(404).send('User not found');
-          }
-
-          // Now update the contact details for the admin (if exists)
-          const checkContactQuery = 'SELECT * FROM contact_details WHERE contact_user_id = ?';
-          connection.query(checkContactQuery, [userId], (err, contactResult) => {
             if (err) {
-              connection.release();
-              console.error('Error checking contact details:', err);
-              return res.status(500).send('Error checking contact details');
+              console.error('Error updating/adding contact details:', err);
+
+              const errorMessage='Error updating/adding contact details'
+              return res.render('error',{errorMessage})
+              
             }
 
-            let contactQuery;
-            let contactParams;
-
-            if (contactResult.length > 0) {
-              // If contact exists, update it
-              contactQuery = `
-                UPDATE contact_details 
-                SET current_address = ?, permanent_address = ?, phone_number = ?, emergency_number = ?
-                WHERE contact_user_id = ?
-              `;
-              contactParams = [currentAddress, permanentAddress, phoneNumber, emergencyContact, userId];
-            } else {
-              // If contact doesn't exist, insert it
-              contactQuery = `
-                INSERT INTO contact_details (contact_user_id, current_address, permanent_address, phone_number, emergency_number)
-                VALUES (?, ?, ?, ?, ?)
-              `;
-              contactParams = [userId, currentAddress, permanentAddress, phoneNumber, emergencyContact];
-            }
-
-            // Insert or update contact details
-            connection.query(contactQuery, contactParams, (err, contactResult) => {
-              connection.release();
-              if (err) {
-                console.error('Error updating/adding contact details:', err);
-                return res.status(500).send('Error updating/adding contact details');
-              }
-
-              // Redirect after successfully updating both user and contact details
-              res.redirect(`/user/${userId}`);
-            });
+            // Redirect after successfully updating both user and contact details
+            res.redirect(`/user/${userId}`);
           });
-        }
-      );
-    } else {
-      // If the user is not an admin, only update user details (no role update)
+        });
+      });
+    } catch (error) {
+      connection.release();
+      console.error('Unexpected error occurred in updating user details:', error);
 
-      if(isAdmin)
-      {
-        connection.query(
-          'UPDATE users SET first_name = ?, last_name = ?, email = ? ,user_role_id=? WHERE user_id = ?',
-          [firstName, lastName, email, roleId,userId],
-          (err, result) => {
-            connection.release();
-            if (err) {
-              console.error('Error updating user:', err);
-              return res.status(500).send('Error updating user data');
-            }
-  
-            if (result.affectedRows === 0) {
-              return res.status(404).send('User not found');
-            }
-  
-            // Redirect after successfully updating user details
-            res.redirect(`/user/${userId}`);
-          }
-        );
-      }
-      else{
-        connection.query(
-          'UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE user_id = ?',
-          [firstName, lastName, email, userId],
-          (err, result) => {
-            connection.release();
-            if (err) {
-              console.error('Error updating user:', err);
-              return res.status(500).send('Error updating user data');
-            }
-  
-            if (result.affectedRows === 0) {
-              return res.status(404).send('User not found');
-            }
-  
-            // Redirect after successfully updating user details
-            res.redirect(`/user/${userId}`);
-          }
-        );
-      }
-      
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+     
     }
   });
 });
 
-//detials to view creator (who is the creator of the leads)
+// Viewing creator of the leads
 router.get('/creator/:creatorId', (req, res) => {
   const creatorId = req.params.creatorId;
 
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
+     
     }
 
-    connection.query(`
-      SELECT 
-    u.*, 
-    r.roles_name AS roleName, 
-    cd.current_address, 
-    cd.permanent_address, 
-    cd.phone_number, 
-    cd.emergency_number
-FROM 
-    users u
-LEFT JOIN
-    roles r ON u.user_role_id = r.role_id
-LEFT JOIN 
-    contact_details cd ON u.user_id = cd.contact_user_id
-WHERE 
-    u.user_id = ?
-`,
-      [creatorId],
-      (error, results) => {
+    try {
+      connection.query(`
+        SELECT 
+          u.*, 
+          r.roles_name AS roleName, 
+          cd.current_address, 
+          cd.permanent_address, 
+          cd.phone_number, 
+          cd.emergency_number
+        FROM 
+          users u
+        LEFT JOIN
+          roles r ON u.user_role_id = r.role_id
+        LEFT JOIN 
+          contact_details cd ON u.user_id = cd.contact_user_id
+        WHERE 
+          u.user_id = ?
+      `, [creatorId], (error, results) => {
         connection.release();
 
         if (error) {
           console.error('Error fetching user:', error);
-          res.status(500).send('Error fetching user data');
-          return;
+
+          const errorMessage='Error fetching user data'
+          return res.render('error',{errorMessage})
+          
         }
 
         if (results.length === 0) {
-          return res.status(404).send('User not found');
+          const errorMessage='User not found'
+          return res.render('error',{errorMessage})
+          
         }
 
         res.render('createdByUserDetail', { user: results[0] });
       });
+    } catch (error) {
+      connection.release();
+
+
+      console.error('Unexpected error occurred in fetching creator details:', error);
+
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+      
+    }
   });
 });
 
 //view assigned user detail
+// Fetching user details for assignment or view
+
 router.get('/assign/:userId', (req, res) => {
   const userId = req.params.userId;
 
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      res.status(500).send('Error connecting to database');
-      return;
+
+      const errorMessage='Error connecting to database'
+      return res.render('error',{errorMessage})
+     
     }
 
-    connection.query(
-      `
-        SELECT 
+    try {
+      connection.query(
+        `SELECT 
           u.*, 
           r.roles_name AS roleName,
-          c.current_address ,
-          c.permanent_address ,
-          c.phone_number ,
+          c.current_address,
+          c.permanent_address,
+          c.phone_number,
           c.emergency_number 
         FROM 
           users u
@@ -508,175 +562,225 @@ router.get('/assign/:userId', (req, res) => {
         LEFT JOIN 
           contact_details c ON u.user_id = c.contact_user_id
         WHERE 
-          u.user_id = ?
-      `,
-      [userId],
-      (err, userResults) => {
-        if (err) {
-          console.error('Error fetching user:', err);
+          u.user_id = ?`,
+        [userId],
+        (err, userResults) => {
           connection.release();
-          res.status(500).send('Error fetching user data');
-          return;
+
+          if (err) {
+            console.error('Error fetching user:', err);
+            const errorMessage='Error fetching user data'
+            return res.render('error',{errorMessage})
+           
+          }
+
+          if (userResults.length === 0) {
+
+            const errorMessage='User not found'
+            return res.render('error',{errorMessage})
+            
+          }
+
+          const isCurrentUser = req.session.user.id === userId;
+          const user = userResults[0];
+
+          // Render the userDetail page with user data and whether the logged-in user is the same as the viewed user
+          res.render('userDetail', { user, isCurrentUser });
         }
-
-        if (userResults.length === 0) {
-          connection.release();
-          return res.status(404).send('User not found');
-        }
-
-        const isCurrentUser = req.session.user.id === userId;
-        const user = userResults[0];
-        connection.release();
-
-        // Render the userDetail page with user and isCurrentUser
-        res.render('userDetail', { user, isCurrentUser });
-      }
-    );
+      );
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      connection.release();
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+      
+    }
   });
 });
 
-// <<<<<-----admin section ----->>>>
+// <<<<<----- Admin Section ----->>>>
 
-//view all user (only for admin)
+// View all users (only for admin)
 router.get('/admin/users', (req, res) => {
   if (!req.session.user || req.session.user.is_admin !== 1) {
     return res.render('unauthorized');
   }
-  currentLoginUser=req.session.user.id; // taking the login users
-  console.log(currentLoginUser)
-  
+
+  const currentLoginUser = req.session.user.id;
+  console.log('Current logged-in user:', currentLoginUser);
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error connecting to database:', err);
-      res.status(500).send('Database connection error');
-      return;
+
+      const errorMessage='Database connection error'
+      return res.render('error',{errorMessage})
+      
     }
 
-    const query = `
-      SELECT 
-        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, 
-        r.roles_name AS roleName, 
-        c.current_address AS currentAddress, c.permanent_address AS permanentAddress,
-        c.phone_number AS phoneNumber, c.emergency_number AS emergencyContact
-      FROM users u
-      LEFT JOIN roles r ON u.user_role_id = r.role_id
-      LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
-    `;
+    try {
+      const query = `
+        SELECT 
+          u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, 
+          r.roles_name AS roleName, 
+          c.current_address AS currentAddress, c.permanent_address AS permanentAddress,
+          c.phone_number AS phoneNumber, c.emergency_number AS emergencyContact
+        FROM users u
+        LEFT JOIN roles r ON u.user_role_id = r.role_id
+        LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
+      `;
 
-    connection.query(query, (err, users) => {
+      connection.query(query, (err, users) => {
+        connection.release();
+
+        if (err) {
+          console.error('Error fetching users:', err);
+          const errorMessage='Error fetching users'
+          return res.render('error',{errorMessage})
+          }
+
+        // Render the 'allUserAdmin' page with the list of users
+        res.render('allUserAdmin', { users, currentLoginUser });
+      });
+    } catch (error) {
+      console.error('Unexpected error:', error);
       connection.release();
-      if (err) {
-        console.error('Error fetching users:', err);
-        res.status(500).send('Error fetching users');
-        return;
-      }
 
-      res.render('allUserAdmin', { users ,currentLoginUser });
-    });
+      const errorMessage='Unexpected error occurred'
+      return res.render('error',{errorMessage})
+      
+    }
   });
 });
+
+
 
 //render edit page for user (only for admin)
 router.get('/admin/users/:userId/edit', (req, res) => {
   const userId = req.params.userId;
 
-  // Check for admin privileges
-  if (!req.session.user || req.session.user.is_admin !== 1) {
-    return res.render('unauthorized');
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      return res.status(500).send('Database connection error');
+  try {
+    // Check for admin privileges
+    if (!req.session.user || req.session.user.is_admin !== 1) {
+      return res.render('unauthorized');
     }
 
-    // Queries for fetching user, contact, bank, and role details
-    const userQuery = `
-      SELECT 
-        u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, u.pip,
-        c.current_address AS currentAddress, c.permanent_address AS permanentAddress,
-        c.phone_number AS phoneNumber, c.emergency_number AS emergencyContact
-      FROM users u
-      LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
-      WHERE u.user_id = ?
-    `;
-
-    const bankQuery = `
-      SELECT 
-       *
-      FROM bank_details 
-      WHERE user_id = ?
-    `;
-
-    const rolesQuery = 'SELECT role_id, roles_name FROM roles';
-
-    const permissionsQuery = `
-      SELECT 
-       *
-      FROM permissions 
-    `;
-
-    // Execute user query
-    connection.query(userQuery, [userId], (err, userResults) => {
+    pool.getConnection((err, connection) => {
       if (err) {
-        connection.release();
-        console.error('Error fetching user details:', err);
-        return res.status(500).send('Error fetching user details');
+        console.error('Error connecting to the database:', err);
+
+        const errorMessage='Database connection error'
+        return res.render('error',{errorMessage})
+        
       }
 
-      if (userResults.length === 0) {
-        connection.release();
-        return res.status(404).send('User not found');
-      }
+      // Queries for fetching user, contact, bank, and role details
+      const userQuery = `
+        SELECT 
+          u.user_id, u.first_name, u.last_name, u.email, u.user_role_id, u.pip,
+          c.current_address AS currentAddress, c.permanent_address AS permanentAddress,
+          c.phone_number AS phoneNumber, c.emergency_number AS emergencyContact
+        FROM users u
+        LEFT JOIN contact_details c ON u.user_id = c.contact_user_id
+        WHERE u.user_id = ?
+      `;
 
-      const user = userResults[0]; // Fetch user details
+      const bankQuery = `
+        SELECT 
+         *
+        FROM bank_details 
+        WHERE user_id = ?
+      `;
 
-      // Execute bank query
-      connection.query(bankQuery, [userId], (err, bankResults) => {
+      const rolesQuery = 'SELECT role_id, roles_name FROM roles';
+
+      const permissionsQuery = `
+        SELECT 
+         *
+        FROM permissions 
+      `;
+
+      // Execute user query
+      connection.query(userQuery, [userId], (err, userResults) => {
         if (err) {
           connection.release();
-          console.error('Error fetching bank details:', err);
-          return res.status(500).send('Error fetching bank details');
+          console.error('Error fetching user details:', err);
+
+          const errorMessage='Error fetching user details'
+          return res.render('error',{errorMessage})
+          
         }
 
-        const bankDetails = bankResults[0] || {}; // Handle if no bank details exist for this user
+        if (userResults.length === 0) {
+          connection.release();
+          const errorMessage='User not found'
+          return res.render('error',{errorMessage})
+         
+        }
 
-        // Execute roles query
-        connection.query(rolesQuery, (err, rolesResults) => {
+        const user = userResults[0]; // Fetch user details
+
+        // Execute bank query
+        connection.query(bankQuery, [userId], (err, bankResults) => {
           if (err) {
             connection.release();
-            console.error('Error fetching roles:', err);
-            return res.status(500).send('Error fetching roles');
+            console.error('Error fetching bank details:', err);
+
+            const errorMessage='Error fetching bank details'
+            return res.render('error',{errorMessage})
+         
           }
 
-          // Execute permissions query
-          connection.query(permissionsQuery, [userId], (err, permissionsResults) => {
-            connection.release();
+          const bankDetails = bankResults[0] || {}; // Handle if no bank details exist for this user
+
+          // Execute roles query
+          connection.query(rolesQuery, (err, rolesResults) => {
             if (err) {
-              console.error('Error fetching permissions:', err);
-              return res.status(500).send('Error fetching permissions');
+              connection.release();
+              console.error('Error fetching roles:', err);
+              const errorMessage='Error fetching roles'
+              return res.render('error',{errorMessage})
+             
             }
 
-            // Filter granted permissions
-            const grantedPermissions = permissionsResults.filter(permission => permission.granted);
+            // Execute permissions query
+            connection.query(permissionsQuery, [userId], (err, permissionsResults) => {
+              connection.release();
+              if (err) {
+                console.error('Error fetching permissions:', err);
 
-            // Pass all data to the template
-            res.render('editAllUserAdmin', {
-              user,
-              bankDetails,
-              roles: rolesResults,
-              permissions: permissionsResults,
-              grantedPermissions: grantedPermissions, // Pass grantedPermissions to template
+                const errorMessage='Error fetching permissions'
+                return res.render('error',{errorMessage})
+                
+              }
+
+              // Filter granted permissions
+              const grantedPermissions = permissionsResults.filter(permission => permission.granted);
+
+              // Pass all data to the template
+              res.render('editAllUserAdmin', {
+                user,
+                bankDetails,
+                roles: rolesResults,
+                permissions: permissionsResults,
+                grantedPermissions: grantedPermissions, // Pass grantedPermissions to template
+              });
             });
           });
         });
       });
     });
-  });
+  } catch (error) {
+    console.error('Unexpected error occurred:', error);
+
+    
+    const errorMessage='Internal server error'
+    return res.render('error',{errorMessage})
+ 
+  }
 });
 
-//save the user details in the dataabse (set by admin)
+// Save the user details in the database (set by admin)
 router.post('/admin/users/:userId/edit', (req, res) => {
   const userId = req.params.userId;
   const { 
@@ -694,134 +798,208 @@ router.post('/admin/users/:userId/edit', (req, res) => {
     userAccountNumber 
   } = req.body;
 
-  if (!req.session.user || req.session.user.is_admin !== 1) {
-    return res.render('unauthorized');
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error connecting to database:', err);
-      res.status(500).send('Database connection error');
-      return;
+  try {
+    // Check for admin privileges
+    if (!req.session.user || req.session.user.is_admin !== 1) {
+      return res.render('unauthorized');
     }
 
-    // Update user details
-    const updateUserQuery = `
-      UPDATE users 
-      SET first_name = ?, last_name = ?, email = ?, pip = ?, user_role_id = ? 
-      WHERE user_id = ?
-    `;
-    connection.query(updateUserQuery, [firstName, lastName, email, pip || null, roleId || null, userId], (err) => {
+    pool.getConnection((err, connection) => {
       if (err) {
-        connection.release();
-        console.error('Error updating user:', err);
-        res.status(500).send('Error updating user');
-        return;
+        console.error('Error connecting to database:', err);
+        const errorMessage = 'Database connection error';
+        return res.render('error', { errorMessage });
       }
 
-      // Update or insert contact details
-      const updateContactQuery = `
-        INSERT INTO contact_details (contact_user_id, current_address, permanent_address, phone_number, emergency_number)
-        VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-          current_address = VALUES(current_address),
-          permanent_address = VALUES(permanent_address),
-          phone_number = VALUES(phone_number),
-          emergency_number = VALUES(emergency_number)
+      // Update user details
+      const updateUserQuery = `
+        UPDATE users 
+        SET first_name = ?, last_name = ?, email = ?, pip = ?, user_role_id = ? 
+        WHERE user_id = ?
       `;
-      connection.query(updateContactQuery, [userId, currentAddress, permanentAddress, phoneNumber, emergencyContact], (err) => {
+      connection.query(updateUserQuery, [firstName, lastName, email, pip || null, roleId || null, userId], (err) => {
         if (err) {
           connection.release();
-          console.error('Error updating contact details:', err);
-          res.status(500).send('Error updating contact details');
-          return;
+          console.error('Error updating user:', err);
+          const errorMessage = 'Error updating user';
+          return res.render('error', { errorMessage });
         }
 
-        // Update or insert bank details
-        const updateBankQuery = `
-          INSERT INTO bank_details (user_id, user_bank_name, user_ifsc_code, user_account_number)
-          VALUES (?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE
-            user_bank_name = VALUES(user_bank_name),
-            user_ifsc_code = VALUES(user_ifsc_code),
-            user_account_number = VALUES(user_account_number)
-        `;
-        connection.query(updateBankQuery, [userId, userBankName, userIfscCode, userAccountNumber], (err) => {
-          connection.release();
-          
+        // Check if contact details already exist for this user
+        const checkContactQuery = `SELECT * FROM contact_details WHERE contact_user_id = ?`;
+        connection.query(checkContactQuery, [userId], (err, results) => {
           if (err) {
-            console.error('Error updating bank details:', err);
-            res.status(500).send('Error updating bank details');
-            return;
+            connection.release();
+            console.error('Error checking contact details:', err);
+            const errorMessage = 'Error checking contact details';
+            return res.render('error', { errorMessage });
           }
-          
-          // Redirect back to the admin user list
-          res.redirect('/user/admin/users');
+
+          if (results.length > 0) {
+            // Contact details exist, update them
+            const updateContactQuery = `
+              UPDATE contact_details 
+              SET current_address = ?, permanent_address = ?, phone_number = ?, emergency_number = ?
+              WHERE contact_user_id = ?
+            `;
+            connection.query(updateContactQuery, [currentAddress, permanentAddress, phoneNumber, emergencyContact, userId], (err) => {
+              if (err) {
+                connection.release();
+                console.error('Error updating contact details:', err);
+                const errorMessage = 'Error updating contact details';
+                return res.render('error', { errorMessage });
+              }
+
+              // Update or insert bank details
+              const updateBankQuery = `
+                INSERT INTO bank_details (user_id, user_bank_name, user_ifsc_code, user_account_number)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                  user_bank_name = VALUES(user_bank_name),
+                  user_ifsc_code = VALUES(user_ifsc_code),
+                  user_account_number = VALUES(user_account_number)
+              `;
+              connection.query(updateBankQuery, [userId, userBankName, userIfscCode, userAccountNumber], (err) => {
+                connection.release();
+                if (err) {
+                  console.error('Error updating bank details:', err);
+                  const errorMessage = 'Error updating bank details';
+                  return res.render('error', { errorMessage });
+                }
+
+                // Redirect back to the admin user list
+                res.redirect('/user/admin/users');
+              });
+            });
+          } else {
+            // No contact details found, insert them
+            const insertContactQuery = `
+              INSERT INTO contact_details (contact_user_id, current_address, permanent_address, phone_number, emergency_number)
+              VALUES (?, ?, ?, ?, ?)
+            `;
+            connection.query(insertContactQuery, [userId, currentAddress, permanentAddress, phoneNumber, emergencyContact], (err) => {
+              if (err) {
+                connection.release();
+                console.error('Error inserting contact details:', err);
+                const errorMessage = 'Error inserting contact details';
+                return res.render('error', { errorMessage });
+              }
+
+              // Update or insert bank details
+              const updateBankQuery = `
+                INSERT INTO bank_details (user_id, user_bank_name, user_ifsc_code, user_account_number)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                  user_bank_name = VALUES(user_bank_name),
+                  user_ifsc_code = VALUES(user_ifsc_code),
+                  user_account_number = VALUES(user_account_number)
+              `;
+              connection.query(updateBankQuery, [userId, userBankName, userIfscCode, userAccountNumber], (err) => {
+                connection.release();
+                if (err) {
+                  console.error('Error updating bank details:', err);
+                  const errorMessage = 'Error updating bank details';
+                  return res.render('error', { errorMessage });
+                }
+
+                // Redirect back to the admin user list
+                res.redirect('/user/admin/users');
+              });
+            });
+          }
         });
       });
     });
-  });
+  } catch (error) {
+    console.error('Unexpected error occurred:', error);
+    const errorMessage = 'Internal server error';
+    return res.render('error', { errorMessage });
+  }
 });
 
-//premission grant for user (allow user to give certain permission) 
+
+// Permission grant for user (allow user to give certain permission) 
 router.post('/admin/users/:userId/permissions/grant', (req, res) => {
   const userId = req.params.userId;
   const permissionName = req.body.permission_name; // Permission name from the form
 
-  // Check if permission_name is provided
-  if (!permissionName) {
-    return res.status(400).send('No permission name provided');
-  }
+  try {
+    // Check if permission_name is provided
+    if (!permissionName) {
 
-  // Check for admin privileges
-  if (!req.session.user || req.session.user.is_admin !== 1) {
-    return res.render('unauthorized');
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      return res.status(500).send('Database connection error');
+      const errorMessage='No permission name provided'
+      return res.render('error',{errorMessage})
+    
     }
 
-    // Check if the permission is already granted to the user
-    const checkPermissionQuery = `
-      SELECT * FROM permissions 
-      WHERE user_id = ? AND permission_name = ?
-    `;
-    
-    connection.query(checkPermissionQuery, [userId, permissionName], (err, results) => {
+    // Check for admin privileges
+    if (!req.session.user || req.session.user.is_admin !== 1) {
+      return res.render('unauthorized');
+    }
+
+    pool.getConnection((err, connection) => {
       if (err) {
-        connection.release();
-        console.error('Error checking permission:', err);
-        return res.status(500).send('Error checking permission');
+        console.error('Error connecting to the database:', err);
+
+        const errorMessage='Database connection error'
+      return res.render('error',{errorMessage})
+       
       }
 
-      if (results.length > 0) {
-        // Permission already granted
-        connection.release();
-        
-      }
-      
-      // If not already granted, insert the new permission
-      const insertPermissionQuery = `
-        INSERT INTO permissions (user_id, permission_name, granted)
-        VALUES (?, ?, 1)  -- granted is set to 1
+      // Check if the permission is already granted to the user
+      const checkPermissionQuery = `
+        SELECT * FROM permissions 
+        WHERE user_id = ? AND permission_name = ?
       `;
-
-      connection.query(insertPermissionQuery, [userId, permissionName], (err, result) => {
-        connection.release();
-
+      
+      connection.query(checkPermissionQuery, [userId, permissionName], (err, results) => {
         if (err) {
-          console.error('Error granting permission:', err);
-          return res.status(500).send('Error granting permission');
+          connection.release();
+          console.error('Error checking permission:', err);
+
+          const errorMessage='Error checking permission'
+          return res.render('error',{errorMessage})
+         
         }
 
-        // Redirect back to the user edit page
-        res.redirect(`/user/admin/users/${userId}/edit`);
+        if (results.length > 0) {
+          // Permission already granted
+          connection.release();
+
+          const errorMessage='Permission already granted'
+          return res.render('error',{errorMessage})
+         
+        }
+        
+        // If not already granted, insert the new permission
+        const insertPermissionQuery = `
+          INSERT INTO permissions (user_id, permission_name, granted)
+          VALUES (?, ?, 1)  -- granted is set to 1
+        `;
+
+        connection.query(insertPermissionQuery, [userId, permissionName], (err, result) => {
+          connection.release();
+
+          if (err) {
+            console.error('Error granting permission:', err);
+
+            const errorMessage='Error granting permission'
+            return res.render('error',{errorMessage})
+            
+          }
+
+          // Redirect back to the user edit page
+          res.redirect(`/user/admin/users/${userId}/edit`);
+        });
       });
     });
-  });
+  } catch (error) {
+    console.error('Unexpected error occurred:', error);
+
+    const errorMessage='Internal server error'
+    return res.render('error',{errorMessage})
+    
+  }
 });
 
 // Route to handle deleting a permission from a user
@@ -829,37 +1007,50 @@ router.post('/admin/users/:userId/permissions/:permissionName/delete', (req, res
   const userId = req.params.userId;
   const permissionName = req.params.permissionName;
 
-  // Check for admin privileges
-  if (!req.session.user || req.session.user.is_admin !== 1) {
-    return res.render('unauthorized');
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      return res.status(500).send('Database connection error');
+  try {
+    // Check for admin privileges
+    if (!req.session.user || req.session.user.is_admin !== 1) {
+      return res.render('unauthorized');
     }
 
-    // Delete the permission from the permissions table
-    const deleteQuery = `
-      DELETE FROM permissions
-      WHERE user_id = ? AND permission_name = ?
-    `;
-
-    connection.query(deleteQuery, [userId, permissionName], (err, result) => {
-      connection.release();
-
+    pool.getConnection((err, connection) => {
       if (err) {
-        console.error('Error deleting permission:', err);
-        return res.status(500).send('Error deleting permission');
+        console.error('Error connecting to the database:', err);
+
+        const errorMessage='Database connection error'
+        return res.render('error',{errorMessage})
+       
       }
 
-      // Redirect back to the user edit page
-      res.redirect(`/user/admin/users/${userId}/edit`);
-    });
-  });
-});
+      // Delete the permission from the permissions table
+      const deleteQuery = `
+        DELETE FROM permissions
+        WHERE user_id = ? AND permission_name = ?
+      `;
+      
+      connection.query(deleteQuery, [userId, permissionName], (err, result) => {
+        connection.release();
+        
+        if (err) {
+          console.error('Error deleting permission:', err);
 
+          const errorMessage='Error deleting permission'
+        return res.render('error',{errorMessage})
+          
+        }
+
+        // Redirect back to the user edit page
+        res.redirect(`/user/admin/users/${userId}/edit`);
+      });
+    });
+  } catch (error) {
+    console.error('Unexpected error occurred:', error);
+
+    const errorMessage='Internal server error'
+    return res.render('error',{errorMessage})
+   
+  }
+});
 
 
 module.exports = router;
