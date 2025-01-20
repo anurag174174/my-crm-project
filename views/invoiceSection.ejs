@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Invoice</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md mt-10">
+    <h1 class="text-2xl font-semibold text-center text-gray-700 mb-6">Generate Invoice</h1>
+    <form action="/leads/invoice/lead/<%= lead_id %>" method="POST">
+      <!-- Lead ID (hidden, filled automatically) -->
+      <input type="hidden" name="lead_id" value="<%= lead_id %>">
+
+      <!-- Client Name (autofilled) -->
+      <div class="mb-4">
+        <label for="client_name" class="block text-gray-600">Client Name:</label>
+        <input type="text" id="client_name" name="client_name" value="<%= client_name %>" class="w-full p-2 mt-2 border border-gray-300 rounded-md" >
+      </div>
+
+      <!-- Invoice Number -->
+      <div class="mb-4">
+        <label for="invoice_number" class="block text-gray-600">Invoice Number:</label>
+        <input type="text" id="invoice_number" name="invoice_number" required class="w-full p-2 mt-2 border border-gray-300 rounded-md">
+      </div>
+
+      <!-- Invoice Date (date picker) -->
+      <div class="mb-4">
+        <label for="invoice_date" class="block text-gray-600">Invoice Date:</label>
+        <input type="date" id="invoice_date" name="invoice_date" required class="w-full p-2 mt-2 border border-gray-300 rounded-md">
+      </div>
+
+      <!-- GST Section (18%) -->
+      <div class="mb-4">
+        <label for="gst" class="block text-gray-600">GST (18%):</label>
+        <input type="text" id="gst" name="gst" value="18" disabled class="w-full p-2 mt-2 border border-gray-300 rounded-md bg-gray-100">
+      </div>
+
+      <!-- Dynamic Fields (Add Custom Fields) -->
+      <div id="custom-fields" class="mb-4">
+        <label for="custom_field" class="block text-gray-600">Custom Field:</label>
+        <div class="flex space-x-4">
+          <input type="text" name="custom_fields[][label]" placeholder="Enter custom field label" class="w-1/2 p-2 mt-2 border border-gray-300 rounded-md">
+          <input type="text" name="custom_fields[][value]" placeholder="Enter custom field value" class="w-1/2 p-2 mt-2 border border-gray-300 rounded-md">
+        </div>
+      </div>
+
+      <!-- Add More Fields Button -->
+      <button type="button" onclick="addCustomField()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none mb-4">Add More Fields</button>
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none">Generate Invoice</button>
+    </form>
+  </div>
+
+  <script>
+    // Function to dynamically add more custom fields
+    function addCustomField() {
+      const customFieldsDiv = document.getElementById('custom-fields');
+      const newField = document.createElement('div');
+      newField.innerHTML = `
+        <div class="flex space-x-4 mb-4">
+          <input type="text" name="custom_fields[][label]" placeholder="Enter custom field label" class="w-1/2 p-2 mt-2 border border-gray-300 rounded-md">
+          <input type="text" name="custom_fields[][value]" placeholder="Enter custom field value" class="w-1/2 p-2 mt-2 border border-gray-300 rounded-md">
+        </div>
+      `;
+      customFieldsDiv.appendChild(newField);
+    }
+  </script>
+</body>
+</html>

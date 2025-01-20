@@ -12,6 +12,7 @@ var credentialRouter=require('./routes/credentails')
 var userDashboardRouter = require('./routes/userDashboard')
 var requrestCredentialRouter=require('./routes/requestCredential')
 
+
 var app = express();
 app.use(session({
     secret: '123456', // Replace with a strong secret key
@@ -39,11 +40,15 @@ app.get('/logout', (req, res) => {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
+
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // For parsing application/json
+app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+
 app.use(cookieParser());
 
 
@@ -53,6 +58,7 @@ app.use('/leads', leadRouter)
 app.use('/user', userDashboardRouter)
 app.use('/credential',credentialRouter)
 app.use('/request',requrestCredentialRouter)
+
 
 
 // catch 404 and forward to error handler

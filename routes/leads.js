@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 
+const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
+
 const pool = require('../database/connection');
 
 // Middleware to check if the user has the correct role
@@ -21,7 +25,7 @@ function checkUserRole(req, res, next) {
       return res.status(500).send('Internal Server Error');
     }
 
-      connection.query(query, [userId], (err, results) => {
+    connection.query(query, [userId], (err, results) => {
       connection.release(); // Always release the connection back to the pool
 
       if (err) {
@@ -38,10 +42,10 @@ function checkUserRole(req, res, next) {
 
       const userRoleId = results[0].user_role_id;
       const isAdmin = results[0].is_admin;
-      const isManager=results[0].is_manager;
+      const isManager = results[0].is_manager;
 
       // Check if the user is either role 2 (authorized user) or admin
-      if (userRoleId !== 2 && isAdmin !== 1 && isManager!==1) {
+      if (userRoleId !== 2 && isAdmin !== 1 && isManager !== 1) {
         return res.status(403).send('Forbidden: You do not have access to this resource');
       }
 
@@ -66,10 +70,10 @@ router.get('/create', checkUserRole, (req, res) => {
       if (err) {
         console.error('Error getting connection from pool:', err);
         //server error
-        
-      const errorMessage='Error connecting to database'
-      return res.render('error',{errorMessage})
-       
+
+        const errorMessage = 'Error connecting to database'
+        return res.render('error', { errorMessage })
+
       }
 
       // Fetch lead statuses
@@ -78,9 +82,9 @@ router.get('/create', checkUserRole, (req, res) => {
           console.error('Error fetching lead statuses:', err);
           connection.release();
           //server error
-          const errorMessage='Error fetching lead statuses'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Error fetching lead statuses'
+          return res.render('error', { errorMessage })
+
         }
 
         // Fetch lead sources
@@ -89,9 +93,9 @@ router.get('/create', checkUserRole, (req, res) => {
             console.error('Error fetching lead sources:', err);
             connection.release();
             //server error
-            const errorMessage='Error fetching lead sources'
-            return res.render('error',{errorMessage})
-            
+            const errorMessage = 'Error fetching lead sources'
+            return res.render('error', { errorMessage })
+
           }
 
           // Fetch lead categories
@@ -100,9 +104,9 @@ router.get('/create', checkUserRole, (req, res) => {
               console.error('Error fetching lead categories:', err);
               connection.release();
               //server error
-              const errorMessage='Error fetching lead categories'
-              return res.render('error',{errorMessage})
-              
+              const errorMessage = 'Error fetching lead categories'
+              return res.render('error', { errorMessage })
+
             }
 
             // Fetch the logged-in user's owner details
@@ -111,18 +115,18 @@ router.get('/create', checkUserRole, (req, res) => {
                 console.error('Error fetching owner details:', err);
                 connection.release();
                 //server error
-                const errorMessage='Error fetching owner details'
-                return res.render('error',{errorMessage})
-              
+                const errorMessage = 'Error fetching owner details'
+                return res.render('error', { errorMessage })
+
               }
 
               if (ownerDetails.length === 0) {
                 connection.release();
                 //user not found
 
-                const errorMessage='User not found'
-                return res.render('error',{errorMessage})
-                
+                const errorMessage = 'User not found'
+                return res.render('error', { errorMessage })
+
               }
 
               // Get owner details
@@ -139,9 +143,9 @@ router.get('/create', checkUserRole, (req, res) => {
   } catch (error) {
     console.error('Unexpected error occurred:', error);
 
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
-   
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
+
   }
 });
 
@@ -199,9 +203,9 @@ router.post('/create', checkUserRole, (req, res) => {
         console.error('Error getting connection from pool:', err);
         //server error
 
-        const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
-        
+        const errorMessage = 'Error connecting to database'
+        return res.render('error', { errorMessage })
+
       }
 
       connection.query(sql, values, (error, results) => {
@@ -210,9 +214,9 @@ router.post('/create', checkUserRole, (req, res) => {
         if (error) {
           console.error('Error inserting data:', error);
           //something went wrong
-          const errorMessage='Error inserting data'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Error inserting data'
+          return res.render('error', { errorMessage })
+
         }
 
         console.log('Data inserted successfully');
@@ -222,9 +226,9 @@ router.post('/create', checkUserRole, (req, res) => {
   } catch (error) {
     console.error('Unexpected error occurred:', error);
 
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
-    
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
+
   }
 });
 
@@ -241,9 +245,9 @@ router.get('/', (req, res) => {
         console.error('Error getting connection from pool:', err);
         //server error
 
-        const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
-        
+        const errorMessage = 'Error connecting to database'
+        return res.render('error', { errorMessage })
+
       }
 
       // Query to check the user's role and admin status
@@ -253,31 +257,31 @@ router.get('/', (req, res) => {
           console.error('Error retrieving user role:', err);
           connection.release();
           //server error
-          const errorMessage='Error retrieving user role'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Error retrieving user role'
+          return res.render('error', { errorMessage })
+
         }
 
         if (roleResult.length === 0) {
           connection.release();
           //user not found
 
-          const errorMessage='User not found'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'User not found'
+          return res.render('error', { errorMessage })
+
         }
 
         const userRoleId = roleResult[0].user_role_id;
         const isAdmin = roleResult[0].is_admin;
-        const isManager=roleResult[0].is_manager;
+        const isManager = roleResult[0].is_manager;
 
         // Check if the user is either an authorized user (user_role_id = 2) or an admin
-        if (userRoleId !== 2 && isAdmin !== 1 && isManager!==1) {
+        if (userRoleId !== 2 && isAdmin !== 1 && isManager !== 1) {
           connection.release();
 
-          const errorMessage='You do not have permission to view leads'
-          return res.render('error',{errorMessage})
-         
+          const errorMessage = 'You do not have permission to view leads'
+          return res.render('error', { errorMessage })
+
         }
 
         // Get the filter value from query parameters (if provided), default to 'all'
@@ -331,9 +335,9 @@ router.get('/', (req, res) => {
             connection.release();
             //server error
 
-            const errorMessage='Error retrieving leads'
-          return res.render('error',{errorMessage})
-            
+            const errorMessage = 'Error retrieving leads'
+            return res.render('error', { errorMessage })
+
             return;
           }
 
@@ -343,10 +347,10 @@ router.get('/', (req, res) => {
               connection.release();
               //server error
 
-              const errorMessage='Error retrieving users'
-              return res.render('error',{errorMessage})
-            
-              
+              const errorMessage = 'Error retrieving users'
+              return res.render('error', { errorMessage })
+
+
             }
 
             connection.release();
@@ -363,8 +367,8 @@ router.get('/', (req, res) => {
     });
   } catch (error) {
     console.error('Unexpected error occurred:', error);
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
   }
 });
 
@@ -379,9 +383,9 @@ router.post('/:leadId/assign', (req, res) => {
       if (err) {
         console.error('Error getting connection from pool:', err);
         //server error
-        const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
-        
+        const errorMessage = 'Error connecting to database'
+        return res.render('error', { errorMessage })
+
       }
 
       // Update the lead owner_id directly using the provided selectedUserId
@@ -392,8 +396,8 @@ router.post('/:leadId/assign', (req, res) => {
         if (err) {
           console.error('Error updating lead owner:', err);
           // something went wrong
-          const errorMessage='Error updating lead owner'
-          return res.render('error',{errorMessage})
+          const errorMessage = 'Error updating lead owner'
+          return res.render('error', { errorMessage })
           // res.status(500).send('Error updating lead owner: ' + err.message);
           // return;
         }
@@ -402,10 +406,10 @@ router.post('/:leadId/assign', (req, res) => {
           console.error('No rows were affected by the UPDATE query.');
           // something went wrong
 
-          const errorMessage='Lead not found or update failed'
-          return res.render('error',{errorMessage})
-          
-          
+          const errorMessage = 'Lead not found or update failed'
+          return res.render('error', { errorMessage })
+
+
         }
 
         res.json({ message: 'Lead owner updated successfully' });
@@ -413,8 +417,8 @@ router.post('/:leadId/assign', (req, res) => {
     });
   } catch (error) {
     console.error('Unexpected error occurred:', error);
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
   }
 });
 
@@ -432,9 +436,9 @@ router.get('/:leadId/edit', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
+
     }
 
     try {
@@ -454,17 +458,17 @@ router.get('/:leadId/edit', (req, res) => {
             console.error('Error fetching lead:', error);
             connection.release();
 
-            const errorMessage='Error fetching lead data'
-          return res.render('error',{errorMessage})
-           
+            const errorMessage = 'Error fetching lead data'
+            return res.render('error', { errorMessage })
+
           }
 
           if (leadResults.length === 0) {
             connection.release();
 
-            const errorMessage='Lead not found'
-            return res.render('error',{errorMessage})
-           
+            const errorMessage = 'Lead not found'
+            return res.render('error', { errorMessage })
+
           }
 
           const lead = leadResults[0];
@@ -475,9 +479,9 @@ router.get('/:leadId/edit', (req, res) => {
               console.error('Error fetching lead statuses:', err);
               connection.release();
 
-              const errorMessage='Error fetching lead statuses'
-            return res.render('error',{errorMessage})
-            
+              const errorMessage = 'Error fetching lead statuses'
+              return res.render('error', { errorMessage })
+
             }
 
             // Fetch all lead categories
@@ -486,9 +490,9 @@ router.get('/:leadId/edit', (req, res) => {
                 console.error('Error fetching lead categories:', err);
                 connection.release();
 
-                const errorMessage='Error fetching lead categories'
-                return res.render('error',{errorMessage})
-                
+                const errorMessage = 'Error fetching lead categories'
+                return res.render('error', { errorMessage })
+
               }
 
               // Fetch contact details for the lead
@@ -499,9 +503,9 @@ router.get('/:leadId/edit', (req, res) => {
                   connection.release();
                   if (err) {
                     console.error('Error fetching contact details:', err);
-                    const errorMessage='Error fetching contact details'
-                    return res.render('error',{errorMessage})
-                    
+                    const errorMessage = 'Error fetching contact details'
+                    return res.render('error', { errorMessage })
+
                   }
 
                   const contactDetails = contactDetailsResults[0] || {}; // Ensure contactDetails is an object
@@ -522,8 +526,8 @@ router.get('/:leadId/edit', (req, res) => {
       );
     } catch (error) {
       console.error('Unexpected error occurred:', error);
-      const errorMessage='Internal server error'
-      return res.render('error',{errorMessage})
+      const errorMessage = 'Internal server error'
+      return res.render('error', { errorMessage })
     }
   });
 });
@@ -552,9 +556,9 @@ router.post('/:leadId/edit', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
+
     }
 
     try {
@@ -590,16 +594,16 @@ router.post('/:leadId/edit', (req, res) => {
           connection.release();
           console.error('Error updating lead:', leadError);
 
-          const errorMessage='Error updating lead data'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Error updating lead data'
+          return res.render('error', { errorMessage })
+
         }
 
         if (leadResults.affectedRows === 0) {
           connection.release();
-          const errorMessage='Lead not found'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Lead not found'
+          return res.render('error', { errorMessage })
+
         }
 
         // Check if contact_details exist for this lead
@@ -609,9 +613,9 @@ router.post('/:leadId/edit', (req, res) => {
             connection.release();
             console.error('Error checking contact details:', contactError);
 
-            const errorMessage='Error checking contact details'
-            return res.render('error',{errorMessage})
-            
+            const errorMessage = 'Error checking contact details'
+            return res.render('error', { errorMessage })
+
           }
 
           if (contactResults.length > 0) {
@@ -639,9 +643,9 @@ router.post('/:leadId/edit', (req, res) => {
               if (updateError) {
                 console.error('Error updating contact details:', updateError);
 
-                const errorMessage='Error updating contact details'
-               return res.render('error',{errorMessage})
-               
+                const errorMessage = 'Error updating contact details'
+                return res.render('error', { errorMessage })
+
               }
 
               res.redirect('/leads'); // Redirect after successful update
@@ -667,9 +671,9 @@ router.post('/:leadId/edit', (req, res) => {
               if (insertError) {
                 console.error('Error inserting contact details:', insertError);
 
-                const errorMessage='Error inserting contact details'
-                return res.render('error',{errorMessage})
-               
+                const errorMessage = 'Error inserting contact details'
+                return res.render('error', { errorMessage })
+
               }
 
               res.redirect('/leads'); // Redirect after successful update
@@ -680,8 +684,8 @@ router.post('/:leadId/edit', (req, res) => {
     } catch (error) {
       connection.release();
       console.error('Unexpected error occurred:', error);
-      const errorMessage='Internal server error'
-       return res.render('error',{errorMessage})
+      const errorMessage = 'Internal server error'
+      return res.render('error', { errorMessage })
     }
   });
 });
@@ -700,8 +704,8 @@ router.get('/opportunities', (req, res) => {
     pool.getConnection((err, connection) => {
       if (err) {
         console.error('Error getting connection from pool:', err);
-        const errorMessage='Internal Server Error'
-        return res.render('error',{errorMessage})
+        const errorMessage = 'Internal Server Error'
+        return res.render('error', { errorMessage })
       }
 
       const query = `
@@ -720,15 +724,15 @@ router.get('/opportunities', (req, res) => {
           ON leads.lead_id = contact_details.lead_id
         WHERE lead_statuses.status_name = 'won';
       `;
-      
+
       connection.query(query, (queryErr, results) => {
         connection.release();
         if (queryErr) {
           console.error('Error executing query:', queryErr);
 
-          const errorMessage='Internal Server Error'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Internal Server Error'
+          return res.render('error', { errorMessage })
+
         }
 
         console.log(results.length);
@@ -755,9 +759,9 @@ router.get('/opportunities/contact', (req, res) => {
       if (err) {
         console.error('Error getting connection from pool:', err);
 
-        const errorMessage='Internal Server Error'
-          return res.render('error',{errorMessage})
-     
+        const errorMessage = 'Internal Server Error'
+        return res.render('error', { errorMessage })
+
       }
 
       const query = `
@@ -774,13 +778,13 @@ router.get('/opportunities/contact', (req, res) => {
         JOIN 
           contact_details cd ON l.lead_id = cd.lead_id;
       `;
-      
+
       connection.query(query, (error, result) => {
         connection.release();
         if (error) {
           console.error('Error executing query:', error);
-          const errorMessage='Internal server error'
-          return res.render('error',{errorMessage})
+          const errorMessage = 'Internal server error'
+          return res.render('error', { errorMessage })
         }
 
         const wonLeads = result[0];
@@ -789,8 +793,8 @@ router.get('/opportunities/contact', (req, res) => {
     });
   } catch (err) {
     console.error('Error in GET /opportunities/contact:', err);
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
   }
 });
 
@@ -807,26 +811,26 @@ router.get('/:lead_id', (req, res) => {
     pool.getConnection((err, connection) => {
       if (err) {
         console.error(err);
-        const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
+        const errorMessage = 'Error connecting to database'
+        return res.render('error', { errorMessage })
       }
 
       connection.query('SELECT * FROM leads WHERE lead_id = ?', [lead_id], (err, lead) => {
         if (err) {
           connection.release();
           console.error(err);
-          const errorMessage='Failed to fetch lead details.'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Failed to fetch lead details.'
+          return res.render('error', { errorMessage })
+
         }
 
         connection.query('SELECT * FROM tasks WHERE lead_id = ?', [lead_id], (err, tasks) => {
           if (err) {
             connection.release();
             console.error(err);
-            const errorMessage='Failed to fetch tasks.'
-            return res.render('error',{errorMessage})
-           
+            const errorMessage = 'Failed to fetch tasks.'
+            return res.render('error', { errorMessage })
+
           }
 
           connection.query('SELECT * FROM lead_activities WHERE lead_id = ?', [lead_id], (err, activities) => {
@@ -834,27 +838,27 @@ router.get('/:lead_id', (req, res) => {
               connection.release();
               console.error(err);
 
-              const errorMessage='Failed to fetch activities.'
-              return res.render('error',{errorMessage})
-              
+              const errorMessage = 'Failed to fetch activities.'
+              return res.render('error', { errorMessage })
+
             }
 
             connection.query('SELECT * FROM permissions WHERE user_id = ?', [lead[0].lead_owner_id], (err, permissions) => {
               if (err) {
                 connection.release();
                 console.error(err);
-                const errorMessage='Failed to fetch permissions'
-                return res.render('error',{errorMessage})
-               
+                const errorMessage = 'Failed to fetch permissions'
+                return res.render('error', { errorMessage })
+
               }
 
               connection.query('SELECT * FROM email_template', (err, emailTemplates) => {
                 if (err) {
                   connection.release();
                   console.error(err);
-                  const errorMessage='Failed to fetch email templates.'
-                  return res.render('error',{errorMessage})
-                  
+                  const errorMessage = 'Failed to fetch email templates.'
+                  return res.render('error', { errorMessage })
+
                 }
 
                 let selectedTemplate = null;
@@ -886,11 +890,11 @@ router.get('/:lead_id', (req, res) => {
         });
       });
     });
-    
+
   } catch (err) {
     console.error('Error in GET /:lead_id:', err);
-    const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
+    const errorMessage = 'Internal server error'
+    return res.render('error', { errorMessage })
   }
 });
 
@@ -907,8 +911,8 @@ router.post('/:lead_id/addTask', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(err);
-      const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
     }
 
     try {
@@ -920,9 +924,9 @@ router.post('/:lead_id/addTask', (req, res) => {
           if (err) {
             console.error(err);
 
-            const errorMessage='Failed to add task.'
-            return res.render('error',{errorMessage})
-           
+            const errorMessage = 'Failed to add task.'
+            return res.render('error', { errorMessage })
+
           }
           res.redirect(`/leads/${lead_id}`);
         }
@@ -930,9 +934,9 @@ router.post('/:lead_id/addTask', (req, res) => {
     } catch (error) {
       connection.release();
       console.error('Error:', error);
-      const errorMessage='Failed to add task.'
-      return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Failed to add task.'
+      return res.render('error', { errorMessage })
+
     }
   });
 });
@@ -948,8 +952,8 @@ router.post('/:lead_id/addActivity', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(err);
-      const errorMessage='Error connecting to database'
-        return res.render('error',{errorMessage})
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
     }
 
     try {
@@ -960,9 +964,9 @@ router.post('/:lead_id/addActivity', (req, res) => {
           connection.release();
           if (err) {
             console.error(err);
-            const errorMessage='Failed to add activity.'
-            return res.render('error',{errorMessage})
-            
+            const errorMessage = 'Failed to add activity.'
+            return res.render('error', { errorMessage })
+
           }
           res.redirect(`/leads/${lead_id}`);
         }
@@ -970,8 +974,8 @@ router.post('/:lead_id/addActivity', (req, res) => {
     } catch (error) {
       connection.release();
       console.error('Error:', error);
-      const errorMessage='Internal server error'
-    return res.render('error',{errorMessage})
+      const errorMessage = 'Internal server error'
+      return res.render('error', { errorMessage })
     }
   });
 });
@@ -986,8 +990,8 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(err);
-      const errorMessage='Error connecting to database'
-      return res.render('error',{errorMessage})
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
     }
 
     try {
@@ -996,9 +1000,9 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
           connection.release();
           console.error(err);
 
-          const errorMessage='Failed to fetch task status.'
-            return res.render('error',{errorMessage})
-         
+          const errorMessage = 'Failed to fetch task status.'
+          return res.render('error', { errorMessage })
+
         }
 
         // Convert TINYINT (0 or 1) to boolean
@@ -1010,9 +1014,9 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
           if (err) {
             console.error(err);
 
-            const errorMessage='Failed to update task status..'
-            return res.render('error',{errorMessage})
-            
+            const errorMessage = 'Failed to update task status..'
+            return res.render('error', { errorMessage })
+
           }
           res.redirect(`/leads/${task[0].lead_id}`);
         });
@@ -1020,9 +1024,9 @@ router.post('/tasks/:task_id/toggleCompletion', (req, res) => {
     } catch (error) {
       connection.release();
       console.error('Error:', error);
-      const errorMessage='Failed to update task status.'
-      return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Failed to update task status.'
+      return res.render('error', { errorMessage })
+
     }
   });
 });
@@ -1037,8 +1041,8 @@ router.post('/tasks/:task_id/delete', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(err);
-      const errorMessage='Error connecting to database'
-      return res.render('error',{errorMessage})
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
     }
 
     try {
@@ -1047,9 +1051,9 @@ router.post('/tasks/:task_id/delete', (req, res) => {
         if (err) {
           console.error(err);
 
-          const errorMessage='Failed to delete task.'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Failed to delete task.'
+          return res.render('error', { errorMessage })
+
         }
         res.redirect('back');
       });
@@ -1057,9 +1061,9 @@ router.post('/tasks/:task_id/delete', (req, res) => {
       connection.release();
       console.error('Error:', error);
 
-      const errorMessage='Failed to delete task..'
-      return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Failed to delete task..'
+      return res.render('error', { errorMessage })
+
     }
   });
 });
@@ -1075,8 +1079,8 @@ router.post('/:lead_id/sendEmail', (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:', err);
-      const errorMessage='Error connecting to database'
-      return res.render('error',{errorMessage})
+      const errorMessage = 'Error connecting to database'
+      return res.render('error', { errorMessage })
     }
 
     try {
@@ -1086,9 +1090,9 @@ router.post('/:lead_id/sendEmail', (req, res) => {
           connection.release();
           console.error(err || 'Lead not found.');
 
-          const errorMessage='Failed to fetch lead details.'
-          return res.render('error',{errorMessage})
-          
+          const errorMessage = 'Failed to fetch lead details.'
+          return res.render('error', { errorMessage })
+
         }
 
         const { email, first_name, last_name } = lead[0];
@@ -1099,10 +1103,10 @@ router.post('/:lead_id/sendEmail', (req, res) => {
             if (err || template.length === 0) {
               connection.release();
               console.error(err || 'Email template not found.');
-              
-          const errorMessage='Failed to fetch email template details.'
-          return res.render('error',{errorMessage})
-             
+
+              const errorMessage = 'Failed to fetch email template details.'
+              return res.render('error', { errorMessage })
+
             }
 
             const { template_subject, template_description } = template[0];
@@ -1125,16 +1129,16 @@ router.post('/:lead_id/sendEmail', (req, res) => {
       connection.release();
       console.error('Error:', error);
 
-      const errorMessage='Failed to send email.'
-       return res.render('error',{errorMessage})
-     
+      const errorMessage = 'Failed to send email.'
+      return res.render('error', { errorMessage })
+
     }
   });
 });
 
 // Function to send the email
 function sendEmail(connection, email, first_name, last_name, subject, body, res, lead_id) {
-  const website=''
+  const website = ''
 
   const personalizedBody = `Dear ${first_name} ${last_name},<br><br>${body}<br><br>Visit our website:<a href="https://knoqlogico.com">Knoqlogico</a><br>Yours faithfully<br><br>Knoqlogico Team`;
   const transporter = nodemailer.createTransport({
@@ -1160,13 +1164,277 @@ function sendEmail(connection, email, first_name, last_name, subject, body, res,
 
     if (error) {
       console.error('Error sending email:', error);
-      const errorMessage='Failed to send email.'
-      return res.render('error',{errorMessage})
-      
+      const errorMessage = 'Failed to send email.'
+      return res.render('error', { errorMessage })
+
     }
     console.log('Email sent:', info.response);
     res.redirect(`/leads/${lead_id}`);  // Redirect back to the lead page
   });
+}
+
+//invoice section
+router.get('/invoice/lead/:lead_id', (req, res) => {
+  const lead_id = req.params.lead_id;
+  console.log(lead_id);
+
+  // Get a connection from the pool
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection:', err);
+      return res.status(500).send('Database connection error');
+    }
+
+    // Fetch lead data using the connection
+    connection.query('SELECT first_name, last_name FROM leads WHERE lead_id = ?', [lead_id], (err, results) => {
+      connection.release(); // Release the connection back to the pool
+
+      if (err) {
+        console.error('Query error:', err);
+        return res.status(500).send('Error fetching lead data');
+      }
+
+      if (results.length > 0) {
+        const lead = results[0];
+        res.render('invoiceSection', {
+          lead_id: lead_id,
+          client_name: `${lead.first_name} ${lead.last_name}`,
+        });
+      } else {
+        res.status(404).send('Lead not found');
+      }
+    });
+  });
+});
+
+router.post('/invoice/lead/:lead_id', (req, res) => {
+  const { lead_id } = req.params;
+  const { invoice_number, invoice_date, custom_fields, client_name } = req.body;
+
+  // Validate required fields
+  if (!invoice_number || !invoice_date || !client_name) {
+    return res.status(400).send('Missing required fields: invoice_number, invoice_date, or client_name');
+  }
+
+  // Sanitize client_name by removing spaces and special characters
+  const sanitizedClientName = client_name.trim().replace(/[^a-zA-Z0-9]/g, '');
+
+  // Log custom_fields for debugging
+  console.log('Custom Fields:', custom_fields);
+
+  // Query to fetch lead category based on lead_id
+  const leadCategoryQuery = `
+    SELECT lc.category_name
+    FROM lead_categories lc
+    JOIN leads l ON l.lead_category_id = lc.lead_category_id
+    WHERE l.lead_id = ?
+  `;
+
+  // Get database connection
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection:', err);
+      return res.status(500).send('Database connection error');
+    }
+
+    // Fetch lead category
+    connection.query(leadCategoryQuery, [lead_id], (err, results) => {
+      if (err) {
+        console.error('Error fetching lead category:', err);
+        connection.release();
+        return res.status(500).send('Error fetching lead category');
+      }
+
+      if (results.length === 0) {
+        connection.release();
+        return res.status(404).send('Lead category not found');
+      }
+
+      const lead_category = results[0].category_name; // Get the lead category name
+      console.log('Lead Category:', lead_category);
+
+      // Insert data into the invoices table
+      const insertInvoiceQuery = `
+        INSERT INTO invoices (lead_id, client_name, invoice_number, invoice_date, created_at)
+        VALUES (?, ?, ?, ?, NOW())
+      `;
+
+      connection.query(insertInvoiceQuery, [lead_id, sanitizedClientName, invoice_number, invoice_date], (err, results) => {
+        if (err) {
+          console.error('Error inserting invoice data:', err);
+          connection.release();
+          return res.status(500).send('Error inserting invoice data');
+        }
+
+        const invoice_id = results.insertId; // Get the inserted invoice ID
+
+        // Define the sanitized PDF file path
+        const pdfFilePath = `leads/invoices/${sanitizedClientName}_${invoice_id}.pdf`;
+
+        // Generate PDF and pass lead_category
+        try {
+          generateInvoicePDF(sanitizedClientName, invoice_id, invoice_number, invoice_date, custom_fields, lead_category, pdfFilePath);
+        } catch (error) {
+          console.error('Error generating PDF:', error);
+          connection.release();
+          return res.status(500).send('Error generating invoice PDF');
+        }
+
+        // Update the invoice with the pdf_url
+        const updateInvoiceQuery = `
+          UPDATE invoices
+          SET pdf_url = ?
+          WHERE invoice_id = ?
+        `;
+
+        connection.query(updateInvoiceQuery, [pdfFilePath, invoice_id], (err) => {
+          if (err) {
+            console.error('Error updating PDF URL:', err);
+            connection.release();
+            return res.status(500).send('Error updating PDF URL');
+          }
+
+          // Remove 'invoices/' prefix from pdf_url
+          const cleanupQuery = `
+            UPDATE invoices
+            SET pdf_url = REPLACE(pdf_url, 'invoices/', '')
+            WHERE pdf_url LIKE 'invoices/%';
+          `;
+
+          connection.query(cleanupQuery, (err) => {
+            connection.release(); // Release the connection here
+
+            if (err) {
+              console.error('Error cleaning up PDF URL:', err);
+              return res.status(500).send('Error cleaning up PDF URL');
+            }
+
+            // Redirect to all invoices page after success
+            res.redirect('/leads/invoice/all-invoice');
+          });
+        });
+      });
+    });
+  });
+});
+
+
+
+// Route to fetch and display all invoices with PDFs
+router.get('/invoice/all-invoice', (req, res) => {
+  // Query to fetch all invoices along with client names and pdf_urls
+  const query = 'SELECT invoice_id, client_name, pdf_url FROM invoices';
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection:', err);
+      return res.status(500).send('Database connection error');
+    }
+
+    connection.query(query, (err, results) => {
+      connection.release();
+
+      if (err) {
+        console.error('Error fetching invoices:', err);
+        return res.status(500).send('Error fetching invoices');
+      }
+
+      // Pass the results (list of invoices) to the EJS template
+      res.render('viewInvoices', { invoices: results });
+    });
+  });
+});
+
+
+router.get('/invoices/:filename', (req, res) => {
+  const { filename } = req.params;
+  console.log('Looking for file:', filename);  // Log the filename for debugging
+  
+  try {
+    // Construct the absolute file path to the requested PDF
+    const filePath = path.join(__dirname, '..', 'leads','invoices', filename);
+    console.log('File path:', filePath);  // Log the full file path for debugging
+    
+    // Check if the file exists
+    if (fs.existsSync(filePath)) {
+      // If the file exists, send it to the client
+      res.sendFile(filePath);
+    } else {
+      // If the file doesn't exist, throw an error
+      console.log('File path:', filePath);
+      throw new Error('File not found');
+     
+
+    }
+  } catch (err) {
+    // If an error occurs, render the error page with the error message
+    res.render('error', { errorMessage: err.message });
+  }
+});
+
+
+function generateInvoicePDF(client_name, invoice_id, invoice_number, invoice_date, custom_fields, lead_category) {
+  // Remove spaces from the client_name
+  const sanitizedClientName = client_name.replace(/\s+/g, ''); // Removes all spaces from client_name
+
+  // Set the filename and location
+  const filePath = path.join(__dirname, '..', 'leads', 'invoices', `${sanitizedClientName}_${invoice_id}.pdf`);
+
+
+  // Create a new PDF document
+  const doc = new PDFDocument({
+    size: 'A4',
+    margin: 20
+  });
+
+  // Pipe the PDF to a writable stream (save it to file)
+  doc.pipe(fs.createWriteStream(filePath));
+
+  // Set fonts and styles
+  doc.font('Helvetica');
+
+  // Add company logo on the left (adjust the path to your logo)
+  const logoPath = path.join(__dirname, '..', 'public', 'images', 'knoqsLogo.png');
+  doc.image(logoPath, 15, 15, { width: 100 }); // Adjust the position and size of the logo
+
+  // Add a line break after the header section
+  doc.moveDown(6);
+
+  // Add invoice details
+  doc.fontSize(12).text(`Invoice Number: ${invoice_number}`, { continued: true });
+  doc.text(` | Invoice Date: ${invoice_date}`, { continued: false });
+  doc.moveDown();
+
+  doc.text(`Client Name: ${client_name}`);
+  doc.text(`Invoice ID: ${invoice_id}`);
+  doc.text(`Service: ${lead_category}`);
+
+  doc.moveDown();
+
+  // Add custom fields if provided
+  if (custom_fields && custom_fields.length > 0) {
+    doc.text('Custom Fields:', { underline: true });
+    custom_fields.forEach(field => {
+      doc.text(`${field.label}: ${field.value}`);
+    });
+  } else {
+    doc.text('No custom fields provided.');
+  }
+
+  // Add a footer with company contact information
+  doc.moveDown();
+  doc.text('Thank you for doing business with us: ', { continued: true });
+
+  // Add the clickable link for "Website"
+  doc.text('website', {
+    link: 'http://www.knoqlogico.com', // Make the text clickable
+    underline: false,
+    color: 'blue', // Optional: set color for the link
+    continued: false // End the text, preventing further continuation
+  });
+
+  // Finalize and save the PDF
+  doc.end();
 }
 
 
